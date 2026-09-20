@@ -1,0 +1,29 @@
+# Cloudflare Tunnel config for astro_engine.
+#
+# Why Cloudflare Tunnel and not ngrok: ngrok's free tier caps you at 20,000
+# requests and 1 GB a month and injects an interstitial page into browser
+# traffic. Cloudflare Tunnel is free with no request cap, no interstitial, and
+# binds your own hostname.
+#
+# Setup, once:
+#   winget install --id Cloudflare.cloudflared
+#   cloudflared tunnel login
+#   cloudflared tunnel create astro
+#   cloudflared tunnel route dns astro astro.yourdomain.com
+#
+# Copy this file to %USERPROFILE%\.cloudflared\config.yml, fill in the tunnel
+# id and hostname, then:
+#   cloudflared tunnel run astro
+
+tunnel: PUT-YOUR-TUNNEL-ID-HERE
+credentials-file: C:\Users\YOU\.cloudflared\PUT-YOUR-TUNNEL-ID-HERE.json
+
+ingress:
+  - hostname: astro.yourdomain.com
+    service: http://127.0.0.1:8000
+    originRequest:
+      connectTimeout: 30s
+      # The engine is stateless; a long-lived keepalive is fine.
+      keepAliveTimeout: 90s
+  # Required catch-all.
+  - service: http_status:404

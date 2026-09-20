@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+ephe/
+.env
+validation/.cache/
+data/*.txt
+data/places.sqlite

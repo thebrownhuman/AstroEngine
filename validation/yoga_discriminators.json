@@ -1,0 +1,202 @@
+{
+  "charts": [
+    {
+      "place": "London",
+      "latitude": 51.5074,
+      "longitude": -0.1278,
+      "local": "1952-02-08T03:41:00",
+      "datetime": "1952-02-08T03:41:00+00:00",
+      "lagna": "Scorpio",
+      "signature": {
+        "Daridra Yoga": [
+          false,
+          true,
+          false,
+          false,
+          true,
+          false,
+          false,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        "Raja Yoga": [
+          true,
+          false,
+          false,
+          true,
+          true
+        ]
+      }
+    },
+    {
+      "place": "London",
+      "latitude": 51.5074,
+      "longitude": -0.1278,
+      "local": "1954-02-08T03:41:00",
+      "datetime": "1954-02-08T03:41:00+00:00",
+      "lagna": "Scorpio",
+      "signature": {
+        "Daridra Yoga": [
+          false,
+          true,
+          false,
+          false,
+          true,
+          false,
+          false,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        "Raja Yoga": [
+          true,
+          false,
+          false,
+          true,
+          true
+        ]
+      }
+    },
+    {
+      "place": "London",
+      "latitude": 51.5074,
+      "longitude": -0.1278,
+      "local": "1954-04-02T14:41:00",
+      "datetime": "1954-04-02T14:41:00+00:00",
+      "lagna": "Leo",
+      "signature": {
+        "Daridra Yoga": [
+          false,
+          true,
+          false,
+          false,
+          true,
+          false,
+          false,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        "Raja Yoga": [
+          true,
+          false,
+          false,
+          true,
+          false
+        ]
+      }
+    },
+    {
+      "place": "Delhi",
+      "latitude": 28.6139,
+      "longitude": 77.209,
+      "local": "1958-04-02T03:41:00",
+      "datetime": "1958-04-02T03:41:00+05:30",
+      "lagna": "Capricorn",
+      "signature": {
+        "Daridra Yoga": [
+          false,
+          true,
+          false,
+          false,
+          true,
+          false,
+          false,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        "Raja Yoga": [
+          true,
+          false,
+          false,
+          true,
+          true
+        ]
+      }
+    },
+    {
+      "place": "London",
+      "latitude": 51.5074,
+      "longitude": -0.1278,
+      "local": "1958-04-02T03:41:00",
+      "datetime": "1958-04-02T03:41:00+00:00",
+      "lagna": "Capricorn",
+      "signature": {
+        "Daridra Yoga": [
+          false,
+          true,
+          false,
+          false,
+          true,
+          false,
+          false,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        "Raja Yoga": [
+          true,
+          false,
+          false,
+          true,
+          true
+        ]
+      }
+    },
+    {
+      "place": "Delhi",
+      "latitude": 28.6139,
+      "longitude": 77.209,
+      "local": "1958-05-25T03:41:00",
+      "datetime": "1958-05-25T03:41:00+05:30",
+      "lagna": "Aries",
+      "signature": {
+        "Daridra Yoga": [
+          false,
+          true,
+          false,
+          true,
+          false,
+          false,
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          false,
+          false
+        ],
+        "Raja Yoga": [
+          true,
+          false,
+          false,
+          true,
+          true
+        ]
+      }
+    }
+  ]
+}
