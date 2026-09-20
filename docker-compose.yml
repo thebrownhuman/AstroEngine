@@ -1,0 +1,9 @@
+services:
+  astro-engine:
+    image: ghcr.io/thebrownhuman/astroengine:latest
+    container_name: astro-engine
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./ephe:/app/ephe
