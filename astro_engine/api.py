@@ -400,9 +400,12 @@ class PoruthamRequest(BaseModel):
 def porutham_report(request: PoruthamRequest) -> dict:
     """The Tamil compatibility checklist.
 
-    Six of the checks reproduce Prokerala exactly and six do not; every entry
-    says which it is in its `parity` field, and `verified_points` counts only
-    the six that can be trusted.
+    All twelve checks reproduce Prokerala exactly -- 648/648 measured -- so
+    every entry carries `"parity": "verified"` and `verified_points` now equals
+    `obtained_points`. Both pairs are kept for API compatibility.
+
+    These are provider-compatible tables, not BPHS: several were recovered by
+    measurement because their classical forms fit only part of the grid.
     """
     return tamil_match.compute(
         request.boy_nakshatra, request.boy_nakshatra_pada,

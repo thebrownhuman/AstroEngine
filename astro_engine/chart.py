@@ -27,7 +27,7 @@ from .ephemeris import (
 from .geo import to_utc
 from .vargas import VARGAS
 
-ENGINE_VERSION = "1.0.0"
+ENGINE_VERSION = "1.1.0"
 
 # Classical graha drishti from BPHS Chapter 26, expressed as house counts from
 # the occupied house. BPHS gives special aspects only to Mars, Jupiter and
