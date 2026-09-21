@@ -26,6 +26,7 @@ from datetime import datetime, timedelta
 
 import swisseph as swe
 
+from . import provenance
 from .constants import NAKSHATRAS, PROKERALA_NAKSHATRA_NAMES, SIGNS, SIGNS_EN, SIGN_LORDS
 from .ephemeris import SiderealScanner, jd_to_datetime, julian_day
 
@@ -180,6 +181,7 @@ def day(date: datetime, utc_offset_hours: float, ayanamsa: str = "lahiri",
         "date": date.date().isoformat(),
         "tara_bala": tara_windows,
         "chandra_bala": moon_windows,
+        **provenance.BALA,
     }
 
 

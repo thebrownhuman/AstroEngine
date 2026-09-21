@@ -647,6 +647,7 @@ def test_tara_bala_window_lists_every_favourable_star():
 
 def test_every_nakshatra_has_its_reference_block():
     """Twenty-seven rows, collected one birth per nakshatra."""
+    from astro_engine import provenance
     from astro_engine.constants import (
         NAKSHATRA_ATTRIBUTE_FIELDS, NAKSHATRA_ATTRIBUTES, nakshatra_attributes,
     )
@@ -661,8 +662,13 @@ def test_every_nakshatra_has_its_reference_block():
     ]
     for index in range(27):
         row = nakshatra_attributes(index)
-        assert tuple(row) == NAKSHATRA_ATTRIBUTE_FIELDS
-        assert all(str(value).strip() for value in row.values())
+        data = {key: row[key] for key in NAKSHATRA_ATTRIBUTE_FIELDS}
+        assert tuple(data) == NAKSHATRA_ATTRIBUTE_FIELDS
+        assert all(str(value).strip() for value in data.values())
+        # The block carries mixed authority and has to say so: the deity is
+        # BPHS, the rest was transcribed from Prokerala.
+        assert row["source"] == provenance.PROVIDER
+        assert row["nakshatra_deity_source"]["source"] == provenance.BPHS
     assert nakshatra_attributes(0)["deity"] == "Ashwini Kumara"
     assert nakshatra_attributes(26)["symbol"] == "Fish"
     # Indexing wraps, so a pada that runs past Revati still resolves.

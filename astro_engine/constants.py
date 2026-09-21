@@ -149,5 +149,16 @@ for _index, _row in NAKSHATRA_ATTRIBUTES.items():
 
 
 def nakshatra_attributes(index: int) -> dict:
-    """Reference data; the deity field follows BPHS Chapter 3."""
-    return dict(NAKSHATRA_ATTRIBUTES[index % len(NAKSHATRAS)])
+    """Reference data for one nakshatra, stamped with where it comes from.
+
+    The block is split in authority: `deity` is BPHS, everything else was
+    transcribed from Prokerala. The stamp says so rather than letting the two
+    sit side by side looking equally authoritative.
+    """
+    from . import provenance
+
+    return {
+        **NAKSHATRA_ATTRIBUTES[index % len(NAKSHATRAS)],
+        **provenance.NAKSHATRA_METADATA,
+        "nakshatra_deity_source": provenance.NAKSHATRA_DEITY,
+    }

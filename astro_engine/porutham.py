@@ -49,6 +49,7 @@ pada-4 star shift, which is not; validation sweeps avoid pada 4 instead.
 
 from __future__ import annotations
 
+from . import provenance
 from .constants import NAKSHATRAS, SIGN_LORDS
 from .matching import (
     GANA_BY_NAKSHATRA, NADI_BY_NAKSHATRA, VARNA_BY_SIGN, VARNA_RANK,
@@ -370,4 +371,5 @@ def compute(
                 "rasi_index": boy_sign},
         "girl": {"nakshatra": NAKSHATRAS[girl_nakshatra], "pada": girl_pada,
                  "rasi_index": girl_sign},
+        **provenance.PORUTHAM,
     }

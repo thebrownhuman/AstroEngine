@@ -28,6 +28,7 @@ from the Moon and a quarter from Venus, regardless of which malefic it is.
 """
 
 from __future__ import annotations
+from . import provenance
 
 # Rahu's house -> the name of the kaal sarpa form. These spellings were read
 # off the live API one house at a time; several differ from the textbook ones
@@ -141,6 +142,7 @@ PAPA_POINTS_PARITY = "grid and total_points both verified"
 
 def compute(chart: dict) -> dict:
     return {
-        "kaal_sarpa": kaal_sarpa(chart),
-        "papasamyam": {**papasamyam(chart), "parity": PAPA_POINTS_PARITY},
+        "kaal_sarpa": {**kaal_sarpa(chart), **provenance.KAAL_SARPA},
+        "papasamyam": {**papasamyam(chart), "parity": PAPA_POINTS_PARITY,
+                       **provenance.PAPASAMYAM},
     }

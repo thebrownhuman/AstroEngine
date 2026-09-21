@@ -21,6 +21,8 @@ from collections import Counter
 from dataclasses import dataclass
 from datetime import date
 
+from . import provenance
+
 MASTER_NUMBERS = frozenset({11, 22, 33})
 KARMIC_DEBT_NUMBERS = frozenset({13, 14, 16, 19})
 
@@ -421,6 +423,7 @@ def report(
     """
     reference = reference or date.today()
     return {
+        **provenance.NUMEROLOGY,
         "input": {
             "first_name": name.first,
             "middle_name": name.middle,

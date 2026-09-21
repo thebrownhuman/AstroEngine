@@ -22,6 +22,7 @@ KP normally runs on its own ayanamsa; pass ayanamsa="krishnamurti".
 
 from __future__ import annotations
 
+from . import provenance
 from .constants import (
     DASHA_SEQUENCE, DASHA_TOTAL_YEARS, NAKSHATRAS, NAKSHATRA_LORDS,
     PROKERALA_NAKSHATRA_NAMES, SIGNS, SIGNS_EN, SIGN_LORDS,
@@ -182,4 +183,5 @@ def compute(chart: dict, cusps: list[float]) -> dict:
         "houses": houses(cusps),
         "planets": planets(longitudes, cusps),
         "house_significators": significators(longitudes, cusps),
+        **provenance.KP,
     }

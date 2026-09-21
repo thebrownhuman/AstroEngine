@@ -26,6 +26,7 @@ exactly. The rest are the published values, unverified.
 
 from __future__ import annotations
 
+from . import provenance
 from .constants import (
     NAKSHATRAS, PROKERALA_NAKSHATRA_NAMES, SIGNS, SIGNS_EN, SIGN_LORDS,
 )
@@ -342,4 +343,5 @@ def compute(boy_chart: dict, girl_chart: dict) -> dict:
         },
         "nadi_dosha": results[7][2] == 0.0,
         "bhakoot_dosha": results[6][2] == 0.0,
+        **provenance.MATCHING,
     }

@@ -142,6 +142,44 @@ Thirty-six numbers, Pythagorean and Chaldean.
 
 ---
 
+## Where each rule comes from
+
+Every block that carries a rule is stamped with a `source` and an `authority`
+string. This is a different question from `parity`, and the two are
+deliberately kept apart: a table can reproduce Prokerala on all 144 cells and
+still have no textual authority behind it, which is exactly the case for most
+of the porutham grid. From the numbers alone an LLM cannot tell the two apart,
+so it is told.
+
+| `source` | meaning | examples |
+|---|---|---|
+| `bphs` | traceable to Brihat Parashara Hora Shastra; the shloka is in `authority` | graha drishti, rashi drishti, contextual benefic/malefic, nakshatra deities |
+| `classical` | standard Jyotisha or a named system, but not BPHS | KP, tara/chandra bala, sun-derived upagrahas, numerology, the yoga set |
+| `provider_compatible` | reproduces Prokerala and was recovered by measuring it; no textual authority | porutham, ashtakoot, muhurta, gowri, Kaal Sarpa, papasamyam, time-derived upagrahas, the non-deity nakshatra metadata |
+| `unverified` | neither reproduced nor textually grounded | Daridra Yoga |
+
+`GET /health` returns the vocabulary with its definitions, so a consumer can
+learn all four in one call.
+
+Three stamps are worth reading in full:
+
+**Kaal Sarpa** is `provider_compatible`, not BPHS. BPHS describes *Sarpa
+Yoga* — malefics in kendras — which is a different construct. The modern
+all-grahas-between-the-nodes rule is not in it.
+
+**The time-derived upagrahas** are mixed. The eight-part division of day and
+night, Gulika at the start of Saturn's portion, and Mandi being the same
+upagraha as Gulika are BPHS Chapter 3, verses 66-70. The part index itself,
+`(lord index - vara) mod 8`, is not: it was recovered by inversion. The stamp
+is `provider_compatible` because the indexing is what decides the answer.
+
+**The nakshatra reference block** carries two stamps. `deity` is BPHS Chapter
+3; the other eleven fields were transcribed from Prokerala and are stamped
+`provider_compatible`, with the BPHS deity provenance in a nested
+`nakshatra_deity_source`.
+
+---
+
 ## Parity
 
 Run everything:
@@ -357,11 +395,13 @@ astro_engine/
   geo.py           local time to UTC, with full timezone history
   calendar_points.py ayana, ritu, Sudarshana Chakra
   bala.py          tara bala, chandra bala, chandrashtama
+  provenance.py    where each rule comes from: bphs / classical /
+                   provider_compatible / unverified
   provider.py      durable record wrapper, for storing charts
   api.py           FastAPI surface
 
 validation/        parity scripts; verify_everything.py runs them all
-tests/             241 tests
+tests/             287 tests
 deploy/            serve script and Cloudflare Tunnel config
 ```
 

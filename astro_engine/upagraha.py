@@ -23,6 +23,7 @@ that Mandi and Gulika are the same upagraha.
 
 from __future__ import annotations
 
+from . import provenance
 from .constants import SIGNS, SIGNS_EN, SIGN_LORDS
 from .ephemeris import SiderealSky, to_dms
 
@@ -108,6 +109,8 @@ def _describe(name: str, longitude: float, lagna_sign: int) -> dict:
         "house": (sign - lagna_sign) % 12 + 1,
         "rasi": {"index": sign, "name": SIGNS[sign], "name_en": SIGNS_EN[sign],
                  "lord": SIGN_LORDS[sign]},
+        **(provenance.UPAGRAHA_TIME if name in TIME_DERIVED
+           else provenance.UPAGRAHA_SOLAR),
     }
 
 

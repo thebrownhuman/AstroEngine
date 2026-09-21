@@ -27,6 +27,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta
 
+from . import provenance
 from .ephemeris import jd_to_datetime, julian_day, sun_rise_set
 
 PARTS = 8
@@ -375,5 +376,7 @@ def compute(
         "auspicious": auspicious_periods(solar, previous["sunrise"]),
         "hora": hora(solar, vara_index),
         "gowri_nalla_neram": gowri_nalla_neram(solar, vara_index),
+        "gowri_nalla_neram_source": provenance.GOWRI,
         "disha_shool": disha_shool(solar, vara_index),
+        **provenance.MUHURTA,
     }

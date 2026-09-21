@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from . import ashtakavarga as av
+from . import provenance
 from . import calendar_points as calendar
 from . import doshas as dosha_rules
 from . import panchanga, relationships as maitri, transits as gochara
@@ -357,6 +358,11 @@ def build(
         "houses": houses,
         "aspects": _aspects(positions, lagna_sign),
         "rashi_aspects": _rashi_aspects(positions, lagna_sign),
+        "sources": {
+            "graha_nature": provenance.GRAHA_NATURE,
+            "graha_drishti": provenance.GRAHA_DRISHTI,
+            "rashi_drishti": provenance.RASHI_DRISHTI,
+        },
         "panchanga": panchanga.compute(
             sun_longitude, positions["Moon"].longitude, vara_index, civil_vara_index
         ),

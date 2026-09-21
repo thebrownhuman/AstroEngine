@@ -20,6 +20,7 @@ from . import kp as krishnamurti
 from . import matching as milan
 from . import muhurta as day_periods
 from . import numerology as num
+from . import provenance
 from . import porutham as tamil_match
 from . import yogas as yg
 from .geo import timezone_for, to_utc
@@ -208,6 +209,7 @@ def health() -> dict:
         "ephemeris": EPHEMERIS_BACKEND,
         "ayanamsas": sorted(AYANAMSA_MODES),
         "vargas": list(VARGAS),
+        "source_vocabulary": provenance.SOURCE_MEANINGS,
     }
 
 

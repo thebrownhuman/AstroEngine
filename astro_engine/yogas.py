@@ -17,6 +17,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from . import provenance
 from .constants import SIGNS_EN, SIGN_LORDS
 
 KENDRAS = (1, 4, 7, 10)
@@ -62,6 +63,8 @@ class Yoga:
                 else "unverified"
             ),
             "evidence": self.evidence,
+            **(provenance.DARIDRA if self.name in UNVERIFIED
+               else provenance.YOGA),
         }
 
 
