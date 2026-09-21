@@ -188,7 +188,18 @@ Separately, `prokerala_compatible` rounds the nakshatra traversal fraction to
 three decimals, costing up to ~1.5 days on a 20-year mahadasha. Dasha dates are
 not scriptural to the second, and the block no longer implies they are.
 
-**Ashtakavarga** splits the same way as the upagrahas. The bindu contribution
+**Ashtakavarga's ekadhipatya reduction contradicts BPHS on purpose.** Chapter
+68 is not vague about the tie case: its worked example gives Capricorn and
+Aquarius the same trikona-corrected number 2, and because Capricorn holds
+planets and Aquarius does not, it reduces Aquarius to zero. This engine leaves
+the empty sign alone on an exact tie, because that is what Prokerala does and
+what 204/204 measured checks require. Chapter 68 is also internally
+inconsistent — its Taurus/Libra example does not follow its own rule for two
+planetless signs — so deferring to the text would not settle it either. The
+stamp says all of this, and a test pins the divergence so nobody "corrects" it
+into a parity failure.
+
+**Ashtakavarga** otherwise splits the same way as the upagrahas. The bindu contribution
 tables are BPHS Chapter 66 and the block is stamped `bphs`, but each
 `ekaadhipatya` view carries its own `provider_compatible` stamp: the text is
 ambiguous on the one clause that decides the table — an empty sign holding
@@ -428,7 +439,7 @@ astro_engine/
   api.py           FastAPI surface
 
 validation/        parity scripts; verify_everything.py runs them all
-tests/             294 tests
+tests/             295 tests
 deploy/            serve script and Cloudflare Tunnel config
 ```
 

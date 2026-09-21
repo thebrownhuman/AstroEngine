@@ -262,3 +262,34 @@ def test_dasha_says_which_conventions_produced_it():
     assert "Chapter 46" in stamp["authority"]
     assert "365.25" in stamp["authority"]
     assert "three decimals" in stamp["authority"]
+
+
+def test_ekadhipatya_diverges_from_bphs_on_purpose():
+    """BPHS Chapter 68 is explicit here, and this engine does not follow it.
+
+    Its worked example gives Capricorn and Aquarius the same trikona-corrected
+    number 2; Capricorn holds planets, Aquarius does not, and the text reduces
+    Aquarius to zero. This engine leaves the empty sign alone on an exact tie,
+    because that is what Prokerala does and what the 204/204 measured checks
+    require.
+
+    The test exists so nobody "corrects" this to match the book without
+    realising it breaks parity. If you do change it, the ashtakavarga sweep
+    will fail, and that is the intended alarm.
+    """
+    from astro_engine.ashtakavarga import ekadhipatya_shodhana
+
+    scores = [0] * 12
+    scores[9] = 2   # Capricorn, occupied
+    scores[10] = 2  # Aquarius, empty, same number
+    out = ekadhipatya_shodhana(scores, occupied={9})
+
+    assert out[9] == 2, "the occupied sign is untouched either way"
+    assert out[10] == 2, "Prokerala's reading: an exact tie is left alone"
+    # BPHS Chapter 68 would give 0 here. That divergence has to stay visible
+    # in the stamp rather than being quietly absorbed.
+    stamp = client.post("/v1/chart", json={
+        **BIRTH, "include_ashtakavarga": True,
+    }).json()["ashtakavarga"]["Sun"]["ekaadhipatya"]
+    assert stamp["source"] == provenance.PROVIDER
+    assert "Chapter 68" in stamp["authority"]

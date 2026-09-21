@@ -48,14 +48,24 @@ def block(source: str, authority: str) -> dict:
 # --- per-block stamps ---------------------------------------------------------
 
 GRAHA_NATURE = block(
-    BPHS, "BPHS Chapter 3, shlokas 10-11: natural and contextual benefic/malefic."
+    BPHS,
+    "BPHS Chapter 3, shloka 11: the Sun, Saturn, Mars, a waning Moon and a "
+    "Mercury joined to a malefic are malefic, the rest benefic; a waning Moon "
+    "conjunct or aspected by a benefic turns benefic, and a waning Moon "
+    "together with Mercury makes both benefic."
 )
 GRAHA_DRISHTI = block(
     BPHS,
-    "BPHS Chapter 26: special aspects for Mars, Jupiter and Saturn only. "
-    "Rahu and Ketu take the ordinary seventh aspect here.",
+    "BPHS Chapter 26, verses 2-5: \"All planets aspect the 7th fully. Saturn, "
+    "Jupiter and Mars have special aspects respectively on 3rd and 10th, 5th "
+    "and 9th, and 4th and 8th.\" The passage names three grahas and no more, "
+    "so Rahu and Ketu take only the ordinary seventh aspect.",
 )
-RASHI_DRISHTI = block(BPHS, "BPHS/Jaimini rashi drishti; movable, fixed and dual.")
+RASHI_DRISHTI = block(
+    BPHS,
+    "BPHS Chapter 8, 'Aspects of the Signs': rashi drishti among movable, "
+    "fixed and dual signs, kept separate from graha drishti.",
+)
 
 NAKSHATRA_DEITY = block(BPHS, "BPHS Chapter 3 nakshatra deity list.")
 NAKSHATRA_METADATA = block(
@@ -75,7 +85,8 @@ UPAGRAHA_TIME = block(
     PROVIDER,
     "Mixed authority. The eight-part division of day and night, Gulika at the "
     "start of Saturn's portion, and Mandi being the same upagraha as Gulika "
-    "are BPHS Chapter 3, verses 66-70. The part index itself -- "
+    "(\"Gulika and Mandi are one and the same and not different\") are BPHS "
+    "Chapter 3, verses 66-69. The part index itself -- "
     "(lord index - vara) mod 8 -- is not in that passage: it was recovered by "
     "inverting Prokerala's longitudes back into the moment the Lagna held "
     "them. Marked provider_compatible because the indexing decides the answer, "
@@ -146,16 +157,22 @@ VARGA = block(
 
 ASHTAKAVARGA = block(
     BPHS,
-    "The bindu contribution tables are BPHS Chapter 66. The row totals "
-    "(48, 49, 39, 54, 56, 52, 39) and their sum of 337 are asserted at import "
-    "so a mistyped digit fails immediately.",
+    "The bindu contribution tables are BPHS Chapter 66, and the trinal "
+    "reduction is Chapter 67. The row totals (48, 49, 39, 54, 56, 52, 39) and "
+    "their sum of 337 are asserted at import so a mistyped digit fails "
+    "immediately.",
 )
 EKADHIPATYA = block(
     PROVIDER,
-    "The same-lord reduction as BPHS states it is ambiguous on one clause, and "
-    "the clause decides the table: an empty sign holding strictly less than "
-    "its occupied twin is zeroed, but on an exact tie it is left alone. That "
-    "reading was measured against Prokerala, not taken from the text.",
+    "This one contradicts BPHS and does so deliberately. Chapter 68 is not "
+    "silent on the tie case: its worked example gives Capricorn and Aquarius "
+    "the same trikona-corrected number 2, and because Capricorn holds planets "
+    "and Aquarius does not, it reduces Aquarius to zero. This engine leaves "
+    "the empty sign alone on an exact tie, which is what Prokerala does and "
+    "what 204/204 measured checks require. Chapter 68 is also internally "
+    "inconsistent - its Taurus/Libra example does not follow its own rule (1) "
+    "for two planetless signs - so following the text would not settle the "
+    "matter either. Treat these numbers as Prokerala's, not as Parashara's.",
 )
 
 TRANSIT = block(
