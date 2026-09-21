@@ -1,9 +1,13 @@
 """Planetary friendship: natural, temporal and the five-fold compound.
 
-Natural (naisargika) friendship is fixed and comes from BPHS: a graha befriends
-the lords of its exaltation sign and of the 2nd, 4th, 5th, 8th, 9th and 12th
-from its own sign. The table is written out rather than derived, because the
-derivation has exceptions and the nodes are not in it at all.
+Natural (naisargika) friendship is fixed and comes from BPHS Chapter 3, verse
+55: a graha befriends the lords of its exaltation sign and of the 2nd, 4th,
+5th, 8th, 9th and 12th from its **Moola-Trikona** -- not from its own sign, as
+this comment said for a long time. The two coincide for most grahas, and the
+table below is written out rather than derived, so the output was never wrong;
+but anyone re-deriving it from the old wording would have got some of it wrong.
+The table stays explicit because the derivation has exceptions and the nodes
+are not in it at all.
 
 Temporal (tatkalika) friendship depends on the chart: everything standing in
 the 2nd, 3rd, 4th, 10th, 11th or 12th sign from a graha is its temporary
