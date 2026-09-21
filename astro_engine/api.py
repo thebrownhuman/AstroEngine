@@ -10,7 +10,7 @@ from datetime import date, datetime, timedelta
 from typing import Literal
 
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from .chart import ENGINE_VERSION, BirthData, build, summarise
 from .dasha import PROKERALA_TRAVERSED_PRECISION
@@ -36,7 +36,22 @@ app = FastAPI(
 )
 
 
+def _build_http_error(exc: Exception) -> HTTPException:
+    """Map expected chart-build failures to stable API status codes."""
+    status_code = 503 if isinstance(exc, FileNotFoundError) else 422
+    return HTTPException(status_code=status_code, detail=str(exc))
+
+
 class ChartRequest(BaseModel):
+    model_config = ConfigDict(
+        json_schema_extra={
+            "oneOf": [
+                {"required": ["place"]},
+                {"required": ["latitude", "longitude"]},
+            ],
+        }
+    )
+
     date: str = Field(..., description="Local birth date, YYYY-MM-DD", examples=["1990-01-15"])
     time: str = Field(..., description="Local birth time, HH:MM or HH:MM:SS", examples=["04:30"])
     place: str | None = Field(
@@ -131,7 +146,12 @@ class ChartRequest(BaseModel):
 
     @model_validator(mode="after")
     def _needs_a_location(self):
-        if self.place is None and (self.latitude is None or self.longitude is None):
+        has_place = self.place is not None
+        has_latitude = self.latitude is not None
+        has_longitude = self.longitude is not None
+        if has_place and (has_latitude or has_longitude):
+            raise ValueError("supply either `place`, or both `latitude` and `longitude`, not both")
+        if not has_place and not (has_latitude and has_longitude):
             raise ValueError("supply either `place`, or both `latitude` and `longitude`")
         return self
 
@@ -207,8 +227,8 @@ def chart(request: ChartRequest) -> dict:
             include_calendar=request.include_calendar,
             include_nakshatra_info=request.include_nakshatra_info,
         )
-    except ValueError as exc:
-        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except (ValueError, FileNotFoundError) as exc:
+        raise _build_http_error(exc) from exc
     if request.include_yogas:
         data["yogas"] = yg.report(data)
     resolved = request.location()[3]
@@ -227,8 +247,8 @@ def chart_summary(request: ChartRequest) -> dict:
             dasha_depth=1,
             reference_time=request.reference_time,
         )
-    except ValueError as exc:
-        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except (ValueError, FileNotFoundError) as exc:
+        raise _build_http_error(exc) from exc
     return {"summary": summarise(data), "engine": data["engine"], "input": data["input"]}
 
 
@@ -237,8 +257,8 @@ def yoga_report(request: ChartRequest) -> dict:
     """Yoga detection only, with the evidence behind each verdict."""
     try:
         data = build(request.to_birth_data(), vargas=["D1"], dasha_depth=1)
-    except ValueError as exc:
-        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except (ValueError, FileNotFoundError) as exc:
+        raise _build_http_error(exc) from exc
     return {"engine": data["engine"], "input": data["input"],
             "lagna": data["lagna"], "yogas": yg.report(data)}
 
@@ -254,8 +274,8 @@ def transits(request: ChartRequest) -> dict:
             reference_time=request.reference_time,
             include_transits=True,
         )
-    except ValueError as exc:
-        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except (ValueError, FileNotFoundError) as exc:
+        raise _build_http_error(exc) from exc
     return {
         "engine": data["engine"],
         "input": data["input"],
@@ -270,8 +290,8 @@ def ashtakavarga_report(request: ChartRequest) -> dict:
     try:
         data = build(request.to_birth_data(), vargas=["D1"], dasha_depth=1,
                      include_ashtakavarga=True)
-    except ValueError as exc:
-        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except (ValueError, FileNotFoundError) as exc:
+        raise _build_http_error(exc) from exc
     return {"engine": data["engine"], "input": data["input"], "lagna": data["lagna"],
             "ashtakavarga": data["ashtakavarga"],
             "sarvashtakavarga": data["sarvashtakavarga"]}
@@ -283,8 +303,8 @@ def upagraha_report(request: ChartRequest) -> dict:
     try:
         data = build(request.to_birth_data(), vargas=["D1"], dasha_depth=1,
                      include_upagrahas=True)
-    except ValueError as exc:
-        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except (ValueError, FileNotFoundError) as exc:
+        raise _build_http_error(exc) from exc
     return {"engine": data["engine"], "input": data["input"],
             "solar_day": data["solar_day"], "upagrahas": data["upagrahas"]}
 
@@ -295,8 +315,8 @@ def dosha_report(request: ChartRequest) -> dict:
     try:
         data = build(request.to_birth_data(), vargas=["D1"], dasha_depth=1,
                      include_doshas=True)
-    except ValueError as exc:
-        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except (ValueError, FileNotFoundError) as exc:
+        raise _build_http_error(exc) from exc
     return {
         "engine": data["engine"], "input": data["input"],
         "doshas": {**data["doshas"], "mangal_dosha": yg.kuja(yg.ChartView(data)).as_dict()},
@@ -309,8 +329,8 @@ def nakshatra_report(request: ChartRequest) -> dict:
     try:
         data = build(request.to_birth_data(), vargas=["D1"], dasha_depth=1,
                      include_nakshatra_info=True)
-    except ValueError as exc:
-        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except (ValueError, FileNotFoundError) as exc:
+        raise _build_http_error(exc) from exc
     moon = data["grahas"]["Moon"]
     return {
         "engine": data["engine"], "input": data["input"],
@@ -328,8 +348,8 @@ def sudarshana_report(request: ChartRequest) -> dict:
     try:
         data = build(request.to_birth_data(), vargas=["D1"], dasha_depth=1,
                      include_calendar=True)
-    except ValueError as exc:
-        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except (ValueError, FileNotFoundError) as exc:
+        raise _build_http_error(exc) from exc
     return {"engine": data["engine"], "input": data["input"],
             "solstice": data["solstice"], "drik_ritu": data["drik_ritu"],
             "sudarshana_chakra": data["sudarshana_chakra"]}
@@ -341,8 +361,8 @@ def relationship_report(request: ChartRequest) -> dict:
     try:
         data = build(request.to_birth_data(), vargas=["D1"], dasha_depth=1,
                      include_relationships=True)
-    except ValueError as exc:
-        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except (ValueError, FileNotFoundError) as exc:
+        raise _build_http_error(exc) from exc
     return {"engine": data["engine"], "input": data["input"],
             "planet_relationship": data["planet_relationship"]}
 
@@ -361,8 +381,8 @@ def matching_report(request: MatchRequest) -> dict:
     try:
         boy = build(request.boy.to_birth_data(), vargas=["D1"], dasha_depth=1)
         girl = build(request.girl.to_birth_data(), vargas=["D1"], dasha_depth=1)
-    except ValueError as exc:
-        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except (ValueError, FileNotFoundError) as exc:
+        raise _build_http_error(exc) from exc
     return milan.compute(boy, girl)
 
 
@@ -392,6 +412,15 @@ def porutham_report(request: PoruthamRequest) -> dict:
 
 
 class DayRequest(BaseModel):
+    model_config = ConfigDict(
+        json_schema_extra={
+            "oneOf": [
+                {"required": ["place"]},
+                {"required": ["latitude", "longitude"]},
+            ],
+        }
+    )
+
     date: str = Field(..., description="Local date, YYYY-MM-DD", examples=["1990-01-15"])
     place: str | None = Field(None, examples=["Delhi"])
     latitude: float | None = Field(None, ge=-90.0, le=90.0)
@@ -400,9 +429,27 @@ class DayRequest(BaseModel):
 
     @model_validator(mode="after")
     def _needs_a_location(self):
-        if self.place is None and (self.latitude is None or self.longitude is None):
+        has_place = self.place is not None
+        has_latitude = self.latitude is not None
+        has_longitude = self.longitude is not None
+        if has_place and (has_latitude or has_longitude):
+            raise ValueError("supply either `place`, or both `latitude` and `longitude`, not both")
+        if not has_place and not (has_latitude and has_longitude):
             raise ValueError("supply either `place`, or both `latitude` and `longitude`")
         return self
+
+
+def _day_location(request: DayRequest) -> tuple[float, float, str | None, datetime, dict]:
+    """Resolve a calendar request once and return its UTC provenance."""
+    latitude, longitude = request.latitude, request.longitude
+    timezone = request.timezone
+    if latitude is None or longitude is None:
+        found = resolve(request.place)
+        latitude, longitude = found.latitude, found.longitude
+        timezone = timezone or found.timezone
+    moment = datetime.fromisoformat(f"{request.date}T12:00:00")
+    _, tz_info = to_utc(moment, latitude, longitude, timezone)
+    return latitude, longitude, timezone, moment, tz_info
 
 
 @app.post("/v1/muhurta")
@@ -411,20 +458,15 @@ def muhurta_report(request: DayRequest) -> dict:
 
     These belong to a calendar date at a place, not to a birth instant.
     """
-    latitude, longitude = request.latitude, request.longitude
-    timezone = request.timezone
-    if latitude is None or longitude is None:
-        found = resolve(request.place)
-        latitude, longitude, timezone = found.latitude, found.longitude, \
-            timezone or found.timezone
     try:
-        moment = datetime.fromisoformat(f"{request.date}T12:00:00")
+        latitude, longitude, _, moment, tz_info = _day_location(request)
+        return day_periods.compute(
+            moment, latitude, longitude, tz_info["utc_offset_hours"]
+        )
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
-    _, tz_info = to_utc(moment, latitude, longitude, timezone)
-    return day_periods.compute(
-        moment, latitude, longitude, tz_info["utc_offset_hours"]
-    )
 
 
 class PersonalDayRequest(DayRequest):
@@ -434,6 +476,12 @@ class PersonalDayRequest(DayRequest):
     janma_rasi: int | None = Field(
         None, ge=0, le=11, description="Natal Moon sign, 0 = Mesha."
     )
+
+    @model_validator(mode="after")
+    def _natal_inputs_are_a_pair(self):
+        if (self.janma_nakshatra is None) != (self.janma_rasi is None):
+            raise ValueError("supply both `janma_nakshatra` and `janma_rasi`, or neither")
+        return self
 
 
 @app.post("/v1/bala")
@@ -447,17 +495,13 @@ def bala_report(request: PersonalDayRequest) -> dict:
     credits ran out first -- so the rules here are the classical ones and the
     block says so.
     """
-    latitude, longitude = request.latitude, request.longitude
-    timezone = request.timezone
-    if latitude is None or longitude is None:
-        found = resolve(request.place)
-        latitude, longitude, timezone = found.latitude, found.longitude,             timezone or found.timezone
     try:
-        moment = datetime.fromisoformat(f"{request.date}T12:00:00")
+        latitude, longitude, _, moment, tz_info = _day_location(request)
+        found = strength.day(moment, tz_info["utc_offset_hours"])
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
-    _, tz_info = to_utc(moment, latitude, longitude, timezone)
-    found = strength.day(moment, tz_info["utc_offset_hours"])
     found["parity"] = strength.PARITY
 
     if request.janma_nakshatra is not None and request.janma_rasi is not None:
@@ -478,8 +522,8 @@ def kp_report(request: ChartRequest) -> dict:
     """Krishnamurti Paddhati: Placidus cusps, sub lords and significators."""
     try:
         data = build(request.to_birth_data(), vargas=["D1"], dasha_depth=1)
-    except ValueError as exc:
-        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except (ValueError, FileNotFoundError) as exc:
+        raise _build_http_error(exc) from exc
     return {"engine": data["engine"], "input": data["input"],
             **krishnamurti.compute(data, data["cusps"][:12])}
 
@@ -628,6 +672,10 @@ def tool_definition() -> dict:
                 },
             },
             "required": ["date", "time"],
+            "oneOf": [
+                {"required": ["place"]},
+                {"required": ["latitude", "longitude"]},
+            ],
         },
     }
 
@@ -668,8 +716,16 @@ def tool_definitions() -> list[dict]:
                     "place": {"type": "string"},
                     "latitude": {"type": "number"},
                     "longitude": {"type": "number"},
+                    "timezone": {
+                        "type": "string",
+                        "description": "IANA timezone; omit to derive it from the coordinates or place.",
+                    },
                 },
                 "required": ["date"],
+                "oneOf": [
+                    {"required": ["place"]},
+                    {"required": ["latitude", "longitude"]},
+                ],
             },
         },
         {

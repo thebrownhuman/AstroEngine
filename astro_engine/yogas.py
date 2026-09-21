@@ -36,7 +36,8 @@ MAHAPURUSHA = {
     "Saturn": "Sasa Yoga",
 }
 
-# Special aspects, as house counts from the occupied house.
+# BPHS Chapter 26 special aspects, as house counts from the occupied house.
+# Rahu and Ketu are not assigned additional 5th/9th aspects in that passage.
 SPECIAL_ASPECTS = {"Mars": (4, 7, 8), "Jupiter": (5, 7, 9), "Saturn": (3, 7, 10)}
 
 
@@ -94,7 +95,7 @@ class ChartView:
         return self.sign(a) == self.sign(b)
 
     def aspects(self, source: str, target_house: int) -> bool:
-        """Rashi drishti from `source` onto a house."""
+        """BPHS graha drishti from `source` onto a house."""
         counts = SPECIAL_ASPECTS.get(source, (7,))
         origin = self.house(source)
         return target_house in {(origin - 1 + (c - 1)) % 12 + 1 for c in counts}
@@ -261,21 +262,23 @@ def _companions(view: ChartView, reference: str, exclude: tuple[str, ...]) -> di
 
 
 def sunapha(view: ChartView) -> Yoga:
-    c = _companions(view, "Moon", ("Sun",) + NODES)
+    # BPHS Ch. 37, vv. 7-10 says "a planet, other than the Sun"; nodes are
+    # planets in the book's nine-graha list and are not excluded here.
+    c = _companions(view, "Moon", ("Sun",))
     present = bool(c["second"])
     return Yoga("Sunapha Yoga", "Chandra Yogas", present,
                 f"2nd from Moon holds {c['second'] or 'nothing'}", c)
 
 
 def anapha(view: ChartView) -> Yoga:
-    c = _companions(view, "Moon", ("Sun",) + NODES)
+    c = _companions(view, "Moon", ("Sun",))
     present = bool(c["twelfth"])
     return Yoga("Anapha Yoga", "Chandra Yogas", present,
                 f"12th from Moon holds {c['twelfth'] or 'nothing'}", c)
 
 
 def duradhara(view: ChartView) -> Yoga:
-    c = _companions(view, "Moon", ("Sun",) + NODES)
+    c = _companions(view, "Moon", ("Sun",))
     present = bool(c["second"]) and bool(c["twelfth"])
     return Yoga("Duradhara Yoga", "Chandra Yogas", present,
                 f"2nd holds {c['second'] or 'nothing'}, "
@@ -284,40 +287,69 @@ def duradhara(view: ChartView) -> Yoga:
 
 def kemadruma(view: ChartView, name: str = "Kemadruma Yoga",
               group: str = "Chandra Yogas") -> Yoga:
-    """No graha in the 2nd or 12th from the Moon.
+    """BPHS Chapter 37, verses 11-13.
 
-    Many texts add "and none conjunct the Moon". Prokerala does not: verified
-    across 21 charts, the conjunction condition must be left out to match.
+    Excluding the Sun, no planet may be with the Moon, in the 2nd or 12th
+    from the Moon, or in an angle from the Ascendant.
     """
-    c = _companions(view, "Moon", ("Sun",) + NODES)
-    together = [g for g in view.occupants(view.house("Moon"))
-                if g not in ("Moon", "Sun") + NODES]
-    present = not (c["second"] or c["twelfth"])
-    return Yoga(name, group, present,
-                "nothing occupies the 2nd or 12th from the Moon" if present
-                else "the 2nd or 12th from the Moon is occupied",
-                {**c, "with_moon": together,
-                 "note": "conjunction with the Moon is deliberately not considered"})
+    planets = tuple(view.grahas)
+    with_moon = [
+        graha for graha in planets
+        if graha not in ("Sun", "Moon")
+        and view.sign(graha) == view.sign("Moon")
+    ]
+    second = [
+        graha for graha in planets
+        if graha != "Sun" and view.house_from(graha, "Moon") == 2
+    ]
+    twelfth = [
+        graha for graha in planets
+        if graha != "Sun" and view.house_from(graha, "Moon") == 12
+    ]
+    kendra = {
+        str(house): [
+            graha for graha in planets
+            if graha != "Sun" and view.house(graha) == house
+        ]
+        for house in KENDRAS
+    }
+    kendra = {house: occupants for house, occupants in kendra.items() if occupants}
+    present = not (with_moon or second or twelfth or kendra)
+    return Yoga(
+        name,
+        group,
+        present,
+        "no planet other than the Sun is in any BPHS-prohibited position"
+        if present else "a BPHS Kemadruma cancellation condition is present",
+        {
+            "with_moon": with_moon,
+            "second_from_moon": second,
+            "twelfth_from_moon": twelfth,
+            "kendra_from_lagna": kendra,
+            "rule_source": "BPHS Chapter 37, verses 11-13",
+        },
+    )
 
 
 # --- soorya yogas ------------------------------------------------------------
 
 def vesi(view: ChartView) -> Yoga:
-    c = _companions(view, "Sun", ("Moon",) + NODES)
+    # BPHS Ch. 38, v. 1 excludes the Moon; the remaining grahas are eligible.
+    c = _companions(view, "Sun", ("Moon",))
     present = bool(c["second"])
     return Yoga("Vesi Yoga", "Soorya Yogas", present,
                 f"2nd from Sun holds {c['second'] or 'nothing'}", c)
 
 
 def vasi(view: ChartView) -> Yoga:
-    c = _companions(view, "Sun", ("Moon",) + NODES)
+    c = _companions(view, "Sun", ("Moon",))
     present = bool(c["twelfth"])
     return Yoga("Vasi Yoga", "Soorya Yogas", present,
                 f"12th from Sun holds {c['twelfth'] or 'nothing'}", c)
 
 
 def ubhayachari(view: ChartView) -> Yoga:
-    c = _companions(view, "Sun", ("Moon",) + NODES)
+    c = _companions(view, "Sun", ("Moon",))
     present = bool(c["second"]) and bool(c["twelfth"])
     return Yoga("Ubhaya Chari Yoga", "Soorya Yogas", present,
                 f"2nd holds {c['second'] or 'nothing'}, "

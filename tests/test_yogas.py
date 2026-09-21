@@ -83,15 +83,15 @@ def test_live_vocabulary_not_the_stale_spec_names(sample):
 
 # --- rules confirmed against Prokerala ---------------------------------------
 
-def test_kemadruma_ignores_conjunction_with_the_moon():
-    """Prokerala checks only the 2nd and 12th from the Moon.
-
-    Including the conjunction condition cost 5 mismatches out of 15.
-    """
+def test_kemadruma_applies_the_bphs_cancellation_conditions():
+    """BPHS excludes conjunction, 2nd/12th occupation, and Lagna kendras."""
     for entry in yogas.detect(chart_for(1965, 5, 29, 20, 17, 51.5074, -0.1278)):
         if entry.name == "Kemadruma Yoga":
-            assert entry.present is True
-            assert entry.evidence["with_moon"], "this chart has a graha with the Moon"
+            evidence = entry.evidence
+            assert entry.present == (not any(
+                evidence[key]
+                for key in ("with_moon", "second_from_moon", "twelfth_from_moon", "kendra_from_lagna")
+            ))
             return
     pytest.fail("Kemadruma not reported")
 
@@ -137,6 +137,26 @@ def test_durudhara_implies_both_sunapha_and_anapha(sample):
     view = yogas.ChartView(sample)
     if yogas.duradhara(view).present:
         assert yogas.sunapha(view).present and yogas.anapha(view).present
+
+
+def test_lunar_and_solar_yogas_follow_bphs_node_wording():
+    # BPHS excludes only the Sun from Sunapha/Anapha/Duradhara and only the
+    # Moon from Vesi/Vasi/Ubhaya Chari; nodes are not excluded by those rules.
+    signs = {
+        "Sun": 0, "Moon": 5, "Mars": 2, "Mercury": 3,
+        "Jupiter": 4, "Venus": 7, "Saturn": 8, "Rahu": 6, "Ketu": 1,
+    }
+    chart = {
+        "lagna": {"sign_index": 0},
+        "grahas": {
+            name: {"sign_index": sign, "house": sign + 1,
+                   "dignity": {"state": "neutral"}}
+            for name, sign in signs.items()
+        },
+    }
+    view = yogas.ChartView(chart)
+    assert yogas.sunapha(view).evidence["second"] == ["Rahu"]
+    assert yogas.vesi(view).evidence["second"] == ["Ketu"]
 
 
 def test_ubhaya_chari_implies_both_vesi_and_vasi(sample):

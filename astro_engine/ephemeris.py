@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import os
 import pathlib
 import threading
@@ -297,19 +298,38 @@ def sun_rise_set(
     geopos = (longitude, latitude, 0.0)
     flags = _BACKEND_FLAG
 
-    def next_rise(after: float) -> float:
-        with _SWE_LOCK:
-            _, values = swe.rise_trans(
-                after, swe.SUN, swe.CALC_RISE | rise_bits, geopos, 0.0, 0.0, flags,
+    def event(kind: str, after: float, calculation: int) -> float:
+        try:
+            with _SWE_LOCK:
+                result, values = swe.rise_trans(
+                    after, swe.SUN, calculation | rise_bits, geopos, 0.0, 0.0, flags,
+                )
+        except Exception as exc:
+            # Swiss Ephemeris raises swisseph.Error for a missing event at
+            # circumpolar latitudes instead of returning its documented
+            # non-zero result code. Normalize both forms for the API.
+            raise ValueError(
+                f"no solar {kind} exists for latitude {latitude:.5f}, "
+                f"longitude {longitude:.5f}; the location may be in polar "
+                "day or polar night"
+            ) from exc
+        value = values[0] if values else 0.0
+        # Swiss Ephemeris reports that no event exists at circumpolar
+        # locations through its result code and/or a zero event time. Do not
+        # let that sentinel reach revjul(), where it becomes a generic 500.
+        if result != 0 or not math.isfinite(value) or value <= 0:
+            raise ValueError(
+                f"no solar {kind} exists for latitude {latitude:.5f}, "
+                f"longitude {longitude:.5f}; the location may be in polar "
+                "day or polar night"
             )
-        return values[0]
+        return value
+
+    def next_rise(after: float) -> float:
+        return event("rise", after, swe.CALC_RISE)
 
     def next_set(after: float) -> float:
-        with _SWE_LOCK:
-            _, values = swe.rise_trans(
-                after, swe.SUN, swe.CALC_SET | rise_bits, geopos, 0.0, 0.0, flags,
-            )
-        return values[0]
+        return event("set", after, swe.CALC_SET)
 
     # Walk forward until prev_rise is the sunrise that opens the Vedic day
     # containing jd_ut.

@@ -16,28 +16,9 @@ parts and so is the night; each upagraha belongs to one part:
 
 The effective vara is the vara itself by day, and the vara four weekdays later
 by night -- the classical rule that night lordship begins with the lord of the
-fifth weekday. Within its part each upagraha sits at the midpoint, except
-Gulika, which sits at the start; Mandi therefore trails Gulika by half a part.
-
-The modulus is the crux. There are eight parts but only seven weekday lords,
-so counting the parts mod 7 (which the "portion of Saturn" phrasing invites)
-agrees with the real table for some weekdays and is off by one for others.
-Mod 8 is what Prokerala does.
-
-None of this was taken from a text. Prokerala's longitudes for six weekday and
-day/night combinations were inverted back into the moment the Lagna held them
-and expressed as a fraction of the span; all 36 measurements landed on an
-exact eighth or half-eighth, and the formula above reproduces every one.
-
-Parity note: those fractions only come out exact against *geometric* sunrise
-and sunset (disc centre, no refraction), the convention Prokerala uses
-throughout. Two caveats remain, both small:
-
-  * day births agree to within 25 arcsec, the residue of sunrise and sunset
-    differing by well under a second;
-  * night births agree to within about a arcminute, because the sunrise that
-    closes the night is one Prokerala places 4 seconds earlier than both Swiss
-    Ephemeris and its own panchang endpoint reports for the same morning.
+fifth weekday. The eight-part allocation follows BPHS Chapter 3, verses 66-70.
+BPHS specifically places Gulika at the start of Saturn's portion and states
+that Mandi and Gulika are the same upagraha.
 """
 
 from __future__ import annotations
@@ -64,7 +45,7 @@ PART_RULER = {
 }
 PART_POINT = {
     "Kala": 0.5, "Mrityu": 0.5, "Ardha Prahara": 0.5,
-    "Yamaghanta": 0.5, "Gulika": 0.0, "Mandi": 0.5,
+    "Yamaghanta": 0.5, "Gulika": 0.0, "Mandi": 0.0,
 }
 
 # Prokerala's ids, so a response can be compared field for field.

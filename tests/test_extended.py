@@ -98,9 +98,9 @@ def test_part_index_counts_over_eight_not_seven():
     assert (upagraha.WEEKDAY_LORDS.index("Sun") - 5) % 7 == 2
 
 
-def test_gulika_sits_at_the_start_and_mandi_at_the_midpoint():
+def test_gulika_and_mandi_are_the_same_bphs_upagraha():
     assert upagraha.PART_POINT["Gulika"] == 0.0
-    assert upagraha.PART_POINT["Mandi"] == 0.5
+    assert upagraha.PART_POINT["Mandi"] == 0.0
     for vara in range(7):
         assert (upagraha.part_index("Gulika", vara, False)
                 == upagraha.part_index("Mandi", vara, False))
@@ -652,7 +652,13 @@ def test_every_nakshatra_has_its_reference_block():
     )
 
     assert len(NAKSHATRA_ATTRIBUTES) == 27
-    assert len({row["deity"] for row in NAKSHATRA_ATTRIBUTES.values()}) == 27
+    assert [NAKSHATRA_ATTRIBUTES[i]["deity"] for i in range(27)] == [
+        "Ashwini Kumara", "Yama", "Agni", "Brahma", "Moon", "Siva",
+        "Aditi", "Jupiter", "Rahu", "Sun", "Aryama", "Sun",
+        "Viswa Karma", "Vayu", "Indra", "Mitra", "Indra", "Niruti",
+        "Varuna", "Viswadeva", "Brahma", "Vishnu", "Vasu", "Varuna",
+        "Ajacharana", "Ahirbudhanya", "Poosha",
+    ]
     for index in range(27):
         row = nakshatra_attributes(index)
         assert tuple(row) == NAKSHATRA_ATTRIBUTE_FIELDS

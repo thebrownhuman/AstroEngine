@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from . import ashtakavarga as av
 from . import calendar_points as calendar
@@ -28,15 +29,39 @@ from .vargas import VARGAS
 
 ENGINE_VERSION = "1.0.0"
 
-# Classical graha drishti, expressed as house counts from the occupied house.
+# Classical graha drishti from BPHS Chapter 26, expressed as house counts from
+# the occupied house. BPHS gives special aspects only to Mars, Jupiter and
+# Saturn; Rahu and Ketu retain the ordinary seventh aspect here.
 SPECIAL_ASPECTS = {
     "Mars": (4, 7, 8),
     "Jupiter": (5, 7, 9),
     "Saturn": (3, 7, 10),
-    "Rahu": (5, 7, 9),
-    "Ketu": (5, 7, 9),
 }
 DEFAULT_ASPECTS = (7,)
+
+
+def _local_reference_time(reference_time: datetime | None, timezone: str) -> datetime:
+    """Return the dasha/transit reference instant as a local naive datetime.
+
+    Birth-time and dasha periods are represented in the birth location's local
+    clock.  An API caller may nevertheless provide an ISO-8601 offset; convert
+    that instant into the resolved location timezone before comparing it.
+    """
+    if reference_time is None:
+        return datetime.now()
+    if reference_time.tzinfo is None:
+        return reference_time
+    try:
+        return reference_time.astimezone(ZoneInfo(timezone)).replace(tzinfo=None)
+    except ZoneInfoNotFoundError as exc:
+        raise ValueError(f"unknown IANA timezone {timezone!r}") from exc
+
+# Jaimini/BPHS rashi drishti. Movable signs aspect fixed signs except the
+# adjacent fixed sign; fixed signs aspect movable signs except the adjacent
+# movable sign; dual signs aspect the other dual signs.
+MOVABLE_SIGNS = frozenset({0, 3, 6, 9})
+FIXED_SIGNS = frozenset({1, 4, 7, 10})
+DUAL_SIGNS = frozenset({2, 5, 8, 11})
 
 HOUSE_MEANINGS = [
     "self, body, vitality", "wealth, speech, family", "courage, siblings, effort",
@@ -83,7 +108,7 @@ def _sign_block(index: int) -> dict:
 
 
 def _aspects(positions: dict, lagna_sign: int) -> list[dict]:
-    """Rashi-level graha drishti: which houses and planets each graha aspects."""
+    """BPHS planetary/graha drishti: houses and planets each graha aspects."""
     house_occupants: dict[int, list[str]] = {h: [] for h in range(1, 13)}
     for name, pos in positions.items():
         house_occupants[_house_of(pos.sign_index, lagna_sign)].append(name)
@@ -102,6 +127,104 @@ def _aspects(positions: dict, lagna_sign: int) -> list[dict]:
             ),
         })
     return out
+
+
+def _rashi_aspected_signs(sign: int) -> list[int]:
+    if sign in MOVABLE_SIGNS:
+        candidates = FIXED_SIGNS
+        excluded_difference = 1  # next sign is the adjacent fixed sign
+    elif sign in FIXED_SIGNS:
+        candidates = MOVABLE_SIGNS
+        excluded_difference = 11  # previous sign is the adjacent movable sign
+    else:
+        candidates = DUAL_SIGNS - {sign}
+        excluded_difference = None
+    return sorted(
+        target for target in candidates
+        if excluded_difference is None
+        or (target - sign) % 12 != excluded_difference
+    )
+
+
+def _rashi_aspects(positions: dict, lagna_sign: int) -> list[dict]:
+    """BPHS/Jaimini sign aspects, kept separate from graha drishti."""
+    grahas_by_sign: dict[int, list[str]] = {sign: [] for sign in range(12)}
+    for name, pos in positions.items():
+        grahas_by_sign[pos.sign_index].append(name)
+
+    out = []
+    for name, pos in positions.items():
+        signs = _rashi_aspected_signs(pos.sign_index)
+        houses = [
+            _house_of(sign, lagna_sign)
+            for sign in signs
+        ]
+        out.append({
+            "graha": name,
+            "from_sign": _sign_block(pos.sign_index),
+            "from_house": _house_of(pos.sign_index, lagna_sign),
+            "aspects_signs": [_sign_block(sign) for sign in signs],
+            "aspects_houses": houses,
+            "aspects_grahas": sorted(
+                graha for sign in signs for graha in grahas_by_sign[sign]
+            ),
+        })
+    return out
+
+
+def _graha_aspect_targets(source: str, source_sign: int) -> set[int]:
+    counts = SPECIAL_ASPECTS.get(source, DEFAULT_ASPECTS)
+    return {(source_sign + count - 1) % 12 for count in counts}
+
+
+def _bphs_nature(
+    positions: dict, name: str, sun_longitude: float,
+) -> tuple[str, list[str]]:
+    """Contextual benefic/malefic result from BPHS Chapter 3, shloka 11."""
+    natural = (
+        "benefic" if name in NATURAL_BENEFICS
+        else "malefic" if name in NATURAL_MALEFICS
+        else "neutral"
+    )
+    if name not in ("Moon", "Mercury"):
+        return natural, ["natural classification"]
+
+    moon_sun_distance = (positions["Moon"].longitude - sun_longitude) % 360.0
+    # 0° is Amavasya (dark Moon); 180° is Purnima (full Moon, bright half).
+    waning_moon = moon_sun_distance > 180.0 or moon_sun_distance < 1e-9
+    moon_mercury_together = (
+        positions["Moon"].sign_index == positions["Mercury"].sign_index
+    )
+    if moon_mercury_together and waning_moon:
+        return "benefic", ["waning Moon and Mercury are joined; BPHS exception"]
+
+    if name == "Mercury":
+        joined_malefics = sorted(
+            other for other in NATURAL_MALEFICS
+            if other in positions
+            and positions[other].sign_index == positions["Mercury"].sign_index
+        )
+        if joined_malefics:
+            return "malefic", [f"joined with natural malefic(s): {joined_malefics}"]
+        return "benefic", ["Mercury is not joined with a natural malefic"]
+
+    if not waning_moon:
+        return "benefic", ["waxing Moon"]
+
+    benefic_sources = []
+    for source in ("Mercury", "Jupiter", "Venus"):
+        source_nature, _ = _bphs_nature(positions, source, sun_longitude)
+        if source_nature != "benefic":
+            continue
+        source_sign = positions[source].sign_index
+        if (
+            source_sign == positions["Moon"].sign_index
+            or positions["Moon"].sign_index in _graha_aspect_targets(source, source_sign)
+        ):
+            benefic_sources.append(source)
+    if benefic_sources:
+        return "benefic", [f"waning Moon joined/aspected by benefic(s): {benefic_sources}"]
+    return "malefic", ["waning Moon"]
 
 
 def _varga_table(positions: dict, lagna_longitude: float, which: list[str]) -> dict:
@@ -150,16 +273,19 @@ def build(
         equinox=birth.equinox,
     )
     positions = sky.positions()
+    sun_longitude = positions["Sun"].longitude
+
+    offset = timedelta(hours=tz_info["utc_offset_hours"])
+    # Validate the solar day before asking Swiss Ephemeris for house cusps.
+    # At circumpolar latitudes houses_ex can fail before rise_trans reports the
+    # missing sunrise/sunset; the API should expose the useful 422 either way.
+    solar = sun_rise_set(
+        jd, birth.latitude, birth.longitude, convention=birth.sunrise_convention
+    )
     angles = sky.angles(birth.latitude, birth.longitude, birth.house_system.encode())
     lagna = angles["ascendant"]
     lagna_sign = lagna.sign_index
 
-    sun_longitude = positions["Sun"].longitude
-
-    offset = timedelta(hours=tz_info["utc_offset_hours"])
-    solar = sun_rise_set(
-        jd, birth.latitude, birth.longitude, convention=birth.sunrise_convention
-    )
     vedic_day_start_local = jd_to_datetime(solar["sunrise_jd"]) + offset
     # Python's weekday() is Monday=0; the vara list is Sunday=0.
     vara_index = (vedic_day_start_local.weekday() + 1) % 7
@@ -170,11 +296,16 @@ def build(
         entry = pos.as_dict()
         entry["house"] = _house_of(pos.sign_index, lagna_sign)
         entry["dignity"] = dignity(name, pos, sun_longitude)
-        entry["nature"] = (
+        natural_nature = (
             "benefic" if name in NATURAL_BENEFICS
             else "malefic" if name in NATURAL_MALEFICS
             else "neutral"
         )
+        bphs_nature, bphs_reasons = _bphs_nature(positions, name, sun_longitude)
+        entry["nature"] = bphs_nature
+        entry["natural_nature"] = natural_nature
+        entry["bphs_nature"] = bphs_nature
+        entry["bphs_nature_reasons"] = bphs_reasons
         grahas[name] = entry
 
     houses = []
@@ -193,7 +324,7 @@ def build(
         year_length=birth.dasha_year_length,
         traversed_precision=birth.dasha_traversed_precision,
     )
-    now = reference_time or datetime.now()
+    now = _local_reference_time(reference_time, tz_info["timezone"])
 
     chart = {
         "engine": {
@@ -225,6 +356,7 @@ def build(
         "grahas": grahas,
         "houses": houses,
         "aspects": _aspects(positions, lagna_sign),
+        "rashi_aspects": _rashi_aspects(positions, lagna_sign),
         "panchanga": panchanga.compute(
             sun_longitude, positions["Moon"].longitude, vara_index, civil_vara_index
         ),
