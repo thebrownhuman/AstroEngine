@@ -284,6 +284,9 @@ def compute(chart: dict) -> dict:
         "sarvashtakavarga": {
             "by_sign": sarva,
             "total": sum(sarva),
+            # The column sum of the seven prastara rows, so it inherits the
+            # bindu tables' authority and none of the reduction's.
+            **provenance.ASHTAKAVARGA,
             "prastara": {"houses": _as_houses(sarva, lagna_sign, sarva_grid),
                          "score": sum(sarva)},
         },

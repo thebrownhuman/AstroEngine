@@ -356,7 +356,8 @@ def sudarshana_report(request: ChartRequest) -> dict:
         raise _build_http_error(exc) from exc
     return {"engine": data["engine"], "input": data["input"],
             "solstice": data["solstice"], "drik_ritu": data["drik_ritu"],
-            "sudarshana_chakra": data["sudarshana_chakra"]}
+            "sudarshana_chakra": data["sudarshana_chakra"],
+            **provenance.CALENDAR}
 
 
 @app.post("/v1/relationships")
@@ -368,7 +369,8 @@ def relationship_report(request: ChartRequest) -> dict:
     except (ValueError, FileNotFoundError) as exc:
         raise _build_http_error(exc) from exc
     return {"engine": data["engine"], "input": data["input"],
-            "planet_relationship": data["planet_relationship"]}
+            "planet_relationship": data["planet_relationship"],
+            **provenance.RELATIONSHIP}
 
 
 

@@ -153,13 +153,19 @@ so it is told.
 
 | `source` | meaning | examples |
 |---|---|---|
-| `bphs` | traceable to Brihat Parashara Hora Shastra; the shloka is in `authority` | graha drishti, rashi drishti, contextual benefic/malefic, nakshatra deities, the sixteen vargas, the ashtakavarga bindu tables |
-| `classical` | standard Jyotisha or a named system, but not BPHS | KP, tara/chandra bala, sun-derived upagrahas, numerology, the yoga set, gochara |
+| `bphs` | traceable to Brihat Parashara Hora Shastra; the shloka is in `authority` | graha drishti, rashi drishti, contextual benefic/malefic, nakshatra deities, the sixteen vargas, the ashtakavarga bindu tables, Vimshottari, dignity, naisargika maitri |
+| `classical` | standard Jyotisha or a named system, but not BPHS | KP, tara/chandra bala, sun-derived upagrahas, numerology, the yoga set, gochara, panchanga, ayana/ritu/Sudarshana, the house significations |
 | `provider_compatible` | reproduces Prokerala and was recovered by measuring it; no textual authority | porutham, ashtakoot, muhurta, gowri, Kaal Sarpa, papasamyam, time-derived upagrahas, the non-deity nakshatra metadata, the ekadhipatya reduction |
 | `unverified` | neither reproduced nor textually grounded | Daridra Yoga |
 
 `GET /health` returns the vocabulary with its definitions, so a consumer can
 learn all four in one call.
+
+Completeness is enforced, not remembered: a test walks every top-level block of
+a fully-populated chart and fails unless each one either carries a stamp or is
+named in an explicit `NO_RULE` list with the reason it carries no rule — raw
+ephemeris output, an echo of the request, or geometry. Adding a block without
+attributing it now fails the suite.
 
 Three stamps are worth reading in full:
 
@@ -172,6 +178,15 @@ night, Gulika at the start of Saturn's portion, and Mandi being the same
 upagraha as Gulika are BPHS Chapter 3, verses 66-70. The part index itself,
 `(lord index - vara) mod 8`, is not: it was recovered by inversion. The stamp
 is `provider_compatible` because the indexing is what decides the answer.
+
+**Vimshottari** is the one most worth reading. The scheme is BPHS Chapter 46,
+but two conventions that move the boundaries are settings rather than doctrine,
+and the stamp says both. The year length is a live disagreement between
+implementations — 365.25 Julian (the default, and Prokerala's), 365.2425
+Gregorian, or 365.2564 sidereal — which over 120 years is about 0.9 days.
+Separately, `prokerala_compatible` rounds the nakshatra traversal fraction to
+three decimals, costing up to ~1.5 days on a 20-year mahadasha. Dasha dates are
+not scriptural to the second, and the block no longer implies they are.
 
 **Ashtakavarga** splits the same way as the upagrahas. The bindu contribution
 tables are BPHS Chapter 66 and the block is stamped `bphs`, but each
@@ -413,7 +428,7 @@ astro_engine/
   api.py           FastAPI surface
 
 validation/        parity scripts; verify_everything.py runs them all
-tests/             291 tests
+tests/             294 tests
 deploy/            serve script and Cloudflare Tunnel config
 ```
 

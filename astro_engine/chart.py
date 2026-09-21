@@ -358,11 +358,18 @@ def build(
         "houses": houses,
         "aspects": _aspects(positions, lagna_sign),
         "rashi_aspects": _rashi_aspects(positions, lagna_sign),
+        # Blocks keyed by graha or sign name cannot carry the stamp inline
+        # without a consumer mistaking "source" for one of the keys, so their
+        # provenance is collected here instead.
         "sources": {
             "graha_nature": provenance.GRAHA_NATURE,
             "graha_drishti": provenance.GRAHA_DRISHTI,
             "rashi_drishti": provenance.RASHI_DRISHTI,
             "vargas": provenance.VARGA,
+            "dasha": provenance.DASHA,
+            "panchanga": provenance.PANCHANGA,
+            "dignity": provenance.DIGNITY,
+            "house_significations": provenance.HOUSE_SIGNIFICATIONS,
         },
         "panchanga": panchanga.compute(
             sun_longitude, positions["Moon"].longitude, vara_index, civil_vara_index
@@ -396,10 +403,12 @@ def build(
         chart.update(av.compute(chart))
     if include_relationships:
         chart["planet_relationship"] = maitri.compute(chart)
+        chart["planet_relationship_source"] = provenance.RELATIONSHIP
     if include_doshas:
         chart["doshas"] = dosha_rules.compute(chart)
     if include_calendar:
         chart.update(calendar.compute(chart))
+        chart["calendar_source"] = provenance.CALENDAR
     if include_nakshatra_info:
         # Keyed on the Moon: "your nakshatra" always means the janma star.
         chart["nakshatra_info"] = nakshatra_attributes(

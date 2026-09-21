@@ -399,8 +399,10 @@ def test_chart_routes():
         "/v1/upagrahas": {"engine", "input", "solar_day", "upagrahas"},
         "/v1/doshas": {"engine", "input", "doshas"},
         "/v1/nakshatra": {"engine", "input", "nakshatra", "additional_info"},
-        "/v1/sudarshana": {"engine", "input", "solstice", "drik_ritu", "sudarshana_chakra"},
-        "/v1/relationships": {"engine", "input", "planet_relationship"},
+        "/v1/sudarshana": {"engine", "input", "solstice", "drik_ritu",
+                           "sudarshana_chakra", "source", "authority"},
+        "/v1/relationships": {"engine", "input", "planet_relationship",
+                              "source", "authority"},
         # `source` and `authority` are the provenance stamp carried by every
         # block that encodes a rule; see astro_engine/provenance.py.
         "/v1/kp": {"engine", "input", "houses", "planets", "house_significators",
@@ -425,9 +427,11 @@ def test_chart_routes():
         "include_ashtakavarga": {"ashtakavarga", "ashtakavarga_source",
                                  "sarvashtakavarga"},
         "include_upagrahas": {"upagrahas"},
-        "include_relationships": {"planet_relationship"},
+        "include_relationships": {"planet_relationship",
+                                  "planet_relationship_source"},
         "include_doshas": {"doshas"},
-        "include_calendar": {"solstice", "drik_ritu", "sudarshana_chakra"},
+        "include_calendar": {"solstice", "drik_ritu", "sudarshana_chakra",
+                             "calendar_source"},
         "include_nakshatra_info": {"nakshatra_info"},
     }
     minimal = {"date": "1990-01-15", "time": "04:30", "latitude": 28.6139, "longitude": 77.2090}

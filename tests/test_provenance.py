@@ -119,8 +119,22 @@ def test_daridra_stays_unverified():
 
 
 def test_bphs_derived_chart_blocks_are_labelled():
+    """`sources` is not uniformly BPHS, and must not be read as though it were."""
     sources = client.post("/v1/chart", json=BIRTH).json()["sources"]
-    assert {block["source"] for block in sources.values()} == {provenance.BPHS}
+
+    expected = {
+        "graha_nature": provenance.BPHS,
+        "graha_drishti": provenance.BPHS,
+        "rashi_drishti": provenance.BPHS,
+        "vargas": provenance.BPHS,
+        "dasha": provenance.BPHS,
+        "dignity": provenance.BPHS,
+        # Panchanga is standard practice, and the house significations are an
+        # editorial summary rather than a quotation. Neither is BPHS.
+        "panchanga": provenance.CLASSICAL,
+        "house_significations": provenance.CLASSICAL,
+    }
+    assert {key: block["source"] for key, block in sources.items()} == expected
     assert "Chapter 26" in sources["graha_drishti"]["authority"]
     assert "Chapter 6" in sources["vargas"]["authority"]
 
@@ -158,3 +172,93 @@ def test_all_twelve_porutham_checks_are_verified():
     assert {m["parity"] for m in report["matches"]} == {"verified"}
     # Verified against Prokerala, but still without textual authority.
     assert report["source"] == provenance.PROVIDER
+
+
+# Blocks with no rule to attribute: raw astronomy, echoes of the request, or
+# pure geometry. Each needs a reason, so that adding to this set is a decision
+# rather than the easy way past the test below.
+NO_RULE = {
+    "engine": "settings and versions, not a rule",
+    "input": "the resolved request, echoed back",
+    "lagna": "an ephemeris longitude",
+    "midheaven": "an ephemeris longitude",
+    "cusps": "Placidus cusps; not Vedic, present only for KP",
+    "grahas": "ephemeris longitudes; the rules over them are stamped in `sources`",
+    "houses": "whole-sign arithmetic; significations stamped in `sources`",
+    "aspects": "stamped as graha_drishti in `sources`",
+    "rashi_aspects": "stamped as rashi_drishti in `sources`",
+    "solar_day": "sunrise and sunset times; the convention is named in the block",
+    "sources": "the stamps themselves",
+    "vargas": "stamped in `sources`; the map is keyed D1/D9/...",
+    "dasha": "stamped in `sources`; the map is keyed by lord",
+    "current_dasha": "a view onto `dasha`, which is stamped in `sources`",
+    "panchanga": "stamped in `sources`",
+    "ashtakavarga": "stamped by the `ashtakavarga_source` sibling",
+    "transits": "stamped by the `transits_source` sibling",
+    "planet_relationship": "stamped by the `planet_relationship_source` sibling",
+    "solstice": "stamped by the `calendar_source` sibling",
+    "drik_ritu": "stamped by the `calendar_source` sibling",
+    "sudarshana_chakra": "stamped by the `calendar_source` sibling",
+}
+
+EVERYTHING = {
+    **BIRTH,
+    "include_yogas": True, "include_transits": True, "include_ashtakavarga": True,
+    "include_upagrahas": True, "include_relationships": True,
+    "include_doshas": True, "include_calendar": True,
+    "include_nakshatra_info": True,
+}
+
+
+def _carries_a_stamp(node):
+    if isinstance(node, dict):
+        if "source" in node and "authority" in node:
+            return True
+        return any(_carries_a_stamp(v) for v in node.values())
+    if isinstance(node, list):
+        return any(_carries_a_stamp(item) for item in node)
+    return False
+
+
+def test_no_chart_block_is_silently_unattributed():
+    """The check that stops this drifting.
+
+    Enumerating the blocks by hand is how a new one ships unstamped: it is not
+    that anybody decides to omit it, it is that nobody remembers it exists. A
+    block added from here on either carries a stamp, or its name has to be
+    added to NO_RULE with a reason, which is a decision somebody makes.
+    """
+    chart = client.post("/v1/chart", json=EVERYTHING).json()
+
+    unattributed = [
+        key for key in chart
+        if not key.endswith("_source")
+        and key not in NO_RULE
+        and not _carries_a_stamp(chart[key])
+    ]
+    assert not unattributed, (
+        f"blocks with no provenance: {sorted(unattributed)}. Stamp them, or add "
+        f"them to NO_RULE with the reason they carry no rule."
+    )
+
+
+def test_the_no_rule_list_has_not_gone_stale():
+    """An entry that no longer matches a real block is a stale excuse."""
+    chart = client.post("/v1/chart", json=EVERYTHING).json()
+    assert not (set(NO_RULE) - set(chart)), (
+        f"NO_RULE names blocks the chart no longer has: "
+        f"{sorted(set(NO_RULE) - set(chart))}"
+    )
+    assert all(reason.strip() for reason in NO_RULE.values())
+
+
+def test_dasha_says_which_conventions_produced_it():
+    """The most-consumed block, and mixed authority in the misleading direction."""
+    stamp = client.post("/v1/chart", json=BIRTH).json()["sources"]["dasha"]
+    assert stamp["source"] == provenance.BPHS
+    # The scheme is BPHS; the two settings that move boundaries are not, and
+    # the authority string has to say so rather than implying the dates are
+    # scriptural.
+    assert "Chapter 46" in stamp["authority"]
+    assert "365.25" in stamp["authority"]
+    assert "three decimals" in stamp["authority"]

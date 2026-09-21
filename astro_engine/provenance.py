@@ -82,6 +82,60 @@ UPAGRAHA_TIME = block(
     "and these are only correct under prokerala_compatible.",
 )
 
+DASHA = block(
+    BPHS,
+    "Vimshottari itself is BPHS Chapter 46: the 120-year cycle, the nakshatra "
+    "lords and their year counts. Two conventions that move the boundaries are "
+    "not from the text and are settings, not doctrine. The year length is a "
+    "live disagreement between implementations - 365.25 Julian (the default "
+    "here, and what Prokerala uses), 365.2425 Gregorian, or 365.2564 sidereal "
+    "- and over 120 years the first two diverge by about 0.9 days. Separately, "
+    "`prokerala_compatible` rounds the nakshatra traversal fraction to three "
+    "decimals, which costs up to ~1.5 days on a 20-year mahadasha.",
+)
+
+PANCHANGA = block(
+    CLASSICAL,
+    "The five limbs are standard panchang, not a BPHS construct. Tithi, yoga "
+    "and karana depend only on the Sun-Moon elongation, so they are geometry "
+    "rather than rule; the vara depends on the sunrise convention and so "
+    "shifts with prokerala_compatible.",
+)
+
+DIGNITY = block(
+    BPHS,
+    "Exaltation, debilitation and own sign follow the BPHS tables; "
+    "debilitation is taken as the seventh sign from exaltation. The "
+    "combustion orbs are the conventional per-graha values rather than a "
+    "BPHS list.",
+)
+
+HOUSE_SIGNIFICATIONS = block(
+    CLASSICAL,
+    "The one-line significations are an editorial summary for reading "
+    "convenience, not a quotation from any chapter. The house lords and "
+    "occupants beside them are computed, not editorial.",
+)
+
+RELATIONSHIP = block(
+    BPHS,
+    "Naisargika friendship is the BPHS table, written out rather than derived "
+    "because the derivation has exceptions and does not cover the nodes. "
+    "Tatkalika and the five-fold panchadha compound are the standard rules. "
+    "Two asymmetries in how the nodes participate are Prokerala's and are "
+    "reproduced deliberately.",
+)
+
+CALENDAR = block(
+    CLASSICAL,
+    "Ayana turns on the Sun's sidereal sign, not the tropical solstice, though "
+    "the labels follow Prokerala in naming each half after the solstice that "
+    "opens it. Only the drik ritu is emitted: Prokerala's vedic ritu "
+    "boundaries came back exactly 59 days apart, which matches neither two "
+    "lunar months nor two solar months, and one sample was not enough to "
+    "recover it. Sudarshana Chakra is the ordinary three-reference reading.",
+)
+
 VARGA = block(
     BPHS,
     "The shodasavarga: BPHS Chapter 6 defines the sixteen divisions and "
