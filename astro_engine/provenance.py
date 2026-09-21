@@ -67,7 +67,12 @@ RASHI_DRISHTI = block(
     "fixed and dual signs, kept separate from graha drishti.",
 )
 
-NAKSHATRA_DEITY = block(BPHS, "BPHS Chapter 3 nakshatra deity list.")
+NAKSHATRA_DEITY = block(
+    BPHS,
+    "BPHS Chapter 3, notes on verse 18: the presiding deities of the 27 "
+    "nakshatras, Ashwini Kumara through Poosha. All 27 verified against the "
+    "text.",
+)
 NAKSHATRA_METADATA = block(
     PROVIDER,
     "Ganam, symbol, animal sign, nadi, colour, direction, syllables, birth "
@@ -95,9 +100,11 @@ UPAGRAHA_TIME = block(
 
 DASHA = block(
     BPHS,
-    "Vimshottari itself is BPHS Chapter 46: the 120-year cycle, the nakshatra "
-    "lords and their year counts. Two conventions that move the boundaries are "
-    "not from the text and are settings, not doctrine. The year length is a "
+    "Vimshottari itself is BPHS Chapter 46, which names it the dasha \"most "
+    "appropriate for the general populace\", sets the span at the 120-year "
+    "natural life, and tabulates the nakshatra lords against their years. "
+    "Two conventions that move the boundaries are not from the text and are "
+    "settings, not doctrine. The year length is a "
     "live disagreement between implementations - 365.25 Julian (the default "
     "here, and what Prokerala uses), 365.2425 Gregorian, or 365.2564 sidereal "
     "- and over 120 years the first two diverge by about 0.9 days. Separately, "
@@ -115,25 +122,33 @@ PANCHANGA = block(
 
 DIGNITY = block(
     BPHS,
-    "Exaltation, debilitation and own sign follow the BPHS tables; "
-    "debilitation is taken as the seventh sign from exaltation. The "
-    "combustion orbs are the conventional per-graha values rather than a "
-    "BPHS list.",
+    "BPHS Chapter 3, verses 49-50: the exaltation signs of the seven grahas "
+    "with their deepest degrees, and \"in the seventh sign from the said "
+    "exaltation sign each planet has its own debilitation\". The combustion "
+    "orbs are conventional per-graha values, not from that passage.",
 )
 
 HOUSE_SIGNIFICATIONS = block(
     CLASSICAL,
-    "The one-line significations are an editorial summary for reading "
-    "convenience, not a quotation from any chapter. The house lords and "
-    "occupants beside them are computed, not editorial.",
+    "BPHS Chapter 11, verses 2-13 does give each house's indications, so this "
+    "is not merely editorial - but this list is not that list. It follows "
+    "later convention on two points where Chapter 11 is explicit: father is "
+    "placed in the 9th here and in the 10th there (the text carries a note "
+    "insisting on the 10th), and debts in the 6th here and the 10th there. It "
+    "also adds terms absent from that chapter - speech, purva punya, the "
+    "occult, moksha. Classical rather than BPHS for those reasons. The house "
+    "lords and occupants beside them are computed, not editorial.",
 )
 
 RELATIONSHIP = block(
     BPHS,
-    "Naisargika friendship is the BPHS table, written out rather than derived "
-    "because the derivation has exceptions and does not cover the nodes. "
-    "Tatkalika and the five-fold panchadha compound are the standard rules. "
-    "Two asymmetries in how the nodes participate are Prokerala's and are "
+    "BPHS Chapter 3: verse 55 gives naisargika friendship (the 2nd, 4th, 5th, "
+    "8th, 9th and 12th lords from a graha's Moola-Trikona, plus its "
+    "exaltation lord; the rest enemies; both at once means neutral), verse 56 "
+    "tatkalika, and verses 57-58 the five-fold panchadha compound with the "
+    "same grades used here. The table is written out rather than derived "
+    "because the derivation has exceptions and does not cover the nodes. Two "
+    "asymmetries in how the nodes participate are Prokerala's and are "
     "reproduced deliberately.",
 )
 
@@ -149,8 +164,9 @@ CALENDAR = block(
 
 VARGA = block(
     BPHS,
-    "The shodasavarga: BPHS Chapter 6 defines the sixteen divisions and "
-    "Chapter 7 their deities and uses. Every mapping here is the classical "
+    "The shodasavarga: BPHS Chapter 6, verses 2-4 name all sixteen divisions "
+    "from Kshetra and Hora through Shashtyamsa, and Chapter 7 gives their "
+    "deities and uses. Every mapping here is the classical "
     "one; `parity` says separately which have been checked placement-for-"
     "placement against Prokerala.",
 )
@@ -177,7 +193,8 @@ EKADHIPATYA = block(
 
 TRANSIT = block(
     CLASSICAL,
-    "Gochara is not BPHS. Sade Sati, Dhaiyya, Kantaka and Ashtama Shani are "
+    "Gochara is not in BPHS at all: the text has no transit chapter and never "
+    "mentions Sade Sati. It, Dhaiyya, Kantaka and Ashtama Shani are "
     "standard practice, and the ingress dates here are computed by bisecting "
     "the ephemeris rather than taken from any table. The phase labels and the "
     "`description` wording reproduce Prokerala's own strings so the two can be "
@@ -186,8 +203,10 @@ TRANSIT = block(
 
 KAAL_SARPA = block(
     PROVIDER,
-    "The modern all-grahas-between-the-nodes rule. BPHS describes Sarpa Yoga "
-    "-- malefics in kendras -- which is a different construct; this is not it. "
+    "The modern all-grahas-between-the-nodes rule. BPHS does have a Sarpa "
+    "Yoga, at Chapter 35 verse 8 - malefics occupying three kendras, also "
+    "called Bhujanga, with its effects at verse 22 - but that is a different "
+    "construct and this is not it. "
     "Two charts of eighteen disagree with Prokerala and are left disagreeing.",
 )
 PAPASAMYAM = block(
@@ -243,10 +262,15 @@ NUMEROLOGY = block(
 
 YOGA = block(
     CLASSICAL,
-    "Standard yoga definitions. The five Panchamahapurusha, Gajakesari and the "
-    "Sunapha/Anapha/Duradhara group are BPHS; the rest are common Jyotisha "
-    "combinations stated the same way across the sources. `parity` says "
-    "separately whether the detector reproduces Prokerala's verdict.",
+    "Mostly BPHS, verified chapter by chapter: the five Panchamahapurusha are "
+    "Chapter 75 verses 1-2 (Mars, Mercury, Jupiter, Venus or Saturn in own "
+    "sign or exaltation, in a kendra from the Lagna - exactly the rule used "
+    "here), Gajakesari is Chapter 36 verses 3-4, Sunapha/Anapha/Duradhara are "
+    "the lunar yogas of Chapter 37, and Vesi/Vasi/Ubhaya Chari the solar "
+    "yogas of Chapter 38. The remainder are common Jyotisha combinations "
+    "stated the same way across the sources, which is why this is classical "
+    "rather than bphs as a whole. `parity` says separately whether each "
+    "detector reproduces Prokerala's verdict.",
 )
 
 DARIDRA = block(

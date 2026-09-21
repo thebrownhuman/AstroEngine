@@ -179,6 +179,11 @@ upagraha as Gulika are BPHS Chapter 3, verses 66-70. The part index itself,
 `(lord index - vara) mod 8`, is not: it was recovered by inversion. The stamp
 is `provider_compatible` because the indexing is what decides the answer.
 
+Every `bphs` stamp cites chapter and verse, and every citation was checked
+against Santhanam's translation rather than recalled. Two stamps say the engine
+knowingly departs from the text — see the ekadhipatya and house-signification
+notes below.
+
 **Vimshottari** is the one most worth reading. The scheme is BPHS Chapter 46,
 but two conventions that move the boundaries are settings rather than doctrine,
 and the stamp says both. The year length is a live disagreement between
@@ -210,6 +215,14 @@ alone — and that reading was measured, not read.
 bisecting the ephemeris, but the phase labels and the `description` prose
 reproduce Prokerala's own strings so the two can be compared directly. That
 prose is theirs, not doctrine.
+
+**The house significations are not BPHS**, though Chapter 11 verses 2-13 does
+enumerate each house's indications. This list departs from that chapter on two
+points where it is explicit — father sits in the 9th here and in the 10th there
+(the text carries a note insisting on the 10th), and debts in the 6th here and
+the 10th there — and adds terms absent from it entirely: speech, purva punya,
+the occult, moksha. Stamped `classical`, with the divergence spelled out rather
+than glossed as "editorial".
 
 **The nakshatra reference block** carries two stamps. `deity` is BPHS Chapter
 3; the other eleven fields were transcribed from Prokerala and are stamped
@@ -439,7 +452,7 @@ astro_engine/
   api.py           FastAPI surface
 
 validation/        parity scripts; verify_everything.py runs them all
-tests/             295 tests
+tests/             296 tests
 deploy/            serve script and Cloudflare Tunnel config
 ```
 

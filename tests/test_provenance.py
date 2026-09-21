@@ -293,3 +293,27 @@ def test_ekadhipatya_diverges_from_bphs_on_purpose():
     }).json()["ashtakavarga"]["Sun"]["ekaadhipatya"]
     assert stamp["source"] == provenance.PROVIDER
     assert "Chapter 68" in stamp["authority"]
+
+
+def test_house_significations_do_not_overclaim_bphs():
+    """BPHS Chapter 11 gives house indications, but this list is not that list.
+
+    Under-claiming BPHS is a smaller error than over-claiming, but it is still
+    an error, so the stamp had to be checked in both directions. Chapter 11
+    verses 2-13 do enumerate each house's indications -- which makes "purely
+    editorial" wrong -- but this list departs from them on two points where the
+    text is explicit, and adds terms that are not in it at all.
+    """
+    chart = client.post("/v1/chart", json=BIRTH).json()
+    stamp = chart["sources"]["house_significations"]
+
+    assert stamp["source"] == provenance.CLASSICAL
+    assert "Chapter 11" in stamp["authority"]
+
+    houses = {h["house"]: h["significations"] for h in chart["houses"]}
+    # BPHS puts father in the 10th and carries a note insisting on it; this
+    # engine follows the later convention and puts him in the 9th.
+    assert "father" in houses[9]
+    assert "father" not in houses[10]
+    # BPHS puts debts in the 10th; here they sit in the 6th.
+    assert "debt" in houses[6]
