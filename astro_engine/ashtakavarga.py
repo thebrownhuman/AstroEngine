@@ -17,6 +17,7 @@ Sarvashtakavarga is the column sum of the seven prastara rows.
 
 from __future__ import annotations
 
+from . import provenance
 from .constants import SIGNS, SIGNS_EN, SIGN_LORDS
 
 # Order matters: this is the order the classical tables are written in.
@@ -269,13 +270,17 @@ def compute(chart: dict) -> dict:
             "trikona": {"houses": _as_houses(trikona, lagna_sign),
                         "score": sum(trikona)},
             "ekaadhipatya": {"houses": _as_houses(ekadhipatya, lagna_sign),
-                             "score": sum(ekadhipatya)},
+                             "score": sum(ekadhipatya),
+                             **provenance.EKADHIPATYA},
         }
 
     sarva = [sum(tables[s]["by_sign"][i] for s in SUBJECTS) for i in range(12)]
     sarva_grid = {s: tables[s]["by_sign"] for s in SUBJECTS}
     return {
         "ashtakavarga": tables,
+        # Sibling, not merged: `ashtakavarga` is keyed by graha name and a
+        # consumer iterating it must not find "source" among the grahas.
+        "ashtakavarga_source": provenance.ASHTAKAVARGA,
         "sarvashtakavarga": {
             "by_sign": sarva,
             "total": sum(sarva),

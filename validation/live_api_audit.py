@@ -392,8 +392,10 @@ def test_chart_routes():
     expected_keys = {
         "/v1/chart/summary": {"summary", "engine", "input"},
         "/v1/yogas": {"engine", "input", "lagna", "yogas"},
-        "/v1/transits": {"engine", "input", "natal_moon", "transits"},
-        "/v1/ashtakavarga": {"engine", "input", "lagna", "ashtakavarga", "sarvashtakavarga"},
+        "/v1/transits": {"engine", "input", "natal_moon", "transits",
+                         "source", "authority"},
+        "/v1/ashtakavarga": {"engine", "input", "lagna", "ashtakavarga",
+                             "ashtakavarga_source", "sarvashtakavarga"},
         "/v1/upagrahas": {"engine", "input", "solar_day", "upagrahas"},
         "/v1/doshas": {"engine", "input", "doshas"},
         "/v1/nakshatra": {"engine", "input", "nakshatra", "additional_info"},
@@ -419,8 +421,9 @@ def test_chart_routes():
     # Every optional switch is exercised alone as well as in the full request.
     flag_to_keys = {
         "include_yogas": {"yogas"},
-        "include_transits": {"transits"},
-        "include_ashtakavarga": {"ashtakavarga", "sarvashtakavarga"},
+        "include_transits": {"transits", "transits_source"},
+        "include_ashtakavarga": {"ashtakavarga", "ashtakavarga_source",
+                                 "sarvashtakavarga"},
         "include_upagrahas": {"upagrahas"},
         "include_relationships": {"planet_relationship"},
         "include_doshas": {"doshas"},

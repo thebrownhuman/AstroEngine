@@ -362,6 +362,7 @@ def build(
             "graha_nature": provenance.GRAHA_NATURE,
             "graha_drishti": provenance.GRAHA_DRISHTI,
             "rashi_drishti": provenance.RASHI_DRISHTI,
+            "vargas": provenance.VARGA,
         },
         "panchanga": panchanga.compute(
             sun_longitude, positions["Moon"].longitude, vara_index, civil_vara_index
@@ -405,6 +406,7 @@ def build(
             chart["grahas"]["Moon"]["nakshatra_index"])
 
     if include_transits:
+        chart["transits_source"] = provenance.TRANSIT
         chart["transits"] = gochara.build(
             chart,
             birth_local=local,

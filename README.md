@@ -153,9 +153,9 @@ so it is told.
 
 | `source` | meaning | examples |
 |---|---|---|
-| `bphs` | traceable to Brihat Parashara Hora Shastra; the shloka is in `authority` | graha drishti, rashi drishti, contextual benefic/malefic, nakshatra deities |
-| `classical` | standard Jyotisha or a named system, but not BPHS | KP, tara/chandra bala, sun-derived upagrahas, numerology, the yoga set |
-| `provider_compatible` | reproduces Prokerala and was recovered by measuring it; no textual authority | porutham, ashtakoot, muhurta, gowri, Kaal Sarpa, papasamyam, time-derived upagrahas, the non-deity nakshatra metadata |
+| `bphs` | traceable to Brihat Parashara Hora Shastra; the shloka is in `authority` | graha drishti, rashi drishti, contextual benefic/malefic, nakshatra deities, the sixteen vargas, the ashtakavarga bindu tables |
+| `classical` | standard Jyotisha or a named system, but not BPHS | KP, tara/chandra bala, sun-derived upagrahas, numerology, the yoga set, gochara |
+| `provider_compatible` | reproduces Prokerala and was recovered by measuring it; no textual authority | porutham, ashtakoot, muhurta, gowri, Kaal Sarpa, papasamyam, time-derived upagrahas, the non-deity nakshatra metadata, the ekadhipatya reduction |
 | `unverified` | neither reproduced nor textually grounded | Daridra Yoga |
 
 `GET /health` returns the vocabulary with its definitions, so a consumer can
@@ -172,6 +172,18 @@ night, Gulika at the start of Saturn's portion, and Mandi being the same
 upagraha as Gulika are BPHS Chapter 3, verses 66-70. The part index itself,
 `(lord index - vara) mod 8`, is not: it was recovered by inversion. The stamp
 is `provider_compatible` because the indexing is what decides the answer.
+
+**Ashtakavarga** splits the same way as the upagrahas. The bindu contribution
+tables are BPHS Chapter 66 and the block is stamped `bphs`, but each
+`ekaadhipatya` view carries its own `provider_compatible` stamp: the text is
+ambiguous on the one clause that decides the table — an empty sign holding
+strictly less than its occupied twin is zeroed, while an exact tie is left
+alone — and that reading was measured, not read.
+
+**Gochara** is `classical`, not BPHS. The ingress dates are computed by
+bisecting the ephemeris, but the phase labels and the `description` prose
+reproduce Prokerala's own strings so the two can be compared directly. That
+prose is theirs, not doctrine.
 
 **The nakshatra reference block** carries two stamps. `deity` is BPHS Chapter
 3; the other eleven fields were transcribed from Prokerala and are stamped
@@ -401,7 +413,7 @@ astro_engine/
   api.py           FastAPI surface
 
 validation/        parity scripts; verify_everything.py runs them all
-tests/             287 tests
+tests/             291 tests
 deploy/            serve script and Cloudflare Tunnel config
 ```
 

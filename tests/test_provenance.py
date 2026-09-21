@@ -55,7 +55,10 @@ def test_health_publishes_the_vocabulary():
     "path,payload",
     [
         ("/v1/chart", {**BIRTH, "include_yogas": True, "include_doshas": True,
-                       "include_upagrahas": True, "include_nakshatra_info": True}),
+                       "include_upagrahas": True, "include_nakshatra_info": True,
+                       "include_ashtakavarga": True, "include_transits": True}),
+        ("/v1/transits", BIRTH),
+        ("/v1/ashtakavarga", BIRTH),
         ("/v1/kp", BIRTH),
         ("/v1/muhurta", DAY),
         ("/v1/bala", DAY),
@@ -119,6 +122,29 @@ def test_bphs_derived_chart_blocks_are_labelled():
     sources = client.post("/v1/chart", json=BIRTH).json()["sources"]
     assert {block["source"] for block in sources.values()} == {provenance.BPHS}
     assert "Chapter 26" in sources["graha_drishti"]["authority"]
+    assert "Chapter 6" in sources["vargas"]["authority"]
+
+
+def test_ashtakavarga_splits_the_reduction_out():
+    """The bindu tables are BPHS 66; the ekadhipatya tie rule was measured."""
+    chart = client.post("/v1/chart", json={
+        **BIRTH, "include_ashtakavarga": True,
+    }).json()
+
+    assert chart["ashtakavarga_source"]["source"] == provenance.BPHS
+    assert "66" in chart["ashtakavarga_source"]["authority"]
+    for graha, table in chart["ashtakavarga"].items():
+        assert table["ekaadhipatya"]["source"] == provenance.PROVIDER, graha
+
+    # The stamp is a sibling because the block is keyed by graha name; a
+    # consumer iterating it must not find "source" sitting among the grahas.
+    assert "source" not in chart["ashtakavarga"]
+
+
+def test_gochara_is_not_claimed_as_bphs():
+    chart = client.post("/v1/chart", json={**BIRTH, "include_transits": True}).json()
+    assert chart["transits_source"]["source"] == provenance.CLASSICAL
+    assert client.post("/v1/transits", json=BIRTH).json()["source"] == provenance.CLASSICAL
 
 
 def test_all_twelve_porutham_checks_are_verified():

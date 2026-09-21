@@ -82,6 +82,37 @@ UPAGRAHA_TIME = block(
     "and these are only correct under prokerala_compatible.",
 )
 
+VARGA = block(
+    BPHS,
+    "The shodasavarga: BPHS Chapter 6 defines the sixteen divisions and "
+    "Chapter 7 their deities and uses. Every mapping here is the classical "
+    "one; `parity` says separately which have been checked placement-for-"
+    "placement against Prokerala.",
+)
+
+ASHTAKAVARGA = block(
+    BPHS,
+    "The bindu contribution tables are BPHS Chapter 66. The row totals "
+    "(48, 49, 39, 54, 56, 52, 39) and their sum of 337 are asserted at import "
+    "so a mistyped digit fails immediately.",
+)
+EKADHIPATYA = block(
+    PROVIDER,
+    "The same-lord reduction as BPHS states it is ambiguous on one clause, and "
+    "the clause decides the table: an empty sign holding strictly less than "
+    "its occupied twin is zeroed, but on an exact tie it is left alone. That "
+    "reading was measured against Prokerala, not taken from the text.",
+)
+
+TRANSIT = block(
+    CLASSICAL,
+    "Gochara is not BPHS. Sade Sati, Dhaiyya, Kantaka and Ashtama Shani are "
+    "standard practice, and the ingress dates here are computed by bisecting "
+    "the ephemeris rather than taken from any table. The phase labels and the "
+    "`description` wording reproduce Prokerala's own strings so the two can be "
+    "compared directly; treat that prose as theirs, not as doctrine.",
+)
+
 KAAL_SARPA = block(
     PROVIDER,
     "The modern all-grahas-between-the-nodes rule. BPHS describes Sarpa Yoga "

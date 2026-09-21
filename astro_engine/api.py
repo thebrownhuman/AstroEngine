@@ -283,6 +283,7 @@ def transits(request: ChartRequest) -> dict:
         "input": data["input"],
         "natal_moon": data["grahas"]["Moon"],
         "transits": data["transits"],
+        **provenance.TRANSIT,
     }
 
 
@@ -296,6 +297,7 @@ def ashtakavarga_report(request: ChartRequest) -> dict:
         raise _build_http_error(exc) from exc
     return {"engine": data["engine"], "input": data["input"], "lagna": data["lagna"],
             "ashtakavarga": data["ashtakavarga"],
+            "ashtakavarga_source": data["ashtakavarga_source"],
             "sarvashtakavarga": data["sarvashtakavarga"]}
 
 
