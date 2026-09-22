@@ -23,6 +23,11 @@ KNOWN_DEVIATIONS = {
 }
 
 SUITES = [
+    # This one is not a parity suite. Every other entry asks whether the engine
+    # matches Prokerala, which cannot catch an error both sides share; this asks
+    # whether the output is what BPHS says and whether it is internally
+    # coherent. It runs in-process, so it needs no server and no cache.
+    ("rules vs BPHS", "validation/against_bphs.py"),
     ("planetary positions vs NASA JPL", "validation/against_jpl.py"),
     ("sunrise, ayanamsa vs published", "validation/against_external.py"),
     ("full Prokerala sweep", "validation/verify_all.py"),

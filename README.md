@@ -241,7 +241,8 @@ python validation/verify_everything.py
 
 ```
 suite                                status  summary
-unit tests                           ok      258 passed
+unit tests                           ok      296 passed
+rules vs BPHS                        ok      164/164 checks pass against BPHS and first principles
 planetary positions vs NASA JPL      ok      28 comparisons, worst deviation +0.135 arcsec
 sunrise, ayanamsa vs published       ok      All external checks passed
 full Prokerala sweep                 ok      508/508 checks pass
@@ -254,8 +255,17 @@ tara and chandra bala                ok      24/24 checks pass
 matching                             ok      418/418 checks pass
 porutham                             ok      648/648 checks pass (all twelve rules)
 
-12/12 suites clean
+13/13 suites clean
 ```
+
+The BPHS suite is the only one that is not a parity check. Every other entry
+asks whether the engine matches Prokerala, which cannot catch an error both
+sides share and cannot check anything at all where Prokerala is the only
+reference. That one asks whether the output is what the text says and whether
+it is internally coherent: 164 assertions over nine births in both hemispheres,
+each citing the chapter and verse it was read from. It runs in-process against
+the repository, so it needs no server and no cache; point it at a deployment
+with `ASTRO_ENGINE_URL`.
 
 Responses are cached under `validation/.cache`, so re-runs are free and take
 about a minute. Deleting the cache means refetching, which spends real credits.
@@ -451,7 +461,8 @@ astro_engine/
   provider.py      durable record wrapper, for storing charts
   api.py           FastAPI surface
 
-validation/        parity scripts; verify_everything.py runs them all
+validation/        parity scripts plus against_bphs.py, which checks the
+                   rules against the text; verify_everything.py runs them all
 tests/             296 tests
 deploy/            serve script and Cloudflare Tunnel config
 ```
