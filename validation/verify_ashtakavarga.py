@@ -17,7 +17,8 @@ from datetime import datetime
 
 sys.path.insert(0, ".")
 from astro_engine import ashtakavarga as av  # noqa: E402
-from astro_engine.chart import BirthData, build  # noqa: E402
+from astro_engine.chart import BirthData  # noqa: E402
+from engine_source import build_chart as build  # noqa: E402
 from astro_engine.constants import SIGNS  # noqa: E402
 from validation.against_prokerala import fetch  # noqa: E402
 
@@ -48,9 +49,12 @@ def run() -> int:
         chart = build(
             BirthData(moment.year, moment.month, moment.day,
                       moment.hour, moment.minute, 0, lat, lon),
-            vargas=["D1"], dasha_depth=1,
+            vargas=["D1"], dasha_depth=1, include_ashtakavarga=True,
         )
-        mine = av.compute(chart)
+        # Read the engine's own block rather than recomputing it here, so a
+        # remote run checks the deployed reduction and not this process's.
+        mine = {"ashtakavarga": chart["ashtakavarga"],
+                "sarvashtakavarga": chart["sarvashtakavarga"]}
         print(f"\n--- {label} ---")
 
         # --- sarvashtakavarga: the whole bindu grid in one response ----------

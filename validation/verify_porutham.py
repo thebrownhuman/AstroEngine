@@ -17,6 +17,7 @@ import sys
 
 sys.path.insert(0, ".")
 from astro_engine import porutham  # noqa: E402
+from engine_source import porutham_report  # noqa: E402
 from astro_engine.constants import NAKSHATRAS  # noqa: E402
 from validation.against_prokerala import fetch  # noqa: E402
 
@@ -35,7 +36,7 @@ def main() -> int:
 
     for girl, girl_pada, boy_pada in SWEEPS:
         for boy in range(27):
-            mine = porutham.compute(boy, boy_pada, girl, girl_pada, twelve=True)
+            mine = porutham_report(boy, boy_pada, girl, girl_pada, twelve=True)
             theirs = fetch("thirumana-porutham", {
                 "girl_nakshatra": girl + ID_OFFSET,
                 "girl_nakshatra_pada": girl_pada,

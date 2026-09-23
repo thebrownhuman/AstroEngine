@@ -18,7 +18,8 @@ from datetime import datetime, timedelta
 
 sys.path.insert(0, ".")
 from astro_engine import yogas  # noqa: E402
-from astro_engine.chart import BirthData, build  # noqa: E402
+from astro_engine.chart import BirthData  # noqa: E402
+from engine_source import build_chart as build  # noqa: E402
 from astro_engine.constants import SIGNS  # noqa: E402
 from astro_engine.vargas import VARGAS  # noqa: E402
 from validation.against_prokerala import fetch  # noqa: E402

@@ -16,10 +16,14 @@ from datetime import datetime, timedelta
 
 sys.path.insert(0, ".")
 from astro_engine import muhurta  # noqa: E402
+from engine_source import muhurta_report  # noqa: E402
 from astro_engine.constants import WEEKDAYS  # noqa: E402
 from validation.against_prokerala import fetch  # noqa: E402
 
 LATITUDE, LONGITUDE = 28.6139, 77.2090
+# Asia/Kolkata has never observed DST, so the fixed offset above and
+# this zone agree for every date in the sweep.
+TIMEZONE = "Asia/Kolkata"
 OFFSET_HOURS = 5.5
 TZ = "+05:30"
 DAYS = [datetime(1990, 1, 14, 12, 0) + timedelta(days=n) for n in range(7)]
@@ -45,7 +49,8 @@ def main() -> int:
     for day in DAYS:
         params = {"ayanamsa": 1, "coordinates": f"{LATITUDE},{LONGITUDE}",
                   "datetime": day.strftime("%Y-%m-%dT%H:%M:%S") + TZ}
-        mine = muhurta.compute(day, LATITUDE, LONGITUDE, OFFSET_HOURS)
+        mine = muhurta_report(day, LATITUDE, LONGITUDE, OFFSET_HOURS,
+                              TIMEZONE)
         weekday = WEEKDAYS[mine["vara_index"]]
 
         def compare(area: str, ours: datetime, theirs: datetime) -> None:

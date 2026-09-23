@@ -23,7 +23,8 @@ from datetime import datetime, timedelta
 from fractions import Fraction
 
 sys.path.insert(0, ".")
-from astro_engine.chart import BirthData, build  # noqa: E402
+from astro_engine.chart import BirthData  # noqa: E402
+from engine_source import build_chart as build  # noqa: E402
 from astro_engine.doshas import PAPA_PLANETS, PAPA_REFERENCES, papasamyam  # noqa: E402
 from validation.parallel_fetch import run  # noqa: E402
 
@@ -52,9 +53,9 @@ def row_for(moment: datetime) -> list[int]:
     chart = build(
         BirthData(moment.year, moment.month, moment.day,
                   moment.hour, moment.minute, 0, *DELHI),
-        vargas=["D1"], dasha_depth=1,
+        vargas=["D1"], dasha_depth=1, include_doshas=True,
     )
-    blocks = papasamyam(chart)["papa_samyam"]["papa_planet"]
+    blocks = chart["doshas"]["papasamyam"]["papa_samyam"]["papa_planet"]
     grid = {(block["name"], entry["name"]): entry["has_dosha"]
             for block in blocks for entry in block["planet_dosha"]}
     return [int(grid[cell]) for cell in CELLS]
