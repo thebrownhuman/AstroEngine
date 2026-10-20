@@ -26,6 +26,15 @@ RUN mkdir -p data \
     && rm data/cities5000.txt data/IN.txt
 
 ENV SE_EPHE_PATH=/app/ephe
+
+# Nothing writes to disk at runtime: the places index is opened mode=ro and
+# the ephemeris files are read-only. Verified against the homelab's real
+# bind mount (644 files, 755 directory) before adding this. Compile bytecode
+# first, as a non-root process cannot write .pyc files into /app.
+RUN python -m compileall -q astro_engine \
+    && useradd --system --uid 10001 --no-create-home --shell /usr/sbin/nologin app
+USER app
+
 EXPOSE 8000
 
 CMD ["uvicorn", "astro_engine.api:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -1,7 +1,9 @@
 """FastAPI surface for the astrology engine.
 
-Stateless and deterministic: same input always yields the same JSON. Designed to
-sit behind a Cloudflare Tunnel and be called as a tool by an LLM.
+Stateless. The same input yields the same JSON, with one exception: when
+`reference_time` is omitted the current instant is used, so the current dasha
+and the transits move with it. Designed to sit behind a Cloudflare Tunnel and be
+called as a tool by an LLM.
 """
 
 from __future__ import annotations
@@ -29,6 +31,10 @@ from . import yogas as yg
 from .geo import timezone_for, to_utc
 from .places import resolve, search
 from .vargas import VARGAS
+from swisseph import Error as SwissEphError
+
+UNSUPPORTED_DATE = "date is outside the range the ephemeris covers"
+
 
 app = FastAPI(
     title="astro_engine",
@@ -520,29 +526,33 @@ def bala_report(request: PersonalDayRequest) -> dict:
     Supply janma_nakshatra and janma_rasi for a personal verdict; without them
     you get the windows and which natal positions each one favours.
 
-    Parity: these two endpoints were never checked against Prokerala -- the
-    credits ran out first -- so the rules here are the classical ones and the
-    block says so.
+    Parity: both daily tables were checked against Prokerala over eight dates
+    (24 window comparisons, all exact; see validation/verify_bala.py), and the
+    `parity` field in the block records that.
     """
     try:
         latitude, longitude, _, moment, tz_info = _day_location(request)
         found = strength.day(moment, tz_info["utc_offset_hours"])
+        found["parity"] = strength.PARITY
+
+        if request.janma_nakshatra is not None and request.janma_rasi is not None:
+            from swisseph import MOON
+
+            transit = strength.SiderealScanner()
+            jd = julian_day(moment - timedelta(hours=tz_info["utc_offset_hours"]))
+            longitude_now = transit.longitude(jd, MOON)
+            found["for_person"] = strength.for_person(
+                request.janma_nakshatra, request.janma_rasi,
+                int(longitude_now / strength.NAKSHATRA_ARC), int(longitude_now / 30.0),
+            )
     except FileNotFoundError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
-    found["parity"] = strength.PARITY
-
-    if request.janma_nakshatra is not None and request.janma_rasi is not None:
-        from swisseph import MOON
-
-        transit = strength.SiderealScanner()
-        jd = julian_day(moment - timedelta(hours=tz_info["utc_offset_hours"]))
-        longitude_now = transit.longitude(jd, MOON)
-        found["for_person"] = strength.for_person(
-            request.janma_nakshatra, request.janma_rasi,
-            int(longitude_now / strength.NAKSHATRA_ARC), int(longitude_now / 30.0),
-        )
+    except (OverflowError, SwissEphError) as exc:
+        # swisseph's message names the server's ephemeris path; the client only
+        # needs to know the date is out of range.
+        raise HTTPException(status_code=422, detail=UNSUPPORTED_DATE) from exc
     return found
 
 

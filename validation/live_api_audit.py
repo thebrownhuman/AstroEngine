@@ -11,11 +11,9 @@ from __future__ import annotations
 
 import json
 import os
-import sys
 import urllib.error
 import urllib.parse
 import urllib.request
-from datetime import date, datetime
 
 
 BASE = os.environ.get("ASTRO_ENGINE_URL", "http://192.168.68.114:8000").rstrip("/")

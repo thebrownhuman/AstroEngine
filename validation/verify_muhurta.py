@@ -15,7 +15,6 @@ import sys
 from datetime import datetime, timedelta
 
 sys.path.insert(0, ".")
-from astro_engine import muhurta  # noqa: E402
 from engine_source import muhurta_report  # noqa: E402
 from astro_engine.constants import WEEKDAYS  # noqa: E402
 from validation.against_prokerala import fetch  # noqa: E402

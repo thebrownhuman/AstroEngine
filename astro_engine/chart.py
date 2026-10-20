@@ -29,7 +29,7 @@ import swisseph as _swe
 from .geo import to_utc
 from .vargas import VARGAS
 
-ENGINE_VERSION = "1.1.0"
+ENGINE_VERSION = "1.1.1"
 
 # Classical graha drishti from BPHS Chapter 26, expressed as house counts from
 # the occupied house. BPHS gives special aspects only to Mars, Jupiter and
@@ -268,7 +268,10 @@ def build(birth: BirthData, *args, **kwargs) -> dict:
     try:
         return _build(birth, *args, **kwargs)
     except (_swe.Error, OverflowError) as exc:
-        raise ValueError(f"{SUPPORTED_RANGE_MESSAGE} ({exc})") from exc
+        # Not interpolated into the message: swisseph's text names the server's
+        # ephemeris directory, and the client only needs the supported range.
+        # The original is preserved on __cause__ for server-side logging.
+        raise ValueError(SUPPORTED_RANGE_MESSAGE) from exc
 
 
 def _build(
@@ -449,6 +452,9 @@ def _build(
 
     return chart
 
+
+
+build.__wrapped__ = _build  # keep inspect.signature(build) truthful
 
 def summarise(chart: dict) -> str:
     """A compact text rendering, useful as a token-cheap LLM prompt header."""

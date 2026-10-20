@@ -16,7 +16,6 @@ import sys
 from datetime import datetime
 
 sys.path.insert(0, ".")
-from astro_engine import ashtakavarga as av  # noqa: E402
 from astro_engine.chart import BirthData  # noqa: E402
 from engine_source import build_chart as build  # noqa: E402
 from astro_engine.constants import SIGNS  # noqa: E402
