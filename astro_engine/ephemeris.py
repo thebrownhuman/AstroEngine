@@ -5,6 +5,7 @@ from __future__ import annotations
 import math
 import os
 import pathlib
+import re
 import threading
 from dataclasses import dataclass
 from datetime import datetime
@@ -76,6 +77,64 @@ else:
     EPHEMERIS_BACKEND = "moshier"
 
 _BASE_FLAGS = _BACKEND_FLAG | swe.FLG_SPEED
+
+# pyswisseph keeps the ephemeris path per thread. Setting it once at import
+# only covers the importing thread, so FastAPI's worker threads silently ran
+# on Moshier even with the files present. Call this (holding _SWE_LOCK)
+# before any swe calculation.
+_THREAD = threading.local()
+
+
+def _ensure_ephe_path() -> None:
+    if _EPHE_PATH and not getattr(_THREAD, "path_set", False):
+        swe.set_ephe_path(_EPHE_PATH)
+        _THREAD.path_set = True
+
+# Supported birth years (inclusive, local calendar year). Found by bisection:
+#  - low end: the Vimshottari cycle starts up to 20 years (the longest
+#    mahadasha) before birth, and datetime cannot represent years below 1.
+#    Every date sampled in year 21 works; years up to 19 fail for some dates.
+#  - high end: past about 3002 swisseph demands sepl_30.se1 and raises;
+#    3003-01-01 passes but 3003-06-01 does not, so 3000 (Moshier's
+#    documented limit) is the bound.
+MIN_YEAR = 21
+MAX_YEAR = 3000
+SUPPORTED_RANGE_MESSAGE = (
+    f"birth year must be between {MIN_YEAR} and {MAX_YEAR} (inclusive); "
+    "dates outside this range are not supported"
+)
+
+MOSHIER_NOTE = (
+    "Date lies outside the bundled Swiss Ephemeris files; the Moshier "
+    "ephemeris was used instead, accurate to about 1 arcsecond rather than "
+    "0.001 arcsecond."
+)
+
+
+def _file_coverage(path: str | None) -> tuple[int, int] | None:
+    """Years spanned by the planetary files (sepl_NN.se1) in `path`.
+
+    Each file covers 600 years starting at NN*100 (negative NN carry an 'm').
+    """
+    if not path:
+        return None
+    spans = []
+    for name in os.listdir(path):
+        m = re.fullmatch(r"sepl_(m?)(\d+)\.se1", name)
+        if m:
+            start = int(m.group(2)) * 100 * (-1 if m.group(1) else 1)
+            spans.append((start, start + 600))
+    if not spans:
+        return None
+    return min(s for s, _ in spans), max(e for _, e in spans)
+
+
+EPHEMERIS_FILE_COVERAGE = _file_coverage(_EPHE_PATH)
+
+
+def ephemeris_used(retflags: int) -> str:
+    """Backend swisseph actually used, from the flag calc_ut returned."""
+    return "moshier" if retflags & swe.FLG_MOSEPH else "swieph"
 
 
 @dataclass(frozen=True)
@@ -188,8 +247,12 @@ class SiderealSky:
         self._ayanamsa_flags = _BACKEND_FLAG
         if equinox == "mean":
             self._ayanamsa_flags |= swe.FLG_NONUT
+        # Backend that really produced the numbers; swisseph falls back to
+        # Moshier silently outside the data files. Set by positions().
+        self.ephemeris = EPHEMERIS_BACKEND
 
     def _activate(self) -> None:
+        _ensure_ephe_path()
         swe.set_sid_mode(AYANAMSA_MODES[self.ayanamsa], 0, 0)
 
     def _ayanamsa_locked(self) -> float:
@@ -208,10 +271,17 @@ class SiderealSky:
         with _SWE_LOCK:
             self._activate()
             ayanamsa = self._ayanamsa_locked()
+            used = set()
             for name, body in GRAHAS:
-                values, _ = swe.calc_ut(self.jd_ut, body, self._flags)
+                values, retflags = swe.calc_ut(self.jd_ut, body, self._flags)
+                used.add(ephemeris_used(retflags))
                 out[name] = _describe(name, values[0] - ayanamsa, values[1], values[3])
-            node_values, _ = swe.calc_ut(self.jd_ut, node_body, self._flags)
+            node_values, retflags = swe.calc_ut(self.jd_ut, node_body, self._flags)
+            # The mean node is an analytic series and always reports MOSEPH,
+            # so only the true node says anything about the data files.
+            if self.node_type == "true":
+                used.add(ephemeris_used(retflags))
+        self.ephemeris = "moshier" if "moshier" in used else "swieph"
         rahu_lon = node_values[0] - ayanamsa
         rahu_speed = node_values[3]
         out["Rahu"] = _describe("Rahu", rahu_lon, 0.0, rahu_speed)
@@ -301,6 +371,7 @@ def sun_rise_set(
     def event(kind: str, after: float, calculation: int) -> float:
         try:
             with _SWE_LOCK:
+                _ensure_ephe_path()
                 result, values = swe.rise_trans(
                     after, swe.SUN, calculation | rise_bits, geopos, 0.0, 0.0, flags,
                 )
@@ -379,6 +450,7 @@ class SiderealScanner:
 
     def longitude(self, jd_ut: float, body: int) -> float:
         with _SWE_LOCK:
+            _ensure_ephe_path()
             swe.set_sid_mode(self._mode, 0, 0)
             _, ayanamsa = swe.get_ayanamsa_ex_ut(jd_ut, self._ayanamsa_flags)
             values, _ = swe.calc_ut(jd_ut, body, self._flags)
@@ -386,6 +458,7 @@ class SiderealScanner:
 
     def speed(self, jd_ut: float, body: int) -> float:
         with _SWE_LOCK:
+            _ensure_ephe_path()
             swe.set_sid_mode(self._mode, 0, 0)
             values, _ = swe.calc_ut(jd_ut, body, self._flags)
         return values[3]

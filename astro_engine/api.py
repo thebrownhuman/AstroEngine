@@ -14,7 +14,10 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 from .chart import ENGINE_VERSION, BirthData, build, summarise
 from .dasha import PROKERALA_TRAVERSED_PRECISION
-from .ephemeris import AYANAMSA_MODES, EPHEMERIS_BACKEND, julian_day
+from .ephemeris import (
+    AYANAMSA_MODES, EPHEMERIS_BACKEND, EPHEMERIS_FILE_COVERAGE, MAX_YEAR,
+    MIN_YEAR, julian_day,
+)
 from . import bala as strength
 from . import kp as krishnamurti
 from . import matching as milan
@@ -217,6 +220,11 @@ def health() -> dict:
         "status": "ok",
         "version": ENGINE_VERSION,
         "ephemeris": EPHEMERIS_BACKEND,
+        "ephemeris_coverage": (
+            {"from_year": EPHEMERIS_FILE_COVERAGE[0], "to_year": EPHEMERIS_FILE_COVERAGE[1]}
+            if EPHEMERIS_FILE_COVERAGE else None
+        ),
+        "supported_years": {"from_year": MIN_YEAR, "to_year": MAX_YEAR},
         "ayanamsas": sorted(AYANAMSA_MODES),
         "vargas": list(VARGAS),
         "source_vocabulary": provenance.SOURCE_MEANINGS,
