@@ -241,7 +241,7 @@ python validation/verify_everything.py
 
 ```
 suite                                status  summary
-unit tests                           ok      296 passed
+unit tests                           ok      353 passed
 rules vs BPHS                        ok      164/164 checks pass against BPHS and first principles
 planetary positions vs NASA JPL      ok      28 comparisons, worst deviation +0.135 arcsec
 sunrise, ayanamsa vs published       ok      All external checks passed
@@ -275,6 +275,15 @@ overrides it. Only if neither holds `.se1` files does Swiss Ephemeris fall
 back to Moshier, which is accurate to about an arcsecond rather than a
 milliarcsecond -- enough to pass every ordinary check and then fail the
 tightest parity sweeps for no visible reason.
+
+The fallback is no longer silent. The shipped files cover roughly 1800-2400, and
+outside that range Swiss Ephemeris quietly switches to Moshier. Each chart's
+`engine.ephemeris` now says which one actually produced it (`swieph` or
+`moshier`), with an `engine.ephemeris_note` on fallback, and `/health` reports
+`ephemeris_coverage` and `supported_years`. pyswisseph keeps its ephemeris path
+per thread, so the path is now set in every worker thread; before that, a threaded
+server run outside Docker (where `SE_EPHE_PATH` is not set) used Moshier in its
+workers while claiming `swieph`.
 
 Sweeps fetch through `validation/parallel_fetch.py`, which gives each
 configured Prokerala app its own worker, token and rate budget. The free tier
@@ -397,6 +406,9 @@ credits each, and none of them is part of a kundli.
 
 ### Precision notes
 
+- Supported birth years are **21 to 3000**. Outside that range `/v1/chart` and the
+  routes built on it answer 422 with the range in the message. The lower bound exists
+  because the Vimshottari cycle starts up to 20 years before birth.
 - Planetary longitudes agree with NASA JPL to **0.135 arcsec** worst case.
 - Sunrise and sunset agree with Prokerala's panchang to **about a second**, but
   the sunset and next-sunrise they feed the muhurta endpoints scatter by up to
@@ -463,7 +475,7 @@ astro_engine/
 
 validation/        parity scripts plus against_bphs.py, which checks the
                    rules against the text; verify_everything.py runs them all
-tests/             296 tests
+tests/             353 tests
 deploy/            serve script and Cloudflare Tunnel config
 ```
 
