@@ -15,10 +15,10 @@ COPY . .
 # ephe/ directory at runtime for full precision, or omit it to fall back to
 # Moshier automatically.
 RUN mkdir -p data \
-    && curl -sSL -o data/cities5000.zip http://download.geonames.org/export/dump/cities5000.zip \
-    && curl -sSL -o data/IN.zip http://download.geonames.org/export/dump/IN.zip \
-    && curl -sSL -o data/admin1CodesASCII.txt http://download.geonames.org/export/dump/admin1CodesASCII.txt \
-    && curl -sSL -o data/countryInfo.txt http://download.geonames.org/export/dump/countryInfo.txt \
+    && curl -fsSL -o data/cities5000.zip https://download.geonames.org/export/dump/cities5000.zip \
+    && curl -fsSL -o data/IN.zip https://download.geonames.org/export/dump/IN.zip \
+    && curl -fsSL -o data/admin1CodesASCII.txt https://download.geonames.org/export/dump/admin1CodesASCII.txt \
+    && curl -fsSL -o data/countryInfo.txt https://download.geonames.org/export/dump/countryInfo.txt \
     && unzip -p data/cities5000.zip cities5000.txt > data/cities5000.txt \
     && unzip -p data/IN.zip IN.txt > data/IN.txt \
     && rm data/cities5000.zip data/IN.zip \
