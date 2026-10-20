@@ -22,9 +22,10 @@ from .constants import (
 )
 from .dasha import DAYS_PER_YEAR, active_chain, vimshottari
 from .ephemeris import (
-    EPHEMERIS_BACKEND, SiderealSky, dignity, jd_to_datetime, julian_day,
-    sun_rise_set,
+    MAX_YEAR, MIN_YEAR, MOSHIER_NOTE, SUPPORTED_RANGE_MESSAGE, SiderealSky,
+    dignity, jd_to_datetime, julian_day, sun_rise_set,
 )
+import swisseph as _swe
 from .geo import to_utc
 from .vargas import VARGAS
 
@@ -250,7 +251,22 @@ def _varga_table(positions: dict, lagna_longitude: float, which: list[str]) -> d
     return table
 
 
-def build(
+def build(birth: BirthData, *args, **kwargs) -> dict:
+    """Build a chart; anything outside the supported years raises ValueError.
+
+    swisseph.Error and OverflowError (from dates beyond what the ephemeris
+    files or datetime can represent) do not subclass ValueError, so without
+    this the API answers a bare 500.
+    """
+    if not MIN_YEAR <= birth.year <= MAX_YEAR:
+        raise ValueError(f"{SUPPORTED_RANGE_MESSAGE}; got {birth.year}")
+    try:
+        return _build(birth, *args, **kwargs)
+    except (_swe.Error, OverflowError) as exc:
+        raise ValueError(f"{SUPPORTED_RANGE_MESSAGE} ({exc})") from exc
+
+
+def _build(
     birth: BirthData,
     vargas: list[str] | None = None,
     dasha_depth: int = 2,
@@ -331,7 +347,8 @@ def build(
         "engine": {
             "name": "astro_engine",
             "version": ENGINE_VERSION,
-            "ephemeris": EPHEMERIS_BACKEND,
+            "ephemeris": sky.ephemeris,
+            **({"ephemeris_note": MOSHIER_NOTE} if sky.ephemeris == "moshier" else {}),
             "zodiac": "sidereal",
             "ayanamsa": birth.ayanamsa,
             "ayanamsa_degrees": round(sky.ayanamsa_value(), 8),
