@@ -7,7 +7,7 @@ interprets these numbers; it never computes them.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone as _tz
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from . import ashtakavarga as av
@@ -41,6 +41,9 @@ SPECIAL_ASPECTS = {
 DEFAULT_ASPECTS = (7,)
 
 
+_UTC = _tz.utc
+
+
 def _local_reference_time(reference_time: datetime | None, timezone: str) -> datetime:
     """Return the dasha/transit reference instant as a local naive datetime.
 
@@ -49,7 +52,9 @@ def _local_reference_time(reference_time: datetime | None, timezone: str) -> dat
     that instant into the resolved location timezone before comparing it.
     """
     if reference_time is None:
-        return datetime.now()
+        # The server clock is not the birth city's clock: take the current
+        # instant as aware UTC and convert it like an explicit aware value.
+        reference_time = datetime.now(_UTC)
     if reference_time.tzinfo is None:
         return reference_time
     try:
