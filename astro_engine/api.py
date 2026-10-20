@@ -9,7 +9,7 @@ from __future__ import annotations
 from datetime import date, datetime, timedelta
 from typing import Literal
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from .chart import ENGINE_VERSION, BirthData, build, summarise
@@ -53,10 +53,15 @@ class ChartRequest(BaseModel):
         }
     )
 
-    date: str = Field(..., description="Local birth date, YYYY-MM-DD", examples=["1990-01-15"])
-    time: str = Field(..., description="Local birth time, HH:MM or HH:MM:SS", examples=["04:30"])
+    date: str = Field(
+        ..., max_length=32, description="Local birth date, YYYY-MM-DD", examples=["1990-01-15"]
+    )
+    time: str = Field(
+        ..., max_length=32, description="Local birth time, HH:MM or HH:MM:SS", examples=["04:30"]
+    )
     place: str | None = Field(
         None,
+        max_length=200,
         description=(
             "Birth place by name, e.g. 'Sultanpur, Uttar Pradesh' or 'London'. "
             "Resolved offline against GeoNames. Supply this OR latitude/longitude."
@@ -67,13 +72,15 @@ class ChartRequest(BaseModel):
     longitude: float | None = Field(None, ge=-180.0, le=180.0)
     timezone: str | None = Field(
         None,
+        max_length=64,
         description="IANA name. Omit to derive it from the coordinates.",
         examples=["Asia/Kolkata"],
     )
-    ayanamsa: str = Field("lahiri", description=f"One of: {', '.join(sorted(AYANAMSA_MODES))}")
+    ayanamsa: str = Field("lahiri", max_length=64, description=f"One of: {', '.join(sorted(AYANAMSA_MODES))}")
     node_type: Literal["mean", "true"] = "mean"
     vargas: list[str] = Field(
         default_factory=lambda: ["D1", "D9", "D10", "D12", "D30"],
+        max_length=len(VARGAS),
         description=f"Divisional charts to include. Available: {', '.join(VARGAS)}",
     )
     dasha_depth: int = Field(2, ge=1, le=4, description="1=maha, 2=+antar, 3=+pratyantar")
@@ -181,6 +188,9 @@ class ChartRequest(BaseModel):
         unknown = [v for v in value if v not in VARGAS]
         if unknown:
             raise ValueError(f"unknown vargas: {unknown}")
+        duplicated = sorted({v for v in value if value.count(v) > 1})
+        if duplicated:
+            raise ValueError(f"duplicate vargas: {duplicated}")
         return value
 
     def to_birth_data(self) -> BirthData:
@@ -430,11 +440,13 @@ class DayRequest(BaseModel):
         }
     )
 
-    date: str = Field(..., description="Local date, YYYY-MM-DD", examples=["1990-01-15"])
-    place: str | None = Field(None, examples=["Delhi"])
+    date: str = Field(
+        ..., max_length=32, description="Local date, YYYY-MM-DD", examples=["1990-01-15"]
+    )
+    place: str | None = Field(None, max_length=200, examples=["Delhi"])
     latitude: float | None = Field(None, ge=-90.0, le=90.0)
     longitude: float | None = Field(None, ge=-180.0, le=180.0)
-    timezone: str | None = None
+    timezone: str | None = Field(None, max_length=64)
 
     @model_validator(mode="after")
     def _needs_a_location(self):
@@ -538,12 +550,14 @@ def kp_report(request: ChartRequest) -> dict:
 
 
 class NumerologyRequest(BaseModel):
-    first_name: str = Field(..., examples=["John"])
-    middle_name: str = Field("", examples=[""])
-    last_name: str = Field(..., examples=["Doe"])
-    date_of_birth: str = Field(..., description="YYYY-MM-DD", examples=["2004-02-12"])
+    first_name: str = Field(..., max_length=100, examples=["John"])
+    middle_name: str = Field("", max_length=100, examples=[""])
+    last_name: str = Field(..., max_length=100, examples=["Doe"])
+    date_of_birth: str = Field(
+        ..., max_length=32, description="YYYY-MM-DD", examples=["2004-02-12"]
+    )
     reference_date: str | None = Field(
-        None, description="For personal/universal cycles. Defaults to today."
+        None, max_length=32, description="For personal/universal cycles. Defaults to today."
     )
     additional_vowel: bool = Field(
         False, description="Treat Y and W as vowels for soul urge and personality."
@@ -579,7 +593,11 @@ def numerology(request: NumerologyRequest) -> dict:
 
 
 @app.get("/v1/places")
-def places(q: str, limit: int = 8, country: str | None = None) -> dict:
+def places(
+    q: str = Query(..., min_length=1, max_length=100),
+    limit: int = Query(8, ge=1, le=50),
+    country: str | None = Query(None, max_length=100),
+) -> dict:
     """Search birth places by name. Offline, no API key, no rate limit."""
     try:
         matches = search(q, limit=limit, country=country)
