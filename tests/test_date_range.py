@@ -4,7 +4,12 @@ import pytest
 from fastapi.testclient import TestClient
 
 from astro_engine.api import app
-from astro_engine.ephemeris import MAX_YEAR, MIN_YEAR
+from astro_engine.ephemeris import EPHEMERIS_BACKEND, MAX_YEAR, MIN_YEAR
+
+needs_files = pytest.mark.skipif(
+    EPHEMERIS_BACKEND != "swieph",
+    reason="needs the bundled .se1 files; set SE_EPHE_PATH",
+)
 
 client = TestClient(app)
 
@@ -34,6 +39,7 @@ def test_boundary_years_still_work(year, month, day):
     assert r.status_code == 200, r.text
 
 
+@needs_files
 @pytest.mark.parametrize("year", [1900, 1990, 2024, 2399])
 def test_in_range_reports_swieph(year):
     engine = _post(year).json()["engine"]
@@ -48,6 +54,7 @@ def test_outside_bundled_files_reports_moshier(year):
     assert "arcsecond" in engine["ephemeris_note"]
 
 
+@needs_files
 def test_health_reports_file_coverage_and_keeps_backend():
     h = client.get("/health").json()
     assert h["ephemeris"] == "swieph"

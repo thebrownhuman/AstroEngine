@@ -7,3 +7,16 @@ services:
       - "8000:8000"
     volumes:
       - ./ephe:/app/ephe
+
+  # Pulls :latest every 5 minutes and recreates astro-engine when it changes.
+  # Scoped by name to astro-engine only, so it leaves other stacks on the host
+  # alone. CI publishes :latest only after the test suite passes.
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower-astro-engine
+    restart: unless-stopped
+    environment:
+      - DOCKER_API_VERSION=1.44
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 300 --cleanup astro-engine

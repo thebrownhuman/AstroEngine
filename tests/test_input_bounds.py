@@ -2,15 +2,21 @@
 import pytest
 from fastapi.testclient import TestClient
 
+from astro_engine import places
 from astro_engine.api import ChartRequest, app
 from astro_engine.vargas import VARGAS
 
 client = TestClient(app)
 CHART = {"date": "1990-01-15", "time": "04:30", "latitude": 28.6, "longitude": 77.2,
          "timezone": "Asia/Kolkata"}
+needs_index = pytest.mark.skipif(
+    not places.INDEX_PATH.exists(),
+    reason="place index not built; run python -m astro_engine.places build",
+)
 NUM = {"first_name": "John", "last_name": "Doe", "date_of_birth": "2004-02-12"}
 
 
+@needs_index
 def test_places_limit_bounds():
     assert client.get("/v1/places", params={"q": "delhi", "limit": 50}).status_code == 200
     assert client.get("/v1/places", params={"q": "delhi", "limit": 1}).status_code == 200
@@ -18,6 +24,7 @@ def test_places_limit_bounds():
     assert client.get("/v1/places", params={"q": "delhi", "limit": 0}).status_code == 422
 
 
+@needs_index
 def test_places_query_and_country_bounds():
     assert client.get("/v1/places", params={"q": "a" * 100}).status_code == 200
     assert client.get("/v1/places", params={"q": "a" * 101}).status_code == 422

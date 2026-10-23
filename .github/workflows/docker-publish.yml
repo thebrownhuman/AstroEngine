@@ -9,7 +9,53 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  # A push to main publishes :latest, which the homelab pulls automatically,
+  # so nothing is published unless the full suite passes. The ephemeris files
+  # and the place index are not in git; without them about 30 tests skip, so
+  # fetch both here to make the gate cover the whole suite.
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      SWISSEPH_REF: c69c14adb7a0f94829586ffd92cd422aacb21e86
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Fetch Swiss Ephemeris files (1800-2400)
+        run: |
+          mkdir -p ephe
+          for f in sepl_18.se1 semo_18.se1 seas_18.se1; do
+            curl -fsSL -o "ephe/$f" "https://raw.githubusercontent.com/aloistr/swisseph/$SWISSEPH_REF/ephe/$f"
+          done
+
+      - name: Build place index
+        run: |
+          mkdir -p data
+          base=https://download.geonames.org/export/dump
+          curl -fsSL -o data/cities5000.zip $base/cities5000.zip
+          curl -fsSL -o data/IN.zip $base/IN.zip
+          curl -fsSL -o data/admin1CodesASCII.txt $base/admin1CodesASCII.txt
+          curl -fsSL -o data/countryInfo.txt $base/countryInfo.txt
+          unzip -p data/cities5000.zip cities5000.txt > data/cities5000.txt
+          unzip -p data/IN.zip IN.txt > data/IN.txt
+          python -m astro_engine.places build
+
+      - name: Run tests
+        run: python -m pytest -q -rs
+
   build-and-push:
+    needs: test
     runs-on: ubuntu-latest
     permissions:
       contents: read
