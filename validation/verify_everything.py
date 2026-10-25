@@ -21,7 +21,10 @@ KNOWN_DEVIATIONS = {
     "yogas": "Daridra Yoga: rule not recovered, flagged unverified",
     "muhurta": "one gowri slot where Prokerala contradicts its own rotation",
     "coverage sweep": "birth-based porutham (tamil Dina, kerala) not recovered; "
-                      "19 Prokerala deity strings and one Abhijit edge unmeasured",
+                      "one Abhijit edge unmeasured",
+    "VedIntel cross-check": "their yoga and two koot tables differ from Prokerala's; "
+                            "Moon-on-cusp births flip with the equinox convention; "
+                            "their delta T differs before 1901",
 }
 
 SUITES = [
@@ -42,6 +45,9 @@ SUITES = [
     ("matching", "validation/verify_matching.py"),
     ("porutham", "validation/verify_porutham.py"),
     ("coverage sweep", "validation/compare_coverage.py"),
+    # A second, independent provider. Not a parity target: where it and
+    # Prokerala disagree, the engine follows Prokerala.
+    ("VedIntel cross-check", "validation/compare_vedintel.py"),
 ]
 
 

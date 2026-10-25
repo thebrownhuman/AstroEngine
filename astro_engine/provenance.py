@@ -69,9 +69,10 @@ RASHI_DRISHTI = block(
 
 NAKSHATRA_DEITY = block(
     BPHS,
-    "BPHS Chapter 3, notes on verse 18: the presiding deities of the 27 "
-    "nakshatras, Ashwini Kumara through Poosha. All 27 verified against the "
-    "text.",
+    "BPHS Chapter 3: the presiding deities, Ashwini Kumara through Poosha, "
+    "with Abhijit's Brahma left out of the 28 so that each of the 27 sits on "
+    "its own star. Prokerala (8 stars measured) and VedIntel (25) agree on "
+    "every one.",
 )
 NAKSHATRA_METADATA = block(
     PROVIDER,

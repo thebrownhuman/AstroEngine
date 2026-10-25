@@ -255,9 +255,10 @@ papasamyam points                    ok      weights exact over 36 charts
 tara and chandra bala                ok      24/24 checks pass
 matching                             ok      418/418 checks pass
 porutham                             ok      648/648 checks pass (all twelve rules)
-coverage sweep                       known   92/114 coverage checks pass across 15 endpoints
+coverage sweep                       known   99/114 coverage checks pass across 15 endpoints
+VedIntel cross-check                 known   176/197 VedIntel checks pass across 11 endpoints
 
-14/14 suites clean
+15/15 suites clean
 ```
 
 The BPHS suite is the only one that is not a parity check. Every other entry
@@ -422,9 +423,27 @@ What it found, and is now reproduced:
 
 Still open, for want of credits: the birth-based `porutham` endpoint (its
 Rasi, Rajju and Gana fit the classical rules on seven pairs, its Dina does not,
-and the Kerala system is unmeasured); Prokerala's own deity strings for 19 of
-the 27 nakshatras (this engine keeps BPHS's names); and `sudarshana-chakra`,
-which returned a non-JSON error on every request.
+and the Kerala system is unmeasured); and `sudarshana-chakra`, which returned
+a non-JSON error on every request.
+
+### Second reference: VedIntel
+
+`validation/sweep_vedintel.py` caches VedIntel AstroAPI answers for the same
+births (their range is 1800-2027) and `validation/compare_vedintel.py` diffs
+them. VedIntel subtracts the nutation-included ayanamsa, so its longitudes sit
+a steady 10-17 arcseconds from ours; longitudes are compared after removing
+that, and everything discrete exactly. Agreeing on every birth: planet signs,
+nakshatras, padas and houses, navamsa, all seven ashtakavarga rows and the
+sarvashtakavarga, KP planets, the three friendship tables, Kaal Sarpa and
+Mangal dosha. The rest is explained: their yoga definitions and two koot
+tables differ from Prokerala's (the engine follows Prokerala, which agrees
+with it on those yogas over 45 charts), a Moon within seconds of arc of a
+nakshatra cusp flips with the equinox convention, and before 1901 their delta T
+differs from ours (ours matches JPL).
+
+It also caught a real bug. The nakshatra deity table had dropped Bhaga and
+kept Abhijit's Brahma, shifting Magha through Uttara Ashadha by one star.
+Prokerala and VedIntel independently agree on the corrected list.
 
 ### Not checked at all
 

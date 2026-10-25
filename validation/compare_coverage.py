@@ -216,7 +216,18 @@ def cmp_kundli(theirs, req):
     if sun["sign_index"] != nd["soorya_rasi"]["id"]:
         diffs.append(f"soorya rasi {sun['sign_index']} vs {nd['soorya_rasi']['id']}")
     flat = chart.get("nakshatra_info") or {}
+    def same_deity(ours, theirs):
+        # Prokerala adds alternates ("Bhaga/Bhagya", "Vayu, Pawan (North)").
+        def norm(text):
+            return "".join(c for c in text.lower() if c.isalpha()).replace("h", "").replace("w", "v")
+        names = [norm(x) for x in theirs.replace("(", "/").replace(",", "/").split("/")]
+        return norm(ours) in names or any(norm(ours) in n or n in norm(ours) for n in names if n)
+
     for key, value in nd.get("additional_info", {}).items():
+        if key == "deity" and key in flat:
+            if not same_deity(flat[key], value):
+                diffs.append(f"additional_info.deity: {flat[key]!r} vs {value!r}")
+            continue
         if key in flat and flat[key] != value:
             diffs.append(f"additional_info.{key}: {flat[key]!r} vs {value!r}")
         elif key not in flat:

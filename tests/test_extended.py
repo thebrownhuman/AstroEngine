@@ -653,13 +653,18 @@ def test_every_nakshatra_has_its_reference_block():
     )
 
     assert len(NAKSHATRA_ATTRIBUTES) == 27
+    # BPHS lists 28 lords, Abhijit's Brahma among them. Prokerala and VedIntel
+    # both give Bhaga for Purva Phalguni and Apas for Purva Ashadha, which
+    # only fits with Abhijit left out; an earlier table had dropped Bhaga and
+    # kept Abhijit, shifting Magha to Uttara Ashadha by one.
     assert [NAKSHATRA_ATTRIBUTES[i]["deity"] for i in range(27)] == [
         "Ashwini Kumara", "Yama", "Agni", "Brahma", "Moon", "Siva",
-        "Aditi", "Jupiter", "Rahu", "Sun", "Aryama", "Sun",
-        "Viswa Karma", "Vayu", "Indra", "Mitra", "Indra", "Niruti",
-        "Varuna", "Viswadeva", "Brahma", "Vishnu", "Vasu", "Varuna",
+        "Aditi", "Jupiter", "Rahu", "Pitris", "Bhaga", "Aryama",
+        "Sun", "Viswa Karma", "Vayu", "Indragni", "Mitra", "Indra",
+        "Niruti", "Apas", "Viswadeva", "Vishnu", "Vasu", "Varuna",
         "Ajacharana", "Ahirbudhanya", "Poosha",
     ]
+    assert len({NAKSHATRA_ATTRIBUTES[i]["deity"] for i in range(27)}) == 27
     for index in range(27):
         row = nakshatra_attributes(index)
         data = {key: row[key] for key in NAKSHATRA_ATTRIBUTE_FIELDS}
