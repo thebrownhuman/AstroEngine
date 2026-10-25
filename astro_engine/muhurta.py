@@ -27,7 +27,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta
 
-from . import anandadi, provenance
+from . import anandadi, auspicious_yoga, provenance
 from .ephemeris import jd_to_datetime, julian_day, sun_rise_set
 
 PARTS = 8
@@ -381,5 +381,13 @@ def compute(
         "anandadi_yoga": anandadi.day(solar["sunrise"], solar["next_sunrise"],
                                       vara_index, utc_offset_hours),
         "anandadi_yoga_source": provenance.ANANDADI,
+        "auspicious_yoga": auspicious_yoga.compute(
+            [t - timedelta(hours=utc_offset_hours) for t in (
+                previous["sunrise"], solar["sunrise"], solar["next_sunrise"],
+                solar_day(day + timedelta(days=1), latitude, longitude,
+                          utc_offset_hours, convention)["next_sunrise"])],
+            utc_offset_hours,
+        ),
+        "auspicious_yoga_source": provenance.AUSPICIOUS_YOGA,
         **provenance.MUHURTA,
     }

@@ -187,6 +187,16 @@ ANANDADI = block(
     "the twenty-eight labels were measured against Prokerala. Entries with "
     "label_parity 'unverified' carry the classical name.",
 )
+AUSPICIOUS_YOGA = block(
+    CLASSICAL,
+    "Amrit Siddhi, Sarvartha Siddhi, Guru and Ravi Pushya, Dwipushkar and "
+    "Tripushkar from the standard muhurta tables (weekday with nakshatra, and "
+    "for the Pushkar yogas a bhadra tithi). The search window -- from the "
+    "date's sunrise to the end of the last nakshatra starting before the next "
+    "sunrise -- was measured against Prokerala's auspicious-yoga on seven "
+    "dates, all agreeing; only two of those dates hold any yoga, so most "
+    "table rows are classical rather than measured.",
+)
 SARVA_REDUCTIONS = block(
     PROVIDER,
     "Prokerala's reduced sarvashtakavarga, recovered by measurement and exact "

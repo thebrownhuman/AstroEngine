@@ -314,6 +314,22 @@ def cmp_anandadi_yoga(theirs, req):
     return diffs
 
 
+def cmp_auspicious_yoga(theirs, req):
+    ours = _muhurta(req)["auspicious_yoga"]
+    diffs = []
+    for o, t in zip(ours, theirs["auspicious_yoga"]):
+        if len(o["period"]) != len(t["period"]):
+            diffs.append(f"{t['name']}: {len(o['period'])} periods vs {len(t['period'])}")
+            continue
+        for a, b in zip(o["period"], t["period"]):
+            if a["combination"] != b["combination"]:
+                diffs.append(f"{t['name']} combination {a['combination']} vs {b['combination']}")
+            for edge in ("start", "end"):
+                if not _close(a[edge], b[edge], WINDOW_SECONDS):
+                    diffs.append(f"{t['name']} {edge} {a[edge]} vs {b[edge]}")
+    return diffs
+
+
 def cmp_not_implemented(name):
     return lambda theirs, req: [f"{name}: not implemented in engine"]
 
@@ -331,7 +347,7 @@ COMPARATORS = {
     "papasamyam-check": cmp_papasamyam_check,
     "porutham": cmp_porutham,
     "anandadi-yoga": cmp_anandadi_yoga,
-    "auspicious-yoga": cmp_not_implemented("auspicious yoga"),
+    "auspicious-yoga": cmp_auspicious_yoga,
     "chandrashtama-periods": cmp_not_implemented("yearly chandrashtama timings"),
 }
 
