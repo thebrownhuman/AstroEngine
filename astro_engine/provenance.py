@@ -178,6 +178,13 @@ ASHTAKAVARGA = block(
     "their sum of 337 are asserted at import so a mistyped digit fails "
     "immediately.",
 )
+SARVA_REDUCTIONS = block(
+    PROVIDER,
+    "Prokerala's reduced sarvashtakavarga, recovered by measurement and exact "
+    "over seven births. It is not the BPHS Chapter 67-68 order: trikona omits "
+    "the zero-in-a-trine rule, and ekaadhipatya is taken from the raw prastara "
+    "with Rahu, Ketu and the lagna counted as occupants.",
+)
 EKADHIPATYA = block(
     PROVIDER,
     "This one contradicts BPHS and does so deliberately. Chapter 68 is not "

@@ -12,7 +12,9 @@ Three views are produced, matching what Prokerala returns:
   trikona       after trikona shodhana (trinal reduction)
   ekaadhipatya  after ekadhipatya shodhana (same-lord reduction)
 
-Sarvashtakavarga is the column sum of the seven prastara rows.
+Sarvashtakavarga is the column sum of the seven prastara rows. Its reduced
+tables follow Prokerala's sarvashtakavarga endpoint, which reduces each graha
+differently from its own ashtakavarga endpoint; see `sarva_reductions`.
 """
 
 from __future__ import annotations
@@ -217,6 +219,35 @@ def ekadhipatya_shodhana(scores: list[int], occupied: set[int]) -> list[int]:
     return out
 
 
+def _trine_minimum_removed(scores: list[int]) -> list[int]:
+    """Trinal reduction without the zero-in-a-trine rule."""
+    out = list(scores)
+    for trine in TRINES:
+        least = min(scores[s] for s in trine)
+        for sign in trine:
+            out[sign] = scores[sign] - least
+    return out
+
+
+def sarva_reductions(grids: dict[str, list[int]],
+                     occupied: set[int]) -> tuple[list[int], list[int]]:
+    """Prokerala's reduced sarvashtakavarga, measured exact over seven births.
+
+    Trikona sums each graha's trinal reduction *without* the zero rule; the
+    per-graha endpoint does apply it. Ekaadhipatya sums each graha's same-lord
+    reduction taken from the raw prastara, not the trikona table, and counts
+    Rahu, Ketu and the lagna as occupants. Neither matches the textbook order.
+    """
+    trikona = [0] * 12
+    ekadhipatya = [0] * 12
+    for scores in grids.values():
+        for sign, value in enumerate(_trine_minimum_removed(scores)):
+            trikona[sign] += value
+        for sign, value in enumerate(ekadhipatya_shodhana(scores, occupied)):
+            ekadhipatya[sign] += value
+    return trikona, ekadhipatya
+
+
 def _house_block(house_number: int, sign: int) -> dict:
     return {
         "house": {"id": house_number - 1, "name": HOUSE_NAMES[house_number - 1],
@@ -276,6 +307,8 @@ def compute(chart: dict) -> dict:
 
     sarva = [sum(tables[s]["by_sign"][i] for s in SUBJECTS) for i in range(12)]
     sarva_grid = {s: tables[s]["by_sign"] for s in SUBJECTS}
+    sarva_occupied = {g["sign_index"] for g in chart["grahas"].values()} | {lagna_sign}
+    sarva_trikona, sarva_ekadhipatya = sarva_reductions(sarva_grid, sarva_occupied)
     return {
         "ashtakavarga": tables,
         # Sibling, not merged: `ashtakavarga` is keyed by graha name and a
@@ -289,5 +322,10 @@ def compute(chart: dict) -> dict:
             **provenance.ASHTAKAVARGA,
             "prastara": {"houses": _as_houses(sarva, lagna_sign, sarva_grid),
                          "score": sum(sarva)},
+            "trikona": {"houses": _as_houses(sarva_trikona, lagna_sign),
+                        "score": sum(sarva_trikona), **provenance.SARVA_REDUCTIONS},
+            "ekaadhipatya": {"houses": _as_houses(sarva_ekadhipatya, lagna_sign),
+                             "score": sum(sarva_ekadhipatya),
+                             **provenance.SARVA_REDUCTIONS},
         },
     }
