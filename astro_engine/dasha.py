@@ -16,6 +16,7 @@ different source.
 
 from __future__ import annotations
 
+import math
 from datetime import datetime, timedelta
 
 from .constants import DASHA_SEQUENCE, DASHA_TOTAL_YEARS, NAKSHATRA_LORDS
@@ -58,7 +59,25 @@ def balance_at_birth(
     return NAKSHATRA_LORDS[nak_index], 1.0 - traversed
 
 
-def _subdivide(lord: str, start: datetime, span_days: float, depth: int) -> list[dict]:
+# Prokerala works in whole seconds: the cycle start is rounded up, every
+# sub-period's length is truncated, and each end is reported one second before
+# the next start. Measured exact on 5832 pratyantardashas over eight births.
+_ONE_SECOND = timedelta(seconds=1)
+
+
+def _length(days: float, whole_seconds: bool) -> timedelta:
+    if whole_seconds:
+        return timedelta(seconds=math.floor(round(days * 86400.0, 6)))
+    return timedelta(days=days)
+
+
+def _period(lord: str, start: datetime, length: timedelta, whole_seconds: bool) -> dict:
+    end = start + length - (_ONE_SECOND if whole_seconds else timedelta(0))
+    return {"lord": lord, "start": start.isoformat(), "end": end.isoformat()}
+
+
+def _subdivide(lord: str, start: datetime, span_days: float, depth: int,
+               whole_seconds: bool = False) -> list[dict]:
     """Recursively split a period into its sub-periods (antar, pratyantar, ...)."""
     if depth <= 0:
         return []
@@ -66,15 +85,14 @@ def _subdivide(lord: str, start: datetime, span_days: float, depth: int) -> list
     cursor = start
     for sub_lord in _rotate_from(lord):
         sub_days = span_days * _LORD_YEARS[sub_lord] / DASHA_TOTAL_YEARS
-        end = cursor + timedelta(days=sub_days)
+        length = _length(sub_days, whole_seconds)
         periods.append({
-            "lord": sub_lord,
-            "start": cursor.isoformat(),
-            "end": end.isoformat(),
+            **_period(sub_lord, cursor, length, whole_seconds),
             "duration_days": round(sub_days, 4),
-            "sub_periods": _subdivide(sub_lord, cursor, sub_days, depth - 1),
+            "sub_periods": _subdivide(sub_lord, cursor, sub_days, depth - 1,
+                                      whole_seconds),
         })
-        cursor = end
+        cursor += length
     return periods
 
 
@@ -85,29 +103,31 @@ def vimshottari(
     depth: int = 2,
     year_length: float = DAYS_PER_YEAR,
     traversed_precision: int | None = None,
+    whole_seconds: bool = False,
 ) -> dict:
     """Full Vimshottari timeline from birth. depth=1 gives mahadashas only,
-    2 adds antardashas, 3 adds pratyantardashas."""
+    2 adds antardashas, 3 adds pratyantardashas. `whole_seconds` reproduces
+    Prokerala's second-level rounding."""
     birth_lord, balance = balance_at_birth(moon_longitude, traversed_precision)
 
     # The first mahadasha is partial: it began before birth.
     first_span = _LORD_YEARS[birth_lord] * year_length
     cycle_start = birth - timedelta(days=first_span * (1.0 - balance))
+    if whole_seconds and cycle_start.microsecond:
+        cycle_start = cycle_start.replace(microsecond=0) + _ONE_SECOND
 
     mahadashas = []
     cursor = cycle_start
     horizon = birth + timedelta(days=horizon_years * year_length)
     for lord in _rotate_from(birth_lord):
         span = _LORD_YEARS[lord] * year_length
-        end = cursor + timedelta(days=span)
+        length = _length(span, whole_seconds)
         mahadashas.append({
-            "lord": lord,
-            "start": cursor.isoformat(),
-            "end": end.isoformat(),
+            **_period(lord, cursor, length, whole_seconds),
             "duration_years": _LORD_YEARS[lord],
-            "sub_periods": _subdivide(lord, cursor, span, depth - 1),
+            "sub_periods": _subdivide(lord, cursor, span, depth - 1, whole_seconds),
         })
-        cursor = end
+        cursor += length
         if cursor > horizon:
             break
 
@@ -129,12 +149,13 @@ def active_chain(dasha: dict, moment: datetime) -> list[dict]:
     labels = ["mahadasha", "antardasha", "pratyantardasha", "sookshma", "prana"]
     depth = 0
     while level and depth < len(labels):
-        match = next(
-            (p for p in level
-             if datetime.fromisoformat(p["start"]) <= moment < datetime.fromisoformat(p["end"])),
-            None,
-        )
-        if match is None:
+        # The last period started at or before the moment. Comparing starts
+        # only works whether or not ends sit one second before the next start.
+        started = [p for p in level if datetime.fromisoformat(p["start"]) <= moment]
+        if not started:
+            break
+        match = started[-1]
+        if depth == 0 and moment > datetime.fromisoformat(match["end"]) + _ONE_SECOND:
             break
         chain.append({
             "level": labels[depth],

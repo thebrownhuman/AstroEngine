@@ -36,11 +36,17 @@ SUB_FRACTIONS = [(lord, years / DASHA_TOTAL_YEARS) for lord, years in DASHA_SEQU
 
 BODIES = ("Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn",
           "Rahu", "Ketu")
+# Prokerala lists the Ascendant as a body too (id 100, between Saturn and
+# Rahu): it has a star lord, so it can sit in a significator's nakshatra. It is
+# never a cusp occupant, since it *is* the first cusp.
+POINTS = ("Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn",
+          "Ascendant", "Rahu", "Ketu")
 PLANET_IDS = {"Sun": 0, "Moon": 1, "Mercury": 2, "Venus": 3, "Mars": 4,
-              "Jupiter": 5, "Saturn": 6, "Rahu": 101, "Ketu": 102}
+              "Jupiter": 5, "Saturn": 6, "Ascendant": 100, "Rahu": 101, "Ketu": 102}
 VEDIC_NAMES = {"Sun": "Ravi", "Moon": "Chandra", "Mercury": "Budha",
                "Venus": "Shukra", "Mars": "Kuja", "Jupiter": "Guru",
-               "Saturn": "Shani", "Rahu": "Rahu", "Ketu": "Ketu"}
+               "Saturn": "Shani", "Ascendant": "Lagna", "Rahu": "Rahu",
+               "Ketu": "Ketu"}
 HOUSE_NAMES = ["Tanu", "Dhan", "Sahaj", "Bandhu", "Putra", "Ari",
                "Yuvati", "Randhra", "Dharma", "Karma", "Labha", "Vyaya"]
 
@@ -135,11 +141,21 @@ def houses(cusps: list[float]) -> list[dict]:
     return out
 
 
+def _occupied(name: str, longitudes: dict[str, float], cusps: list[float]) -> int:
+    # The Ascendant defines the first cusp, so it is in house 1 by definition;
+    # the lagna can land a few arcseconds behind the Placidus cusp otherwise.
+    return 1 if name == "Ascendant" else house_of(longitudes[name], cusps)
+
+
+def _house(number: int) -> dict:
+    return {"id": number - 1, "name": HOUSE_NAMES[number - 1], "number": number}
+
+
 def planets(longitudes: dict[str, float], cusps: list[float]) -> list[dict]:
     out = []
-    for name in BODIES:
+    for name in POINTS:
         block = lords_of(longitudes[name])
-        out.append({"planet": _body(name), "house": house_of(longitudes[name], cusps),
+        out.append({"planet": _body(name), "house": _occupied(name, longitudes, cusps),
                     **block})
     return out
 
@@ -152,7 +168,7 @@ def significators(longitudes: dict[str, float], cusps: list[float]) -> list[dict
     sits in the nakshatra of the planet that owns the cusp.
     """
     star_lord = {name: NAKSHATRA_LORDS[int(longitudes[name] % 360.0 / NAKSHATRA_ARC)]
-                 for name in BODIES}
+                 for name in POINTS}
     occupants: dict[int, list[str]] = {h: [] for h in range(1, 13)}
     for name in BODIES:
         occupants[house_of(longitudes[name], cusps)].append(name)
@@ -166,12 +182,34 @@ def significators(longitudes: dict[str, float], cusps: list[float]) -> list[dict
             "house": {"id": index, "name": HOUSE_NAMES[index], "number": number},
             "cusp_occupants": [_body(n) for n in in_house],
             "cusp_nakshatra_occupants": [
-                _body(n) for n in BODIES if star_lord[n] in in_house
+                _body(n) for n in POINTS if star_lord[n] in in_house
             ],
             "cusp_owner": _body(owner),
             "cusp_owner_nakshatra_planets": [
-                _body(n) for n in BODIES if star_lord[n] == owner
+                _body(n) for n in POINTS if star_lord[n] == owner
             ],
+        })
+    return out
+
+
+def planet_significators(longitudes: dict[str, float], cusps: list[float]) -> list[dict]:
+    """The same four levels read the other way: which houses each body signifies.
+
+    The house its star lord occupies, the house it occupies, the cusps its
+    star lord owns, and the cusps it owns itself.
+    """
+    owned = {name: [h for h in range(1, 13)
+                    if SIGN_LORDS[int(cusps[h - 1] % 360.0 / 30.0)] == name]
+             for name in POINTS}
+    out = []
+    for name in POINTS:
+        lord = NAKSHATRA_LORDS[int(longitudes[name] % 360.0 / NAKSHATRA_ARC)]
+        out.append({
+            "planet": _body(name),
+            "nakshatra_lord_house": _house(house_of(longitudes[lord], cusps)),
+            "occupied_house": _house(_occupied(name, longitudes, cusps)),
+            "rasi_lord_house": [_house(h) for h in owned[lord]],
+            "rasi_lord_own_house": [_house(h) for h in owned[name]],
         })
     return out
 
@@ -179,9 +217,11 @@ def significators(longitudes: dict[str, float], cusps: list[float]) -> list[dict
 def compute(chart: dict, cusps: list[float]) -> dict:
     """Everything KP, from a built chart and its Placidus cusps."""
     longitudes = {name: chart["grahas"][name]["longitude"] for name in BODIES}
+    longitudes["Ascendant"] = chart["lagna"]["longitude"]
     return {
         "houses": houses(cusps),
         "planets": planets(longitudes, cusps),
         "house_significators": significators(longitudes, cusps),
+        "planet_significators": planet_significators(longitudes, cusps),
         **provenance.KP,
     }

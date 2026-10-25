@@ -95,6 +95,7 @@ class BirthData:
     dasha_year_length: float = DAYS_PER_YEAR
     equinox: str = "mean"
     dasha_traversed_precision: int | None = None
+    dasha_whole_seconds: bool = False
     sunrise_convention: str = "apparent"
 
     def local_datetime(self) -> datetime:
@@ -348,6 +349,7 @@ def _build(
         positions["Moon"].longitude, local, depth=dasha_depth,
         year_length=birth.dasha_year_length,
         traversed_precision=birth.dasha_traversed_precision,
+        whole_seconds=birth.dasha_whole_seconds,
     )
     now = _local_reference_time(reference_time, tz_info["timezone"])
 

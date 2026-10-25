@@ -216,6 +216,7 @@ class ChartRequest(BaseModel):
             dasha_traversed_precision=(
                 PROKERALA_TRAVERSED_PRECISION if self.prokerala_compatible else None
             ),
+            dasha_whole_seconds=self.prokerala_compatible,
             sunrise_convention="geometric" if self.prokerala_compatible else "apparent",
         )
 
