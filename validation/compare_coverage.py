@@ -414,7 +414,10 @@ def main() -> int:
             print(f"    {when}: {len(diffs)} diffs")
             for d in diffs[:6]:
                 print(f"      {d}")
-    return 0
+    agree = sum(ok for ok, _ in tally.values())
+    total = sum(n for _, n in tally.values())
+    print(f"{agree}/{total} coverage checks pass across {len(tally)} endpoints")
+    return 0 if agree == total else 1
 
 
 if __name__ == "__main__":

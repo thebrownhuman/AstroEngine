@@ -122,16 +122,17 @@ Thirty-six numbers, Pythagorean and Chaldean.
 | `POST /v1/chart/summary` | a token-cheap text rendering for an LLM prompt |
 | `POST /v1/yogas` | yoga detection with the evidence behind each verdict |
 | `POST /v1/transits` | gochara only |
-| `POST /v1/ashtakavarga` | bindu tables only |
+| `POST /v1/ashtakavarga` | bindu tables only, with Prokerala's reduced sarvashtakavarga |
 | `POST /v1/upagrahas` | the eleven upagrahas |
 | `POST /v1/doshas` | Kaal Sarpa, papasamyam, Mangal dosha |
 | `POST /v1/relationships` | the three friendship tables |
 | `POST /v1/sudarshana` | the chart from Lagna, Sun and Moon; ayana and ritu |
 | `POST /v1/bala` | tara bala, chandra bala, chandrashtama for a date |
-| `POST /v1/muhurta` | a calendar date's periods at a place |
+| `POST /v1/chandrashtama` | every chandrashtama in a year, by nakshatra, with the peak |
+| `POST /v1/muhurta` | a calendar date's periods at a place, anandadi and auspicious yogas |
 | `POST /v1/matching` | Ashtakoot, from two births |
 | `POST /v1/porutham` | the Tamil checklist, from two nakshatras |
-| `POST /v1/kp` | cusps, sub lords, significators |
+| `POST /v1/kp` | cusps, sub lords, house and planet significators |
 | `POST /v1/nakshatra` | the janma nakshatra with its full reference block |
 | `POST /v1/numerology` | the thirty-six numbers |
 | `GET /v1/places` | offline place search |
@@ -254,8 +255,9 @@ papasamyam points                    ok      weights exact over 36 charts
 tara and chandra bala                ok      24/24 checks pass
 matching                             ok      418/418 checks pass
 porutham                             ok      648/648 checks pass (all twelve rules)
+coverage sweep                       known   92/114 coverage checks pass across 15 endpoints
 
-13/13 suites clean
+14/14 suites clean
 ```
 
 The BPHS suite is the only one that is not a parity check. Every other entry
@@ -396,6 +398,33 @@ the first of the next cover the same three degrees twenty of the zodiac.
 The engine does not imitate this. Validation sweeps avoid pada 4 instead. It
 cost most of a day to find: an early sign sweep used all four padas, and the
 resulting "failures" in five already-verified rules were entirely this bug.
+
+### Coverage sweep, 2026-10-25
+
+`validation/sweep_coverage.py` fetched up to eight births for every Vedic
+endpoint that had none or one to four, and `validation/compare_coverage.py`
+diffs the engine against that cache. Agreeing fully: planet positions, KP
+planet positions and both KP significator tables, dasha periods (now to the
+second), planet relationships, the reduced sarvashtakavarga, Mangal dosha,
+papasamyam-check, auspicious yogas and yearly chandrashtama. Anandadi yoga
+agrees on 7/8; the eighth is an Abhijit edge Prokerala puts 33 s earlier.
+
+What it found, and is now reproduced:
+
+- **Dasha seconds.** Prokerala rounds the cycle start up to a whole second,
+  truncates each sub-period's length to whole seconds and ends each period one
+  second before the next. Pratyantar boundaries had drifted by up to 2 s.
+- **KP Ascendant.** It is a point with a star lord (id 100, between Saturn and
+  Rahu), so it appears in the nakshatra-based significator lists.
+- **Reduced sarvashtakavarga** is not built like the per-graha tables: trikona
+  omits the zero-in-a-trine rule, and ekaadhipatya reduces the raw prastara
+  with Rahu, Ketu and the lagna counted as occupants.
+
+Still open, for want of credits: the birth-based `porutham` endpoint (its
+Rasi, Rajju and Gana fit the classical rules on seven pairs, its Dina does not,
+and the Kerala system is unmeasured); Prokerala's own deity strings for 19 of
+the 27 nakshatras (this engine keeps BPHS's names); and `sudarshana-chakra`,
+which returned a non-JSON error on every request.
 
 ### Not checked at all
 

@@ -20,6 +20,8 @@ sys.path.insert(0, ".")
 KNOWN_DEVIATIONS = {
     "yogas": "Daridra Yoga: rule not recovered, flagged unverified",
     "muhurta": "one gowri slot where Prokerala contradicts its own rotation",
+    "coverage sweep": "birth-based porutham (tamil Dina, kerala) not recovered; "
+                      "19 Prokerala deity strings and one Abhijit edge unmeasured",
 }
 
 SUITES = [
@@ -39,6 +41,7 @@ SUITES = [
     ("tara and chandra bala", "validation/verify_bala.py"),
     ("matching", "validation/verify_matching.py"),
     ("porutham", "validation/verify_porutham.py"),
+    ("coverage sweep", "validation/compare_coverage.py"),
 ]
 
 
