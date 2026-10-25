@@ -568,6 +568,28 @@ def kp_report(request: ChartRequest) -> dict:
             **krishnamurti.compute(data, data["cusps"][:12])}
 
 
+class ChandrashtamaRequest(ChartRequest):
+    year: int = Field(..., ge=1801, le=2399, description="Calendar year to list.")
+
+
+@app.post("/v1/chandrashtama")
+def chandrashtama_report(request: ChandrashtamaRequest) -> dict:
+    """Every chandrashtama in a year for the natal Moon of this birth.
+
+    The year is read in the birth's UTC offset, held fixed all year.
+    """
+    try:
+        data = build(request.to_birth_data(), vargas=["D1"], dasha_depth=1)
+    except (ValueError, FileNotFoundError) as exc:
+        raise _build_http_error(exc) from exc
+    moon = data["grahas"]["Moon"]
+    offset = data["input"]["utc_offset_hours"]
+    return {"engine": data["engine"], "input": data["input"],
+            **strength.chandrashtama_periods(
+                moon["nakshatra_index"], moon["sign_index"], request.year, offset,
+                ayanamsa=request.ayanamsa)}
+
+
 class NumerologyRequest(BaseModel):
     first_name: str = Field(..., max_length=100, examples=["John"])
     middle_name: str = Field("", max_length=100, examples=[""])

@@ -197,6 +197,13 @@ AUSPICIOUS_YOGA = block(
     "dates, all agreeing; only two of those dates hold any yoga, so most "
     "table rows are classical rather than measured.",
 )
+CHANDRASHTAMA = block(
+    PROVIDER,
+    "The Moon in the eighth sign from the natal Moon is classical. The yearly "
+    "listing, its split by nakshatra and the peak (janma nakshatra plus "
+    "fifteen) follow Prokerala's chandrashtama-periods, measured on seven "
+    "births.",
+)
 SARVA_REDUCTIONS = block(
     PROVIDER,
     "Prokerala's reduced sarvashtakavarga, recovered by measurement and exact "

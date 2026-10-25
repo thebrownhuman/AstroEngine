@@ -68,10 +68,10 @@ def _moon_longitude(scanner: SiderealScanner, jd: float) -> float:
 
 
 def _crossings(scanner: SiderealScanner, start_jd: float, end_jd: float,
-               arc: float) -> list[float]:
+               arc: float, seconds: float = BISECTION_SECONDS) -> list[float]:
     """Julian days where the Moon enters a new arc-wide division."""
     step = SCAN_STEP_HOURS / 24.0
-    tolerance = BISECTION_SECONDS / 86400.0
+    tolerance = seconds / 86400.0
     edges = []
 
     previous = start_jd
@@ -94,8 +94,8 @@ def _crossings(scanner: SiderealScanner, start_jd: float, end_jd: float,
 
 
 def _windows(scanner: SiderealScanner, start_jd: float, end_jd: float,
-             arc: float) -> list[tuple[float, float, int]]:
-    edges = [start_jd] + _crossings(scanner, start_jd, end_jd, arc) + [end_jd]
+             arc: float, seconds: float = BISECTION_SECONDS) -> list[tuple[float, float, int]]:
+    edges = [start_jd] + _crossings(scanner, start_jd, end_jd, arc, seconds) + [end_jd]
     out = []
     for begin, finish in zip(edges, edges[1:]):
         middle = (begin + finish) / 2
@@ -182,6 +182,60 @@ def day(date: datetime, utc_offset_hours: float, ayanamsa: str = "lahiri",
         "tara_bala": tara_windows,
         "chandra_bala": moon_windows,
         **provenance.BALA,
+    }
+
+
+# The janma nakshatra plus fifteen is the one Prokerala flags as the peak of a
+# chandrashtama, when it falls inside the eighth sign; when it does not (a
+# janma star whose sixteenth lies outside that sign), no window is flagged.
+CHANDRASHTAMA_PEAK_OFFSET = 15
+CHANDRASHTAMA_SECONDS = 0.05
+
+
+def _naks(index: int) -> dict:
+    return {"index": index, "name": PROKERALA_NAKSHATRA_NAMES[index],
+            "name_iast": NAKSHATRAS[index]}
+
+
+def chandrashtama_periods(janma_nakshatra: int, janma_rasi: int, year: int,
+                          utc_offset_hours: float, ayanamsa: str = "lahiri") -> dict:
+    """Every chandrashtama touching a calendar year, split by nakshatra.
+
+    The year runs in the fixed `utc_offset_hours`, as Prokerala's does: it
+    prints one offset for the whole year rather than following DST.
+    """
+    scanner = SiderealScanner(ayanamsa=ayanamsa)
+    offset = timedelta(hours=utc_offset_hours)
+    target = (janma_rasi + CHANDRASHTAMA_POSITION - 1) % 12
+    peak = (janma_nakshatra + CHANDRASHTAMA_PEAK_OFFSET) % 27
+    year_start = julian_day(datetime(year, 1, 1) - offset)
+    year_end = julian_day(datetime(year + 1, 1, 1) - offset)
+
+    periods = []
+    for begin, finish, sign in _windows(scanner, year_start - 3, year_end + 3, 30.0,
+                                        CHANDRASHTAMA_SECONDS):
+        if sign != target or finish <= year_start or begin >= year_end:
+            continue
+        stars = _windows(scanner, begin, finish, NAKSHATRA_ARC, CHANDRASHTAMA_SECONDS)
+        periods.append({
+            "start": _stamp(begin, utc_offset_hours),
+            "end": _stamp(finish, utc_offset_hours),
+            "nakshatra_timings": [
+                {"nakshatra": _naks(index), "start": _stamp(a, utc_offset_hours),
+                 "end": _stamp(b, utc_offset_hours), "is_peak": index == peak}
+                for a, b, index in stars
+            ],
+        })
+
+    first_star = int(target * 30.0 / NAKSHATRA_ARC)
+    last_star = int((target * 30.0 + 29.999999) / NAKSHATRA_ARC)
+    return {
+        "rasi": {"index": target, "name": SIGNS[target], "name_en": SIGNS_EN[target],
+                 "lord": SIGN_LORDS[target]},
+        "nakshatras": [_naks(i) for i in range(first_star, last_star + 1)],
+        "peak_nakshatra": _naks(peak) if first_star <= peak <= last_star else None,
+        "periods": periods,
+        **provenance.CHANDRASHTAMA,
     }
 
 

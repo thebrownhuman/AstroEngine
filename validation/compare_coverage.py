@@ -330,6 +330,34 @@ def cmp_auspicious_yoga(theirs, req):
     return diffs
 
 
+def cmp_chandrashtama_periods(theirs, req, year=2026):
+    ours = client.post("/v1/chandrashtama", json={**req, "year": year}).json()
+    diffs = []
+    if ours["rasi"]["index"] != theirs["chandrashtama"]["rasi"]["id"]:
+        return [f"rasi {ours['rasi']['index']} vs {theirs['chandrashtama']['rasi']['id']}"]
+    if [n["index"] for n in ours["nakshatras"]] != [n["id"] for n in theirs["chandrashtama"]["nakshatra"]]:
+        diffs.append("nakshatra list differs")
+    o, t = ours["periods"], theirs["chandrashtama_timing"]
+    if len(o) != len(t):
+        return diffs + [f"periods {len(o)} vs {len(t)}"]
+    for a, b in zip(o, t):
+        for edge in ("start", "end"):
+            if not _close(a[edge], b[edge], WINDOW_SECONDS):
+                diffs.append(f"period {edge} {a[edge]} vs {b[edge]}")
+        if len(a["nakshatra_timings"]) != len(b["nakshatra_timings"]):
+            diffs.append(f"{b['start']}: {len(a['nakshatra_timings'])} stars vs "
+                         f"{len(b['nakshatra_timings'])}")
+            continue
+        for x, y in zip(a["nakshatra_timings"], b["nakshatra_timings"]):
+            if x["nakshatra"]["index"] != y["nakshatra"]["id"] or x["is_peak"] != y["is_peak"]:
+                diffs.append(f"{y['start']}: star/peak {x['nakshatra']['index']},{x['is_peak']} "
+                             f"vs {y['nakshatra']['id']},{y['is_peak']}")
+            for edge in ("start", "end"):
+                if not _close(x[edge], y[edge], WINDOW_SECONDS):
+                    diffs.append(f"star {edge} {x[edge]} vs {y[edge]}")
+    return diffs
+
+
 def cmp_not_implemented(name):
     return lambda theirs, req: [f"{name}: not implemented in engine"]
 
@@ -348,7 +376,7 @@ COMPARATORS = {
     "porutham": cmp_porutham,
     "anandadi-yoga": cmp_anandadi_yoga,
     "auspicious-yoga": cmp_auspicious_yoga,
-    "chandrashtama-periods": cmp_not_implemented("yearly chandrashtama timings"),
+    "chandrashtama-periods": cmp_chandrashtama_periods,
 }
 
 _ZONE_BY_COORD = {f"{lat},{lon}": zone for _, _, lat, lon, zone in births()}
