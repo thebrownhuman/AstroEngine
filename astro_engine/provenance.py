@@ -178,6 +178,15 @@ ASHTAKAVARGA = block(
     "their sum of 337 are asserted at import so a mistyped digit fails "
     "immediately.",
 )
+ANANDADI = block(
+    PROVIDER,
+    "Weekday against the Moon's star on the 28-star scheme, Sunday counting "
+    "from Ashwini and each later weekday four stars on. The rule is the "
+    "classical one; the window convention (every nakshatra between the "
+    "date's sunrise and the next, read with the date's weekday) and nine of "
+    "the twenty-eight labels were measured against Prokerala. Entries with "
+    "label_parity 'unverified' carry the classical name.",
+)
 SARVA_REDUCTIONS = block(
     PROVIDER,
     "Prokerala's reduced sarvashtakavarga, recovered by measurement and exact "

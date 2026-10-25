@@ -276,6 +276,44 @@ def _pair_request(pair, side):
                         "ayanamsa": pair["ayanamsa"]}, zone)
 
 
+def _close(ours: str, theirs: str, seconds: float) -> bool:
+    a = datetime.fromisoformat(ours)
+    b = datetime.fromisoformat(theirs).replace(tzinfo=None)
+    return abs((a - b).total_seconds()) <= seconds
+
+
+# Prokerala's Moon timings in the day endpoints scatter by about a second
+# around ours (see README, Precision notes), so windows get two seconds.
+WINDOW_SECONDS = 2.0
+
+
+def _muhurta(req):
+    return client.post("/v1/muhurta", json={
+        "date": req["date"], "latitude": req["latitude"],
+        "longitude": req["longitude"], "timezone": req["timezone"]}).json()
+
+
+def cmp_anandadi_yoga(theirs, req):
+    ours = _muhurta(req)["anandadi_yoga"]
+    theirs = theirs["anandadi_yoga"]
+    if len(ours) != len(theirs):
+        return [f"count {len(ours)} vs {len(theirs)}: "
+                f"{[o['id'] for o in ours]} vs {[t['id'] for t in theirs]}"]
+    diffs = []
+    for o, t in zip(ours, theirs):
+        if o["id"] != t["id"]:
+            diffs.append(f"id {o['id']} vs {t['id']}")
+            continue
+        if o["label_parity"] == "verified":
+            for key in ("name", "type", "description"):
+                if o[key] != t[key]:
+                    diffs.append(f"{t['id']} {key} {o[key]!r} vs {t[key]!r}")
+        for edge in ("start", "end"):
+            if not _close(o[edge], t[edge], WINDOW_SECONDS):
+                diffs.append(f"{t['name']} {edge} {o[edge]} vs {t[edge]}")
+    return diffs
+
+
 def cmp_not_implemented(name):
     return lambda theirs, req: [f"{name}: not implemented in engine"]
 
@@ -292,7 +330,7 @@ COMPARATORS = {
     "kundli": cmp_kundli,
     "papasamyam-check": cmp_papasamyam_check,
     "porutham": cmp_porutham,
-    "anandadi-yoga": cmp_not_implemented("anandadi yoga"),
+    "anandadi-yoga": cmp_anandadi_yoga,
     "auspicious-yoga": cmp_not_implemented("auspicious yoga"),
     "chandrashtama-periods": cmp_not_implemented("yearly chandrashtama timings"),
 }

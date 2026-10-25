@@ -27,7 +27,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta
 
-from . import provenance
+from . import anandadi, provenance
 from .ephemeris import jd_to_datetime, julian_day, sun_rise_set
 
 PARTS = 8
@@ -378,5 +378,8 @@ def compute(
         "gowri_nalla_neram": gowri_nalla_neram(solar, vara_index),
         "gowri_nalla_neram_source": provenance.GOWRI,
         "disha_shool": disha_shool(solar, vara_index),
+        "anandadi_yoga": anandadi.day(solar["sunrise"], solar["next_sunrise"],
+                                      vara_index, utc_offset_hours),
+        "anandadi_yoga_source": provenance.ANANDADI,
         **provenance.MUHURTA,
     }
