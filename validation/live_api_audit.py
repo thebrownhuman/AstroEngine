@@ -120,7 +120,7 @@ def test_health_and_openapi():
         "/v1/chart", "/v1/chart/summary", "/v1/yogas", "/v1/transits",
         "/v1/ashtakavarga", "/v1/upagrahas", "/v1/doshas", "/v1/nakshatra",
         "/v1/sudarshana", "/v1/relationships", "/v1/kp", "/v1/matching",
-        "/v1/porutham", "/v1/muhurta", "/v1/bala", "/v1/numerology",
+        "/v1/porutham", "/v1/muhurta", "/v1/bala", "/v1/chandrashtama", "/v1/numerology",
         "/v1/places", "/v1/timezone", "/v1/tool-definition", "/v1/tool-definitions",
         "/health",
     }
@@ -403,7 +403,7 @@ def test_chart_routes():
                               "source", "authority"},
         # `source` and `authority` are the provenance stamp carried by every
         # block that encodes a rule; see astro_engine/provenance.py.
-        "/v1/kp": {"engine", "input", "houses", "planets", "house_significators",
+        "/v1/kp": {"engine", "input", "houses", "planets", "house_significators", "planet_significators",
                    "source", "authority"},
     }
     for path, keys in expected_keys.items():
