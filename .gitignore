@@ -7,3 +7,4 @@ ephe/
 validation/.cache/
 data/*.txt
 data/places.sqlite
+docs/bphs/
