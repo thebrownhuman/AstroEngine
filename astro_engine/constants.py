@@ -72,6 +72,15 @@ OWN_SIGNS = {
     "Jupiter": [8, 11], "Venus": [1, 6], "Saturn": [9, 10],
 }
 
+# Moolatrikona sign index and degree span [start, end), BPHS Chapter 3,
+# verses 49-54. Where the span shares a sign with exaltation or own sign, the
+# rest of that sign keeps the other dignity.
+MOOLATRIKONA = {
+    "Sun": (4, 0.0, 20.0), "Moon": (1, 3.0, 30.0), "Mars": (0, 0.0, 12.0),
+    "Mercury": (5, 15.0, 20.0), "Jupiter": (8, 0.0, 10.0),
+    "Venus": (6, 0.0, 15.0), "Saturn": (10, 0.0, 20.0),
+}
+
 # Maximum elongation from the Sun at which a planet is considered combust.
 COMBUSTION_ORB = {
     "Moon": 12.0, "Mars": 17.0, "Mercury": 14.0,
@@ -95,8 +104,8 @@ PROKERALA_NAKSHATRA_NAMES = [
 assert len(PROKERALA_NAKSHATRA_NAMES) == len(NAKSHATRAS)
 
 
-# Per-nakshatra reference data. The deity field below follows BPHS Chapter 3,
-# shlokas 10-11 and the accompanying nakshatra deity list. The other fields
+# Per-nakshatra reference data. The deity field below follows BPHS Chapter 7,
+# verses 24-26 (Sharma V1), except Ashlesha's Ahi, given as Rahu. The other fields
 # are retained for API compatibility but are not BPHS authority.
 NAKSHATRA_ATTRIBUTE_FIELDS = (
     "deity",

@@ -13,7 +13,7 @@ from datetime import datetime
 import swisseph as swe
 
 from .constants import (
-    COMBUSTION_ORB, EXALTATION, NAKSHATRAS, NAKSHATRA_LORDS,
+    COMBUSTION_ORB, EXALTATION, MOOLATRIKONA, NAKSHATRAS, NAKSHATRA_LORDS,
     OWN_SIGNS, SIGNS, SIGNS_EN, SIGN_LORDS,
 )
 
@@ -305,7 +305,13 @@ class SiderealSky:
 
 
 def dignity(name: str, position: Position, sun_longitude: float | None) -> dict:
-    """Classical dignity: exaltation, debilitation, own sign, combustion."""
+    """Classical dignity: exaltation, debilitation, own sign, combustion.
+
+    `state` is the sign-level reading Prokerala reports and stays as it is.
+    `bphs_state` refines it by degree: deep exaltation and Moolatrikona
+    occupy only part of their sign in BPHS, so Mercury at 25 Virgo is
+    own_sign there, not exalted, and the Moon at 10 Taurus is moolatrikona.
+    """
     state = "neutral"
     exalt = EXALTATION.get(name)
     if exalt is not None:
@@ -317,6 +323,18 @@ def dignity(name: str, position: Position, sun_longitude: float | None) -> dict:
     if state == "neutral" and position.sign_index in OWN_SIGNS.get(name, []):
         state = "own_sign"
 
+    bphs_state = state
+    degree = position.longitude % 30.0
+    if exalt is not None and state == "exalted" and name in MOOLATRIKONA:
+        if MOOLATRIKONA[name][0] == exalt_sign and degree >= MOOLATRIKONA[name][1]:
+            bphs_state = "moolatrikona"
+    if name in MOOLATRIKONA:
+        sign, start, end = MOOLATRIKONA[name]
+        if position.sign_index == sign and state != "exalted":
+            bphs_state = "moolatrikona" if start <= degree < end else "own_sign"
+        if name == "Mercury" and position.sign_index == 5 and degree >= end:
+            bphs_state = "own_sign"
+
     combust = False
     elongation = None
     orb = COMBUSTION_ORB.get(name)
@@ -327,6 +345,7 @@ def dignity(name: str, position: Position, sun_longitude: float | None) -> dict:
 
     return {
         "state": state,
+        "bphs_state": bphs_state,
         "combust": combust,
         "elongation_from_sun": round(elongation, 4) if elongation is not None else None,
     }

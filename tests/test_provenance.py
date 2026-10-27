@@ -89,7 +89,8 @@ def test_the_blocks_without_textual_authority_say_so():
     assert chart["doshas"]["kaal_sarpa"]["source"] == provenance.PROVIDER
 
     upagrahas = {u["name"]: u["source"] for u in chart["upagrahas"]}
-    assert upagrahas["Dhuma"] == provenance.CLASSICAL
+    # Verbatim in BPHS Ch.3 v61-64 (Sharma V1).
+    assert upagrahas["Dhuma"] == provenance.BPHS
     # The part index behind the time-derived six was measured, not read.
     for name in ("Gulika", "Mandi", "Kala", "Mrityu", "Ardha Prahara", "Yamaghanta"):
         assert upagrahas[name] == provenance.PROVIDER, name
@@ -140,12 +141,12 @@ def test_bphs_derived_chart_blocks_are_labelled():
 
 
 def test_ashtakavarga_splits_the_reduction_out():
-    """The bindu tables are BPHS 66; the ekadhipatya tie rule was measured."""
+    """Bindu tables are BPHS 66, but the zero-in-a-trine reduction follows Prokerala."""
     chart = client.post("/v1/chart", json={
         **BIRTH, "include_ashtakavarga": True,
     }).json()
 
-    assert chart["ashtakavarga_source"]["source"] == provenance.BPHS
+    assert chart["ashtakavarga_source"]["source"] == provenance.PROVIDER
     assert "66" in chart["ashtakavarga_source"]["authority"]
     for graha, table in chart["ashtakavarga"].items():
         assert table["ekaadhipatya"]["source"] == provenance.PROVIDER, graha
@@ -292,7 +293,7 @@ def test_ekadhipatya_diverges_from_bphs_on_purpose():
         **BIRTH, "include_ashtakavarga": True,
     }).json()["ashtakavarga"]["Sun"]["ekaadhipatya"]
     assert stamp["source"] == provenance.PROVIDER
-    assert "Chapter 68" in stamp["authority"]
+    assert "Ch.70 v5" in stamp["authority"]
 
 
 def test_house_significations_do_not_overclaim_bphs():

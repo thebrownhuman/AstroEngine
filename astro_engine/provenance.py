@@ -69,10 +69,12 @@ RASHI_DRISHTI = block(
 
 NAKSHATRA_DEITY = block(
     BPHS,
-    "BPHS Chapter 3: the presiding deities, Ashwini Kumara through Poosha, "
-    "with Abhijit's Brahma left out of the 28 so that each of the 27 sits on "
-    "its own star. Prokerala (8 stars measured) and VedIntel (25) agree on "
-    "every one.",
+    "BPHS Chapter 7, verses 24-26 (Sharma V1, the Bhamsha passage): the "
+    "presiding deities, Ashwini Kumara through Poosha, with Abhijit's Aja "
+    "left out of the 28 so that each of the 27 sits on its own star. One "
+    "label follows the providers instead: BPHS names Ashlesha's deity Ahi "
+    "(the serpent), reported here as Rahu, as Prokerala (8 stars measured) "
+    "and VedIntel (25) both do.",
 )
 NAKSHATRA_METADATA = block(
     PROVIDER,
@@ -83,16 +85,20 @@ NAKSHATRA_METADATA = block(
 )
 
 UPAGRAHA_SOLAR = block(
-    CLASSICAL,
-    "The five sun-derived upagrahas are fixed offsets from the Sun, standard "
-    "across the classical sources.",
+    BPHS,
+    "The five sun-derived upagrahas (Dhuma, Vyatipata, Parivesha, Indrachapa, "
+    "Upaketu) are fixed offsets from the Sun given verbatim in BPHS Chapter 3, "
+    "verses 61-64 (Sharma V1); the engine reproduces the translator's worked "
+    "example exactly.",
 )
 UPAGRAHA_TIME = block(
     PROVIDER,
-    "Mixed authority. The eight-part division of day and night, Gulika at the "
-    "start of Saturn's portion, and Mandi being the same upagraha as Gulika "
-    "(\"Gulika and Mandi are one and the same and not different\") are BPHS "
-    "Chapter 3, verses 66-69. The part index itself -- "
+    "Mixed authority. The eight-part division of day and night and Mandi "
+    "being the same upagraha as Gulika (\"Gulika and Mandi are one and the "
+    "same and not different\") are BPHS Chapter 3, verses 66-69. Placing "
+    "Gulika at the start of Saturn's portion is not: the verse is ambiguous, "
+    "and the translator's Dhruvanka method gives the end. The start follows "
+    "Prokerala. The part index itself -- "
     "(lord index - vara) mod 8 -- is not in that passage: it was recovered by "
     "inverting Prokerala's longitudes back into the moment the Lagna held "
     "them. Marked provider_compatible because the indexing decides the answer, "
@@ -173,9 +179,12 @@ VARGA = block(
 )
 
 ASHTAKAVARGA = block(
-    BPHS,
-    "The bindu contribution tables are BPHS Chapter 66, and the trinal "
-    "reduction is Chapter 67. The row totals (48, 49, 39, 54, 56, 52, 39) and "
+    PROVIDER,
+    "Mixed authority. The bindu contribution tables are BPHS Chapter 66, and "
+    "the trinal reduction is Chapter 67 except for one case: when a trine "
+    "holds a zero, BPHS says to leave that trine alone (\"tat trikonam na "
+    "shodhayet\", Sharma V2 Ch.69 v4, whose example keeps 0, 3, 6), while "
+    "this engine zeroes all three, as Prokerala does. The row totals (48, 49, 39, 54, 56, 52, 39) and "
     "their sum of 337 are asserted at import so a mistyped digit fails "
     "immediately.",
 )
@@ -214,15 +223,12 @@ SARVA_REDUCTIONS = block(
 )
 EKADHIPATYA = block(
     PROVIDER,
-    "This one contradicts BPHS and does so deliberately. Chapter 68 is not "
-    "silent on the tie case: its worked example gives Capricorn and Aquarius "
-    "the same trikona-corrected number 2, and because Capricorn holds planets "
-    "and Aquarius does not, it reduces Aquarius to zero. This engine leaves "
-    "the empty sign alone on an exact tie, which is what Prokerala does and "
-    "what 204/204 measured checks require. Chapter 68 is also internally "
-    "inconsistent - its Taurus/Libra example does not follow its own rule (1) "
-    "for two planetless signs - so following the text would not settle the "
-    "matter either. Treat these numbers as Prokerala's, not as Parashara's.",
+    "This one contradicts BPHS and does so deliberately. On an exact tie "
+    "between the two signs of one lord, the Sanskrit (Sharma V2 Ch.70 v5) "
+    "reduces the planetless sign; this engine leaves the empty sign alone, "
+    "which is what Prokerala does and what 204/204 measured checks require. "
+    "Sharma's worked example has Capricorn and Aquarius both empty at 2 and "
+    "clears both, which the engine also does. Treat these numbers as Prokerala's, not as Parashara's.",
 )
 
 TRANSIT = block(

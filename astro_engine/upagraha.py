@@ -17,8 +17,9 @@ parts and so is the night; each upagraha belongs to one part:
 The effective vara is the vara itself by day, and the vara four weekdays later
 by night -- the classical rule that night lordship begins with the lord of the
 fifth weekday. The eight-part allocation follows BPHS Chapter 3, verses 66-70.
-BPHS specifically places Gulika at the start of Saturn's portion and states
-that Mandi and Gulika are the same upagraha.
+BPHS states that Mandi and Gulika are the same upagraha. Where in Saturn's
+portion Gulika falls is ambiguous in the verse; the translator's Dhruvanka
+method gives its end. This engine uses the start, which matches Prokerala.
 """
 
 from __future__ import annotations
