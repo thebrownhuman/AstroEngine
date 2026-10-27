@@ -29,7 +29,7 @@ import swisseph as _swe
 from .geo import to_utc
 from .vargas import VARGAS
 
-ENGINE_VERSION = "1.2.1"
+ENGINE_VERSION = "1.2.2"
 
 # Classical graha drishti from BPHS Chapter 26, expressed as house counts from
 # the occupied house. BPHS gives special aspects only to Mars, Jupiter and
