@@ -23,7 +23,8 @@ from .constants import (
 from .dasha import DAYS_PER_YEAR, active_chain, bhayata_fraction, vimshottari
 from .ephemeris import (
     MAX_YEAR, MIN_YEAR, MOSHIER_NOTE, SUPPORTED_RANGE_MESSAGE, SiderealSky,
-    SiderealScanner, dignity, jd_to_datetime, julian_day, sun_rise_set,
+    SiderealScanner, dignity, ephemeris_range_errors, jd_to_datetime, julian_day,
+    sun_rise_set,
 )
 import swisseph as _swe
 from .geo import to_utc
@@ -262,22 +263,32 @@ def _varga_table(positions: dict, lagna_longitude: float, which: list[str]) -> d
     return table
 
 
-def build(birth: BirthData, *args, **kwargs) -> dict:
-    """Build a chart; anything outside the supported years raises ValueError.
-
-    swisseph.Error and OverflowError (from dates beyond what the ephemeris
-    files or datetime can represent) do not subclass ValueError, so without
-    this the API answers a bare 500.
-    """
+def build(
+    birth: BirthData,
+    vargas: list[str] | None = None,
+    dasha_depth: int = 2,
+    reference_time: datetime | None = None,
+    include_transits: bool = False,
+    include_ashtakavarga: bool = False,
+    include_upagrahas: bool = False,
+    include_relationships: bool = False,
+    include_doshas: bool = False,
+    include_calendar: bool = False,
+    include_nakshatra_info: bool = False,
+) -> dict:
+    """Build a chart; anything outside the supported years raises ValueError."""
     if not MIN_YEAR <= birth.year <= MAX_YEAR:
         raise ValueError(f"{SUPPORTED_RANGE_MESSAGE}; got {birth.year}")
-    try:
-        return _build(birth, *args, **kwargs)
-    except (_swe.Error, OverflowError) as exc:
-        # Not interpolated into the message: swisseph's text names the server's
-        # ephemeris directory, and the client only needs the supported range.
-        # The original is preserved on __cause__ for server-side logging.
-        raise ValueError(SUPPORTED_RANGE_MESSAGE) from exc
+    with ephemeris_range_errors(SUPPORTED_RANGE_MESSAGE):
+        return _build(
+            birth, vargas=vargas, dasha_depth=dasha_depth,
+            reference_time=reference_time, include_transits=include_transits,
+            include_ashtakavarga=include_ashtakavarga,
+            include_upagrahas=include_upagrahas,
+            include_relationships=include_relationships,
+            include_doshas=include_doshas, include_calendar=include_calendar,
+            include_nakshatra_info=include_nakshatra_info,
+        )
 
 
 def _build(
@@ -469,9 +480,6 @@ def _build(
 
     return chart
 
-
-
-build.__wrapped__ = _build  # keep inspect.signature(build) truthful
 
 def summarise(chart: dict) -> str:
     """A compact text rendering, useful as a token-cheap LLM prompt header."""

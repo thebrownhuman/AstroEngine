@@ -7,6 +7,7 @@ import os
 import pathlib
 import re
 import threading
+from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -103,6 +104,22 @@ SUPPORTED_RANGE_MESSAGE = (
     f"birth year must be between {MIN_YEAR} and {MAX_YEAR} (inclusive); "
     "dates outside this range are not supported"
 )
+
+
+@contextmanager
+def ephemeris_range_errors(message: str):
+    """Turn an out-of-range date into a ValueError carrying `message`.
+
+    swisseph.Error and OverflowError (from dates beyond what the ephemeris
+    files or datetime can represent) do not subclass ValueError, so without
+    this the API answers a bare 500. The original text is not passed on:
+    swisseph's names the server's ephemeris directory, and the client only
+    needs the range. It stays on __cause__ for server-side logging.
+    """
+    try:
+        yield
+    except (swe.Error, OverflowError) as exc:
+        raise ValueError(message) from exc
 
 MOSHIER_NOTE = (
     "Date lies outside the bundled Swiss Ephemeris files; the Moshier "

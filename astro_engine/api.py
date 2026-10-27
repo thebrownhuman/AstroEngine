@@ -18,7 +18,7 @@ from .chart import ENGINE_VERSION, BirthData, build, summarise
 from .dasha import PROKERALA_TRAVERSED_PRECISION
 from .ephemeris import (
     AYANAMSA_MODES, EPHEMERIS_BACKEND, EPHEMERIS_FILE_COVERAGE, MAX_YEAR,
-    MIN_YEAR, julian_day,
+    MIN_YEAR, ephemeris_range_errors, julian_day,
 )
 from . import bala as strength
 from . import kp as krishnamurti
@@ -31,7 +31,6 @@ from . import yogas as yg
 from .geo import timezone_for, to_utc
 from .places import resolve, search
 from .vargas import VARGAS
-from swisseph import Error as SwissEphError
 
 UNSUPPORTED_DATE = "date is outside the range the ephemeris covers"
 
@@ -554,28 +553,25 @@ def bala_report(request: PersonalDayRequest) -> dict:
     `parity` field in the block records that.
     """
     try:
-        latitude, longitude, _, moment, tz_info = _day_location(request)
-        found = strength.day(moment, tz_info["utc_offset_hours"])
-        found["parity"] = strength.PARITY
+        with ephemeris_range_errors(UNSUPPORTED_DATE):
+            latitude, longitude, _, moment, tz_info = _day_location(request)
+            found = strength.day(moment, tz_info["utc_offset_hours"])
+            found["parity"] = strength.PARITY
 
-        if request.janma_nakshatra is not None and request.janma_rasi is not None:
-            from swisseph import MOON
+            if request.janma_nakshatra is not None and request.janma_rasi is not None:
+                from swisseph import MOON
 
-            transit = strength.SiderealScanner()
-            jd = julian_day(moment - timedelta(hours=tz_info["utc_offset_hours"]))
-            longitude_now = transit.longitude(jd, MOON)
-            found["for_person"] = strength.for_person(
-                request.janma_nakshatra, request.janma_rasi,
-                int(longitude_now / strength.NAKSHATRA_ARC), int(longitude_now / 30.0),
-            )
+                transit = strength.SiderealScanner()
+                jd = julian_day(moment - timedelta(hours=tz_info["utc_offset_hours"]))
+                longitude_now = transit.longitude(jd, MOON)
+                found["for_person"] = strength.for_person(
+                    request.janma_nakshatra, request.janma_rasi,
+                    int(longitude_now / strength.NAKSHATRA_ARC), int(longitude_now / 30.0),
+                )
     except FileNotFoundError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
-    except (OverflowError, SwissEphError) as exc:
-        # swisseph's message names the server's ephemeris path; the client only
-        # needs to know the date is out of range.
-        raise HTTPException(status_code=422, detail=UNSUPPORTED_DATE) from exc
     return found
 
 
