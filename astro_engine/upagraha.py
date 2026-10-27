@@ -97,7 +97,21 @@ def part_bounds(index: int, span_start_jd: float, span_end_jd: float) -> tuple[f
     return span_start_jd + index * width, span_start_jd + (index + 1) * width
 
 
-def _describe(name: str, longitude: float, lagna_sign: int) -> dict:
+# strict_bphs takes Gulika and Mandi at the end of Saturn's portion, where the
+# Dhruvanka method of BPHS Chapter 3 (Sharma V1, notes to v66-70) lands.
+STRICT_PART_POINT = {**PART_POINT, "Gulika": 1.0, "Mandi": 1.0}
+
+
+def _source(name: str, strict_bphs: bool) -> dict:
+    if name not in TIME_DERIVED:
+        return provenance.UPAGRAHA_SOLAR
+    if strict_bphs and name in ("Gulika", "Mandi"):
+        return provenance.GULIKA_STRICT
+    return provenance.UPAGRAHA_TIME
+
+
+def _describe(name: str, longitude: float, lagna_sign: int,
+              strict_bphs: bool = False) -> dict:
     longitude %= 360.0
     sign = int(longitude / 30.0)
     return {
@@ -110,8 +124,7 @@ def _describe(name: str, longitude: float, lagna_sign: int) -> dict:
         "house": (sign - lagna_sign) % 12 + 1,
         "rasi": {"index": sign, "name": SIGNS[sign], "name_en": SIGNS_EN[sign],
                  "lord": SIGN_LORDS[sign]},
-        **(provenance.UPAGRAHA_TIME if name in TIME_DERIVED
-           else provenance.UPAGRAHA_SOLAR),
+        **_source(name, strict_bphs),
     }
 
 
@@ -126,6 +139,7 @@ def compute(
     ayanamsa: str = "lahiri",
     equinox: str = "mean",
     house_system: bytes = b"P",
+    strict_bphs: bool = False,
 ) -> list[dict]:
     """Every upagraha for one birth, in Prokerala's listing order.
 
@@ -140,10 +154,11 @@ def compute(
     span = ((solar["sunset_jd"], solar["next_sunrise_jd"]) if by_night
             else (solar["sunrise_jd"], solar["sunset_jd"]))
 
+    points = STRICT_PART_POINT if strict_bphs else PART_POINT
     for name in TIME_DERIVED:
         begin, end = part_bounds(part_index(name, vara_index, by_night), *span)
-        moment = begin + (end - begin) * PART_POINT[name]
+        moment = begin + (end - begin) * points[name]
         sky = SiderealSky(moment, ayanamsa=ayanamsa, equinox=equinox)
         values[name] = sky.angles(latitude, longitude, house_system)["ascendant"].longitude
 
-    return [_describe(name, values[name], lagna_sign) for name in ORDER]
+    return [_describe(name, values[name], lagna_sign, strict_bphs) for name in ORDER]

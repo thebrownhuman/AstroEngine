@@ -17,6 +17,7 @@ different source.
 from __future__ import annotations
 
 import math
+from collections.abc import Callable
 from datetime import datetime, timedelta
 
 from .constants import DASHA_SEQUENCE, DASHA_TOTAL_YEARS, NAKSHATRA_LORDS
@@ -57,6 +58,33 @@ def balance_at_birth(
     if traversed_precision is not None:
         traversed = round(traversed, traversed_precision)
     return NAKSHATRA_LORDS[nak_index], 1.0 - traversed
+
+
+def bhayata_fraction(moon_at: Callable[[float], float], jd_ut: float) -> float:
+    """BPHS V2 Ch.48 v16: the part of the birth nakshatra already traversed,
+    measured in time (Bhayata over Bhabhoga) rather than in arc.
+
+    `moon_at` maps a Julian day to the Moon's sidereal longitude. The Moon
+    spends 0.8-1.2 days in a nakshatra, so a 1.5-day window either side
+    always holds both boundaries; bisection runs to about a millisecond.
+    """
+    index = int((moon_at(jd_ut) % 360.0) / NAKSHATRA_ARC)
+
+    def inside(jd: float) -> bool:
+        return int((moon_at(jd) % 360.0) / NAKSHATRA_ARC) == index
+
+    def edge(inner: float, outer: float) -> float:
+        for _ in range(40):
+            middle = (inner + outer) / 2
+            if inside(middle):
+                inner = middle
+            else:
+                outer = middle
+        return (inner + outer) / 2
+
+    start = edge(jd_ut, jd_ut - 1.5)
+    end = edge(jd_ut, jd_ut + 1.5)
+    return (jd_ut - start) / (end - start)
 
 
 # Prokerala works in whole seconds: the cycle start is rounded up, every
@@ -104,11 +132,15 @@ def vimshottari(
     year_length: float = DAYS_PER_YEAR,
     traversed_precision: int | None = None,
     whole_seconds: bool = False,
+    traversed: float | None = None,
 ) -> dict:
     """Full Vimshottari timeline from birth. depth=1 gives mahadashas only,
     2 adds antardashas, 3 adds pratyantardashas. `whole_seconds` reproduces
-    Prokerala's second-level rounding."""
+    Prokerala's second-level rounding. `traversed` replaces the arc fraction
+    of the birth nakshatra, e.g. with `bhayata_fraction` for strict BPHS."""
     birth_lord, balance = balance_at_birth(moon_longitude, traversed_precision)
+    if traversed is not None:
+        balance = 1.0 - traversed
 
     # The first mahadasha is partial: it began before birth.
     first_span = _LORD_YEARS[birth_lord] * year_length

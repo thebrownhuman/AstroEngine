@@ -43,6 +43,34 @@ Several features **only** match under `prokerala_compatible`, because they are
 built on sunrise: the six time-derived upagrahas, and everything in
 `/v1/muhurta`.
 
+### The opposite direction: `strict_bphs`
+
+`strict_bphs` follows Brihat Parashara Hora Shastra (G. C. Sharma's
+two-volume edition) wherever the default follows Prokerala or a common
+convention. It is off by default, and setting it together with
+`prokerala_compatible` is a 422. It is accepted by every endpoint that takes
+a birth.
+
+| | default | `strict_bphs: true` | text |
+|---|---|---|---|
+| Dignity `state` | sign-level (whole exaltation sign) | `bphs_state`: by degree, with Moolatrikona | V1 Ch.3 v49-54 |
+| Dasha balance | fraction of the nakshatra's arc | Bhayata/Bhabhoga, fraction of its time | V2 Ch.48 v16 |
+| Gulika, Mandi | Lagna at the start of Saturn's portion | at its end (Dhruvanka method) | V1 Ch.3 v66-70 |
+| Ashtakavarga tables | the common tables | the Sanskrit's: four cells in the Moon's and Venus's tables move | V2 Ch.68 v49-51, v59-60 |
+| Trikona shodhana | a zero in a trine zeroes it | a trine holding a zero is left alone | V2 Ch.69 v4 |
+| Ekadhipatya tie | planetless sign kept | planetless sign cleared | V2 Ch.70 v5 |
+| Reduced sarvashtakavarga | Prokerala's recovered method | sum of each graha's strict reductions | V2 Ch.69-70 |
+| Gajakesari | Jupiter in a kendra from the Moon | kendra from Lagna or Moon, a benefic joining or aspecting, not debilitated, combust or in an enemy sign | V1 Ch.38 v3-4 |
+
+Every block the flag changes carries `source: "bphs"` and the citation, and
+`engine.strict_bphs` is `true`. Mahapurusha yogas count Moolatrikona as own
+sign, so they do not drop out when the dignity state refines.
+
+Unchanged in both modes, because the text is ambiguous rather than settled:
+the Kemadruma kendra clause (V1 Ch.39 v11), Rahu and Ketu as Sunapha/Vesi
+companions (V1 Ch.39 v7, Ch.40 v1), and Ashlesha's deity name.
+`validation/against_bphs.py` checks 80-89 hold the strict mode to the text.
+
 ---
 
 ## What it computes

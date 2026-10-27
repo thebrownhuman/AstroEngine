@@ -118,6 +118,23 @@ for _subject, _rows in BENEFIC.items():
         f"{_subject}: row total"
 assert sum(EXPECTED_TOTALS.values()) == SARVA_TOTAL
 
+# The same tables as the Sanskrit of Sharma's BPHS (V2 Ch.68 v46-63) reads
+# them, used under strict_bphs. Four cells move; every row total stays.
+BENEFIC_STRICT: dict[str, dict[str, tuple[int, ...]]] = {
+    subject: dict(rows) for subject, rows in BENEFIC.items()
+}
+BENEFIC_STRICT["Moon"]["Moon"] = (1, 3, 6, 7, 9, 10, 11)          # v49-51
+BENEFIC_STRICT["Moon"]["Mars"] = (2, 3, 5, 6, 10, 11)             # v49-51
+BENEFIC_STRICT["Moon"]["Jupiter"] = (1, 2, 4, 7, 8, 10, 11)       # v49-51
+BENEFIC_STRICT["Venus"]["Mars"] = (3, 4, 6, 9, 11, 12)            # v59-60
+for _subject, _rows in BENEFIC_STRICT.items():
+    assert sum(len(h) for h in _rows.values()) == EXPECTED_TOTALS[_subject],         f"{_subject}: strict row total"
+
+
+def table(strict_bphs: bool = False) -> dict[str, dict[str, tuple[int, ...]]]:
+    return BENEFIC_STRICT if strict_bphs else BENEFIC
+
+
 # Trines of signs, used by trikona shodhana.
 TRINES = [(0, 4, 8), (1, 5, 9), (2, 6, 10), (3, 7, 11)]
 
@@ -143,24 +160,26 @@ PLANET_IDS = {
 RESPONSE_ORDER = ("Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Lagna")
 
 
-def bhinna(subject: str, reference_signs: dict[str, int]) -> list[int]:
+def bhinna(subject: str, reference_signs: dict[str, int],
+           strict_bphs: bool = False) -> list[int]:
     """Bindus for one graha, indexed by sign 0-11.
 
     `reference_signs` gives the sign index of each contributor, including
     "Lagna".
     """
     scores = [0] * 12
-    for contributor, houses in BENEFIC[subject].items():
+    for contributor, houses in table(strict_bphs)[subject].items():
         base = reference_signs[contributor]
         for house in houses:
             scores[(base + house - 1) % 12] += 1
     return scores
 
 
-def contributions(subject: str, reference_signs: dict[str, int]) -> dict[str, list[int]]:
+def contributions(subject: str, reference_signs: dict[str, int],
+                  strict_bphs: bool = False) -> dict[str, list[int]]:
     """Same as `bhinna`, but kept split by contributor (the prastara grid)."""
     grid = {}
-    for contributor, houses in BENEFIC[subject].items():
+    for contributor, houses in table(strict_bphs)[subject].items():
         row = [0] * 12
         base = reference_signs[contributor]
         for house in houses:
@@ -169,22 +188,26 @@ def contributions(subject: str, reference_signs: dict[str, int]) -> dict[str, li
     return grid
 
 
-def trikona_shodhana(scores: list[int]) -> list[int]:
+def trikona_shodhana(scores: list[int], strict_bphs: bool = False) -> list[int]:
     """Trinal reduction.
 
     Within each trine, a zero anywhere zeroes all three; otherwise the smallest
-    value is subtracted from all three.
+    value is subtracted from all three. Under strict_bphs a trine holding a
+    zero is left as it is (Sharma V2 Ch.69 v4).
     """
     out = list(scores)
     for trine in TRINES:
         values = [scores[s] for s in trine]
         least = min(values)
+        if least == 0 and strict_bphs:
+            continue
         for sign in trine:
             out[sign] = 0 if least == 0 else scores[sign] - least
     return out
 
 
-def ekadhipatya_shodhana(scores: list[int], occupied: set[int]) -> list[int]:
+def ekadhipatya_shodhana(scores: list[int], occupied: set[int],
+                         strict_bphs: bool = False) -> list[int]:
     """Same-lord reduction, applied to the trikona-reduced table.
 
     For the five grahas that own two signs:
@@ -200,7 +223,8 @@ def ekadhipatya_shodhana(scores: list[int], occupied: set[int]) -> list[int]:
     That last clause is the one the texts state loosely, and getting it wrong
     is visible: leaving a smaller empty sign alone shows up as "Mars
     ekaadhipatya in Kanya: 1 vs 0", and zeroing it on a tie as "Saturn
-    ekaadhipatya in Mesha: 0 vs 4".
+    ekaadhipatya in Mesha: 0 vs 4". strict_bphs zeroes it on a tie, as
+    Sharma V2 Ch.70 v5 says.
     """
     out = list(scores)
     for a, b in SAME_LORD_PAIRS:
@@ -213,9 +237,9 @@ def ekadhipatya_shodhana(scores: list[int], occupied: set[int]) -> list[int]:
         if not a_full and not b_full:
             out[a] = out[b] = 0 if first == second else min(first, second)
         elif a_full:
-            out[b] = first if second >= first else 0
+            out[b] = 0 if second < first or (strict_bphs and second == first) else first
         else:
-            out[a] = second if first >= second else 0
+            out[a] = 0 if first < second or (strict_bphs and first == second) else second
     return out
 
 
@@ -282,17 +306,23 @@ def reference_signs(chart: dict) -> dict[str, int]:
 
 
 def compute(chart: dict) -> dict:
-    """Every ashtakavarga view for one chart, keyed by graha."""
+    """Every ashtakavarga view for one chart, keyed by graha.
+
+    Follows the chart's `engine.strict_bphs` stamp.
+    """
+    strict = bool(chart.get("engine", {}).get("strict_bphs"))
     signs = reference_signs(chart)
     lagna_sign = signs["Lagna"]
     occupied = {chart["grahas"][name]["sign_index"] for name in SUBJECTS}
 
     tables = {}
+    reduced = {}
     for subject in SUBJECTS:
-        grid = contributions(subject, signs)
+        grid = contributions(subject, signs, strict)
         scores = [sum(row[s] for row in grid.values()) for s in range(12)]
-        trikona = trikona_shodhana(scores)
-        ekadhipatya = ekadhipatya_shodhana(trikona, occupied)
+        trikona = trikona_shodhana(scores, strict)
+        ekadhipatya = ekadhipatya_shodhana(trikona, occupied, strict)
+        reduced[subject] = (trikona, ekadhipatya)
         tables[subject] = {
             "total": sum(scores),
             "by_sign": scores,
@@ -302,30 +332,38 @@ def compute(chart: dict) -> dict:
                         "score": sum(trikona)},
             "ekaadhipatya": {"houses": _as_houses(ekadhipatya, lagna_sign),
                              "score": sum(ekadhipatya),
-                             **provenance.EKADHIPATYA},
+                             **(provenance.EKADHIPATYA_STRICT if strict
+                                else provenance.EKADHIPATYA)},
         }
 
     sarva = [sum(tables[s]["by_sign"][i] for s in SUBJECTS) for i in range(12)]
     sarva_grid = {s: tables[s]["by_sign"] for s in SUBJECTS}
     sarva_occupied = {g["sign_index"] for g in chart["grahas"].values()} | {lagna_sign}
-    sarva_trikona, sarva_ekadhipatya = sarva_reductions(sarva_grid, sarva_occupied)
+    if strict:
+        # The textbook order: each graha reduced on its own, then summed.
+        sarva_trikona = [sum(reduced[s][0][i] for s in SUBJECTS) for i in range(12)]
+        sarva_ekadhipatya = [sum(reduced[s][1][i] for s in SUBJECTS) for i in range(12)]
+        tables_source, sarva_source = provenance.ASHTAKAVARGA_STRICT, provenance.SARVA_STRICT
+    else:
+        sarva_trikona, sarva_ekadhipatya = sarva_reductions(sarva_grid, sarva_occupied)
+        tables_source, sarva_source = provenance.ASHTAKAVARGA, provenance.SARVA_REDUCTIONS
     return {
         "ashtakavarga": tables,
         # Sibling, not merged: `ashtakavarga` is keyed by graha name and a
         # consumer iterating it must not find "source" among the grahas.
-        "ashtakavarga_source": provenance.ASHTAKAVARGA,
+        "ashtakavarga_source": tables_source,
         "sarvashtakavarga": {
             "by_sign": sarva,
             "total": sum(sarva),
             # The column sum of the seven prastara rows, so it inherits the
             # bindu tables' authority and none of the reduction's.
-            **provenance.ASHTAKAVARGA,
+            **tables_source,
             "prastara": {"houses": _as_houses(sarva, lagna_sign, sarva_grid),
                          "score": sum(sarva)},
             "trikona": {"houses": _as_houses(sarva_trikona, lagna_sign),
-                        "score": sum(sarva_trikona), **provenance.SARVA_REDUCTIONS},
+                        "score": sum(sarva_trikona), **sarva_source},
             "ekaadhipatya": {"houses": _as_houses(sarva_ekadhipatya, lagna_sign),
                              "score": sum(sarva_ekadhipatya),
-                             **provenance.SARVA_REDUCTIONS},
+                             **sarva_source},
         },
     }

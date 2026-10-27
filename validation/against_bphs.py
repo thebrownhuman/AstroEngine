@@ -676,8 +676,8 @@ if deities[8] not in SHARMA_DEITY[8]:
 departure("Moolatrikona dignity",
           "V1 Ch.3 v51-54 splits Virgo for Mercury (0-15 exalted, 15-20 "
           "moolatrikona, 20-30 own) and Taurus for the Moon (0-3 exalted, rest "
-          "moolatrikona); the engine has no moolatrikona state and calls the whole "
-          "exaltation sign exalted [bphs gap]")
+          "moolatrikona); `bphs_state` follows that, `state` stays sign-level "
+          "for Prokerala unless strict_bphs is set [provider_compatible]")
 departure("Gajakesari conditions",
           "V1 Ch.38 v3-4 allows a kendra from the Lagna or the Moon and requires a "
           "benefic conjunction or aspect with Jupiter not debilitated, combust or "
@@ -691,6 +691,94 @@ departure("Gulika point",
           "V1 Ch.3 v70 takes the Lagna 'at the time of Gulika's portion'; the "
           "translator's Dhruvanka method (portion number x 1/8 span) lands on the "
           "end of Saturn's portion, the engine on its start [provider_compatible]")
+
+# --- strict_bphs ------------------------------------------------------------
+#
+# Checks 80-89: with strict_bphs set, every departure above that the book
+# settles must be gone, and the block must say so. Kemadruma and the nodes in
+# Sunapha/Vesi are readings, not rules, and stay as they are in both modes.
+# Built in-process: a deployment predating the flag would simply ignore it.
+
+import swisseph as _swe  # noqa: E402
+
+from astro_engine import yogas as yoga_mod  # noqa: E402
+from astro_engine.chart import BirthData, build  # noqa: E402
+from astro_engine.dasha import bhayata_fraction  # noqa: E402
+from astro_engine.ephemeris import SiderealScanner  # noqa: E402
+
+_strict_birth = BirthData(1990, 1, 15, 4, 30, 0, 28.6139, 77.209, "Asia/Kolkata",
+                          strict_bphs=True)
+strict = build(_strict_birth, vargas=["D1"], dasha_depth=1,
+               include_ashtakavarga=True, include_upagrahas=True)
+
+bad = []
+for subject, rows in SHARMA_REKHA.items():
+    for who, houses in zip(_C, rows):
+        if av_mod.table(True)[subject][who] != houses:
+            bad.append((subject, who))
+check("80 strict: every rekha cell is V2 Ch.68 v46-63, Moon and Venus included",
+      not bad, str(bad))
+check("81 strict: the ashtakavarga block says bphs",
+      strict["ashtakavarga_source"]["source"] == "bphs"
+      and strict["sarvashtakavarga"]["trikona"]["source"] == "bphs"
+      and all(t["ekaadhipatya"]["source"] == "bphs"
+              for t in strict["ashtakavarga"].values()), "")
+tri = av_mod.trikona_shodhana([0, 1, 1, 1, 3, 1, 1, 1, 6, 1, 1, 1], strict_bphs=True)
+check("82 strict: a trine holding a zero is left alone (V2 Ch.69 v4)",
+      tri[0::4] == [0, 3, 6], str(tri[0::4]))
+out = av_mod.ekadhipatya_shodhana([3] + [0] * 6 + [3] + [0] * 4, {0}, strict_bphs=True)
+check("83 strict: an ekadhipatya tie clears the planetless sign (V2 Ch.70 v5)",
+      (out[0], out[7]) == (3, 0), str((out[0], out[7])))
+
+_scan = SiderealScanner()
+_f = bhayata_fraction(lambda t: _scan.longitude(t, _swe.MOON),
+                      strict["input"]["julian_day_ut"])
+_lord = strict["dasha"]["birth_dasha_lord"]
+check("84 strict: the dasha balance is Bhayata/Bhabhoga (V2 Ch.48 v16)",
+      abs(strict["dasha"]["balance_at_birth_years"] - (1 - _f) * years[_lord]) < 1e-5,
+      f"{strict['dasha']['balance_at_birth_years']} vs {(1 - _f) * years[_lord]:.6f}")
+check("85 strict: the dasha block says bphs",
+      strict["sources"]["dasha"]["source"] == "bphs", "")
+
+bad = [n for n, g in strict["grahas"].items()
+       if g["dignity"]["state"] != g["dignity"]["bphs_state"]]
+check("86 strict: dignity state is the degree-level BPHS reading (V1 Ch.3 v49-54)",
+      not bad and strict["sources"]["dignity"]["source"] == "bphs", str(bad))
+
+from astro_engine.ephemeris import SiderealSky, sun_rise_set  # noqa: E402
+
+_ups = {u["name"]: u for u in strict["upagrahas"]}
+_jd = strict["input"]["julian_day_ut"]
+_solar = sun_rise_set(_jd, 28.6139, 77.209)
+_night = _jd >= _solar["sunset_jd"]
+_span = ((_solar["sunset_jd"], _solar["next_sunrise_jd"]) if _night
+         else (_solar["sunrise_jd"], _solar["sunset_jd"]))
+_vara = strict["panchanga"]["vara"]["index"]
+_, _end = upa.part_bounds(upa.part_index("Gulika", _vara, _night), *_span)
+_asc = SiderealSky(_end).angles(28.6139, 77.209, b"P")["ascendant"].longitude
+check("87 strict: Gulika is the Lagna at the end of Saturn's portion (Dhruvanka)",
+      abs(_ups["Gulika"]["longitude"] - round(_asc % 360, 9)) < 1e-6
+      and _ups["Gulika"]["source"] == "bphs" and _ups["Mandi"]["source"] == "bphs",
+      f"{_ups['Gulika']['longitude']} vs {_asc:.9f}")
+
+
+def _gk_view(jupiter_sign, moon_sign, mercury_sign, strict_mode):
+    signs = {"Sun": 6, "Moon": moon_sign, "Mars": 6, "Mercury": mercury_sign,
+             "Jupiter": jupiter_sign, "Venus": 6, "Saturn": 6, "Rahu": 2, "Ketu": 8}
+    grahas = {g: {"sign_index": s, "house": s + 1,
+                  "nature": "benefic" if g in ("Mercury", "Venus", "Moon") else "malefic",
+                  "dignity": {"state": "neutral", "combust": False}}
+              for g, s in signs.items()}
+    return yoga_mod.ChartView({"grahas": grahas, "lagna": {"sign_index": 0},
+                               "engine": {"strict_bphs": True} if strict_mode else {}})
+
+
+_gk = yoga_mod.gajakesari(_gk_view(3, 1, 3, True))
+check("88 strict: Gajakesari counts a kendra from the Lagna (V1 Ch.38 v3-4)",
+      _gk.present and _gk.as_dict()["source"] == "bphs", _gk.reason)
+_gk = yoga_mod.gajakesari(_gk_view(3, 0, 6, True))
+check("89 strict: Gajakesari needs a benefic joining or aspecting Jupiter",
+      not _gk.present, _gk.reason)
 
 print(f"\n{BASE}\n" + "-" * 78)
 failed = [(c, d) for c, ok, d in results if not ok]

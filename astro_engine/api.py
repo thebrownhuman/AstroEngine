@@ -104,6 +104,18 @@ class ChartRequest(BaseModel):
             "correct values."
         ),
     )
+    strict_bphs: bool = Field(
+        False,
+        description=(
+            "Follow Brihat Parashara Hora Shastra (G. C. Sharma's edition) where "
+            "the default follows Prokerala or common practice: dignity by "
+            "degree with Moolatrikona, Bhayata/Bhabhoga dasha balance, Gulika "
+            "and Mandi at the end of Saturn's portion, the Sanskrit "
+            "ashtakavarga tables and shodhana, and the full Gajakesari "
+            "conditions. Every block it changes is stamped source 'bphs'. "
+            "Cannot be combined with prokerala_compatible."
+        ),
+    )
     include_yogas: bool = Field(
         False,
         description=(
@@ -202,6 +214,15 @@ class ChartRequest(BaseModel):
             raise ValueError(f"duplicate vargas: {duplicated}")
         return value
 
+    @model_validator(mode="after")
+    def _one_convention(self):
+        if self.strict_bphs and self.prokerala_compatible:
+            raise ValueError(
+                "strict_bphs and prokerala_compatible ask for opposite conventions; "
+                "set at most one"
+            )
+        return self
+
     def to_birth_data(self) -> BirthData:
         try:
             moment = datetime.fromisoformat(f"{self.date}T{self.time}")
@@ -218,6 +239,7 @@ class ChartRequest(BaseModel):
             ),
             dasha_whole_seconds=self.prokerala_compatible,
             sunrise_convention="geometric" if self.prokerala_compatible else "apparent",
+            strict_bphs=self.strict_bphs,
         )
 
 

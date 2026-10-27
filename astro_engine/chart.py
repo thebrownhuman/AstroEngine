@@ -20,10 +20,10 @@ from .constants import (
     NATURAL_BENEFICS, NATURAL_MALEFICS, SIGNS, SIGNS_EN, SIGN_LORDS,
     nakshatra_attributes,
 )
-from .dasha import DAYS_PER_YEAR, active_chain, vimshottari
+from .dasha import DAYS_PER_YEAR, active_chain, bhayata_fraction, vimshottari
 from .ephemeris import (
     MAX_YEAR, MIN_YEAR, MOSHIER_NOTE, SUPPORTED_RANGE_MESSAGE, SiderealSky,
-    dignity, jd_to_datetime, julian_day, sun_rise_set,
+    SiderealScanner, dignity, jd_to_datetime, julian_day, sun_rise_set,
 )
 import swisseph as _swe
 from .geo import to_utc
@@ -97,6 +97,11 @@ class BirthData:
     dasha_traversed_precision: int | None = None
     dasha_whole_seconds: bool = False
     sunrise_convention: str = "apparent"
+    # Follow Sharma's BPHS where the default follows Prokerala or a common
+    # convention: dignity by degree, Bhayata/Bhabhoga dasha balance, Gulika at
+    # the end of Saturn's portion, the Sanskrit ashtakavarga cells and
+    # shodhana, and the full Gajakesari conditions.
+    strict_bphs: bool = False
 
     def local_datetime(self) -> datetime:
         return datetime(self.year, self.month, self.day, self.hour, self.minute, self.second)
@@ -322,6 +327,8 @@ def _build(
         entry = pos.as_dict()
         entry["house"] = _house_of(pos.sign_index, lagna_sign)
         entry["dignity"] = dignity(name, pos, sun_longitude)
+        if birth.strict_bphs:
+            entry["dignity"]["state"] = entry["dignity"]["bphs_state"]
         natural_nature = (
             "benefic" if name in NATURAL_BENEFICS
             else "malefic" if name in NATURAL_MALEFICS
@@ -345,11 +352,16 @@ def _build(
             "occupants": [n for n, g in grahas.items() if g["house"] == h],
         })
 
+    traversed = None
+    if birth.strict_bphs:
+        scanner = SiderealScanner(birth.ayanamsa, birth.equinox)
+        traversed = bhayata_fraction(lambda t: scanner.longitude(t, _swe.MOON), jd)
     dasha = vimshottari(
         positions["Moon"].longitude, local, depth=dasha_depth,
         year_length=birth.dasha_year_length,
         traversed_precision=birth.dasha_traversed_precision,
         whole_seconds=birth.dasha_whole_seconds,
+        traversed=traversed,
     )
     now = _local_reference_time(reference_time, tz_info["timezone"])
 
@@ -365,6 +377,8 @@ def _build(
             "house_convention": "whole_sign",
             "node_type": birth.node_type,
             "equinox": f"{birth.equinox}_of_date",
+            # Only when set, so default output is byte-for-byte what it was.
+            **({"strict_bphs": True} if birth.strict_bphs else {}),
         },
         "input": {
             "latitude": birth.latitude,
@@ -393,9 +407,9 @@ def _build(
             "graha_drishti": provenance.GRAHA_DRISHTI,
             "rashi_drishti": provenance.RASHI_DRISHTI,
             "vargas": provenance.VARGA,
-            "dasha": provenance.DASHA,
+            "dasha": provenance.DASHA_STRICT if birth.strict_bphs else provenance.DASHA,
             "panchanga": provenance.PANCHANGA,
-            "dignity": provenance.DIGNITY,
+            "dignity": provenance.DIGNITY_STRICT if birth.strict_bphs else provenance.DIGNITY,
             "house_significations": provenance.HOUSE_SIGNIFICATIONS,
         },
         "panchanga": panchanga.compute(
@@ -425,6 +439,7 @@ def _build(
             jd, birth.latitude, birth.longitude, sun_longitude, lagna_sign,
             solar, vara_index, ayanamsa=birth.ayanamsa, equinox=birth.equinox,
             house_system=birth.house_system.encode(),
+            strict_bphs=birth.strict_bphs,
         )
     if include_ashtakavarga:
         chart.update(av.compute(chart))

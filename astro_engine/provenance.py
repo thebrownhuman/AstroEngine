@@ -105,6 +105,15 @@ UPAGRAHA_TIME = block(
     "and these are only correct under prokerala_compatible.",
 )
 
+GULIKA_STRICT = block(
+    BPHS,
+    "strict_bphs: Gulika and Mandi are the Lagna at the end of Saturn's "
+    "portion. The portion is BPHS Chapter 3, verses 66-69, whose day and "
+    "night tables (Sharma V1) the part index reproduces for all seven varas; "
+    "the end is the translator's Dhruvanka method (portion number times one "
+    "eighth of the span).",
+)
+
 DASHA = block(
     BPHS,
     "Vimshottari itself is BPHS Chapter 46, which names it the dasha \"most "
@@ -311,6 +320,56 @@ YOGA = block(
     "stated the same way across the sources, which is why this is classical "
     "rather than bphs as a whole. `parity` says separately whether each "
     "detector reproduces Prokerala's verdict.",
+)
+
+# --- strict_bphs ------------------------------------------------------------
+#
+# Stamped in place of the blocks above when a request sets strict_bphs, on
+# exactly the outputs that mode changes. Citations are Sharma's edition.
+
+DASHA_STRICT = block(
+    BPHS,
+    "strict_bphs: Vimshottari per BPHS (Sharma V2 Ch.48 v12-15), with the "
+    "balance at birth taken as Bhayata over Bhabhoga - the time the Moon has "
+    "spent in the birth nakshatra over the time it spends in all of it - as "
+    "V2 Ch.48 v16 prescribes, instead of the fraction of arc. Antardashas are "
+    "proportional per V2 Ch.53 v1. The year length is still a setting.",
+)
+DIGNITY_STRICT = block(
+    BPHS,
+    "strict_bphs: `state` is the degree-level reading of BPHS Chapter 3, "
+    "verses 49-54 (Sharma V1): exaltation and debilitation signs with their "
+    "deepest degrees, and the Moolatrikona spans, so Mercury past 20 Virgo is "
+    "own_sign and the Moon past 3 Taurus is moolatrikona. The combustion orbs "
+    "are still conventional.",
+)
+ASHTAKAVARGA_STRICT = block(
+    BPHS,
+    "strict_bphs: the rekha tables as the Sanskrit of Sharma V2 Ch.68 v46-63 "
+    "gives them, which differs from the common tables in four cells: in the "
+    "Moon's, the Moon gives the 9th and Mars does not, and Jupiter gives the "
+    "2nd rather than the 12th (v49-51); in Venus's, Mars gives the 4th rather "
+    "than the 5th (v59-60). Row totals are unchanged. Trikona shodhana is V2 "
+    "Ch.69 v3-5, leaving a trine that holds a zero untouched (v4).",
+)
+EKADHIPATYA_STRICT = block(
+    BPHS,
+    "strict_bphs: ekadhipatya shodhana per Sharma V2 Ch.70 v1-5, applied to "
+    "the trikona-reduced table, including the tie: when one sign is occupied "
+    "and the other is not and both hold the same number, the planetless sign "
+    "is cleared (v5, \"sagrahagrahayos tulye sarvam samshodhyam agrahe\").",
+)
+SARVA_STRICT = block(
+    BPHS,
+    "strict_bphs: the reduced sarvashtakavarga is the column sum of the seven "
+    "grahas' own strict reductions (Sharma V2 Ch.69-70), in the textbook order, "
+    "rather than Prokerala's recovered sarva method.",
+)
+GAJAKESARI_STRICT = block(
+    BPHS,
+    "strict_bphs: Sharma V1 Ch.38 v3-4. Jupiter in a kendra from the Lagna or "
+    "from the Moon, joined with or aspected by a benefic, and not debilitated, "
+    "combust or in an enemy's sign.",
 )
 
 DARIDRA = block(

@@ -19,8 +19,12 @@ from dataclasses import dataclass, field
 
 from . import provenance
 from .constants import SIGNS_EN, SIGN_LORDS
+from .relationships import NATURAL_ENEMIES
 
 KENDRAS = (1, 4, 7, 10)
+# Moolatrikona only appears under strict_bphs, where it splits a graha's own
+# sign; it is still the graha's own sign for the yogas.
+DIGNIFIED_STATES = ("own_sign", "exalted", "moolatrikona")
 TRIKONAS = (1, 5, 9)
 DUSTHANAS = (6, 8, 12)
 FIXED_SIGNS = (1, 4, 7, 10)  # Taurus, Leo, Scorpio, Aquarius
@@ -49,6 +53,9 @@ class Yoga:
     present: bool
     reason: str
     evidence: dict = field(default_factory=dict)
+    # Replaces the group's provenance stamp, for a detector whose rule changes
+    # under strict_bphs.
+    source: dict | None = None
 
     def as_dict(self) -> dict:
         return {
@@ -63,7 +70,8 @@ class Yoga:
                 else "unverified"
             ),
             "evidence": self.evidence,
-            **(provenance.DARIDRA if self.name in UNVERIFIED
+            **(self.source if self.source is not None
+               else provenance.DARIDRA if self.name in UNVERIFIED
                else provenance.YOGA),
         }
 
@@ -75,6 +83,7 @@ class ChartView:
         self.chart = chart
         self.grahas = chart["grahas"]
         self.lagna_sign = chart["lagna"]["sign_index"]
+        self.strict_bphs = bool(chart.get("engine", {}).get("strict_bphs"))
 
     def house(self, graha: str) -> int:
         return self.grahas[graha]["house"]
@@ -104,13 +113,15 @@ class ChartView:
         return target_house in {(origin - 1 + (c - 1)) % 12 + 1 for c in counts}
 
     def dignified(self, graha: str) -> bool:
-        return self.grahas[graha]["dignity"]["state"] in ("own_sign", "exalted")
+        return self.grahas[graha]["dignity"]["state"] in DIGNIFIED_STATES
 
 
 # --- major yogas -------------------------------------------------------------
 
 def gajakesari(view: ChartView) -> Yoga:
     """Jupiter in a kendra from the Moon."""
+    if view.strict_bphs:
+        return _gajakesari_strict(view)
     position = view.house_from("Jupiter", "Moon")
     present = position in KENDRAS
     return Yoga(
@@ -118,6 +129,40 @@ def gajakesari(view: ChartView) -> Yoga:
         f"Jupiter is in the {position} from the Moon"
         + ("" if present else f"; a kendra {KENDRAS} is required"),
         {"jupiter_house_from_moon": position},
+    )
+
+
+def _gajakesari_strict(view: ChartView) -> Yoga:
+    """Sharma V1 Ch.38 v3-4: Jupiter in a kendra from the Lagna or the Moon,
+    joined with or aspected by a benefic, and not debilitated, combust or in
+    an enemy's sign. Benefics are the chart's own BPHS natures."""
+    from_lagna = view.house("Jupiter")
+    from_moon = view.house_from("Jupiter", "Moon")
+    in_kendra = from_lagna in KENDRAS or from_moon in KENDRAS
+    benefics = [g for g in SEVEN_GRAHAS
+                if g != "Jupiter" and view.grahas[g]["nature"] == "benefic"
+                and (view.in_same_sign(g, "Jupiter")
+                     or view.aspects(g, view.house("Jupiter")))]
+    jupiter = view.grahas["Jupiter"]["dignity"]
+    debilitated = jupiter["state"] == "debilitated"
+    combust = jupiter["combust"]
+    enemy_sign = SIGN_LORDS[view.sign("Jupiter")] in NATURAL_ENEMIES["Jupiter"]
+    present = in_kendra and bool(benefics) and not (debilitated or combust or enemy_sign)
+    failures = [text for flag, text in (
+        (not in_kendra, "not in a kendra from the Lagna or the Moon"),
+        (not benefics, "no benefic joins or aspects Jupiter"),
+        (debilitated, "Jupiter is debilitated"),
+        (combust, "Jupiter is combust"),
+        (enemy_sign, "Jupiter is in an enemy's sign"),
+    ) if flag]
+    return Yoga(
+        "Gajakesari Yoga", "Major Yogas", present,
+        "every BPHS condition holds" if present else "; ".join(failures),
+        {"jupiter_house_from_lagna": from_lagna,
+         "jupiter_house_from_moon": from_moon,
+         "benefic_links": benefics, "debilitated": debilitated,
+         "combust": combust, "enemy_sign": enemy_sign},
+        source=provenance.GAJAKESARI_STRICT,
     )
 
 
@@ -129,7 +174,7 @@ def mahapurusha(view: ChartView, graha: str) -> Yoga:
     """
     state = view.grahas[graha]["dignity"]["state"]
     house = view.house(graha)
-    dignified = state in ("own_sign", "exalted")
+    dignified = state in DIGNIFIED_STATES
     present = dignified and house in KENDRAS
     if not dignified:
         reason = f"{graha} is {state}, not in its own sign or exaltation"
