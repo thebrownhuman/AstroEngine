@@ -8,3 +8,4 @@ validation/.cache/
 data/*.txt
 data/places.sqlite
 docs/bphs/
+docs/books/
