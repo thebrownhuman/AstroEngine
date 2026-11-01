@@ -30,7 +30,7 @@ import swisseph as _swe
 from .geo import to_utc
 from .vargas import VARGAS
 
-ENGINE_VERSION = "1.3.3"
+ENGINE_VERSION = "1.4.0"
 
 # Classical graha drishti from BPHS Chapter 26, expressed as house counts from
 # the occupied house. BPHS gives special aspects only to Mars, Jupiter and
@@ -395,6 +395,7 @@ def _build(
         whole_seconds=birth.dasha_whole_seconds,
         traversed=traversed,
     )
+    dasha.update(provenance.dasha_stamps(dasha["traversed_precision"], birth.strict_bphs))
     now = _local_reference_time(reference_time, tz_info["timezone"])
 
     chart = {

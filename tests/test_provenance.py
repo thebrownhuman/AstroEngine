@@ -191,7 +191,7 @@ NO_RULE = {
     "solar_day": "sunrise and sunset times; the convention is named in the block",
     "sources": "the stamps themselves",
     "vargas": "stamped in `sources`; the map is keyed D1/D9/...",
-    "dasha": "stamped in `sources`; the map is keyed by lord",
+    "dasha": "stamped inline (`source`, `balance_at_birth_source`) and in `sources`",
     "current_dasha": "a view onto `dasha`, which is stamped in `sources`",
     "panchanga": "stamped in `sources`",
     "ashtakavarga": "stamped by the `ashtakavarga_source` sibling",
@@ -318,3 +318,14 @@ def test_house_significations_do_not_overclaim_bphs():
     assert "father" not in houses[10]
     # BPHS puts debts in the 10th; here they sit in the 6th.
     assert "debt" in houses[6]
+
+
+def test_dasha_balance_is_labelled_by_convention():
+    plain = client.post("/v1/chart", json={**BIRTH, "prokerala_compatible": False}).json()["dasha"]
+    assert plain["traversed_precision"] is None
+    assert plain["source"] == provenance.BPHS
+    assert plain["balance_at_birth_source"]["source"] == provenance.BPHS
+    compat = client.post("/v1/chart", json=BIRTH).json()["dasha"]
+    assert compat["traversed_precision"] == 3
+    assert compat["source"] == provenance.BPHS
+    assert compat["balance_at_birth_source"]["source"] == provenance.PROVIDER

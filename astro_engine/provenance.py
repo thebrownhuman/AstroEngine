@@ -128,6 +128,39 @@ DASHA = block(
     "decimals, which costs up to ~1.5 days on a 20-year mahadasha.",
 )
 
+
+
+def dasha_stamps(traversed_precision: int | None, strict_bphs: bool) -> dict:
+    """Inline stamps for the `dasha` subtree; values are not touched.
+
+    The periods themselves are BPHS Vimshottari. The balance at birth is BPHS
+    unless the traversal fraction was rounded (`traversed_precision` set, which
+    only `prokerala_compatible` does), in which case it is Prokerala's number.
+    """
+    if traversed_precision is not None:
+        balance = block(
+            PROVIDER,
+            f"The nakshatra traversal fraction was rounded to {traversed_precision} "
+            "decimals to reproduce Prokerala (prokerala_compatible). The rounding "
+            "is not in BPHS and shifts every boundary by up to ~1.5 days.",
+        )
+    elif strict_bphs:
+        balance = block(BPHS, "Bhayata over Bhabhoga, BPHS (Sharma) V2 Ch.48 v16.")
+    else:
+        balance = block(
+            BPHS,
+            "Unrounded fraction of the nakshatra arc still to run, times the "
+            "lord's years (BPHS Chapter 46). `traversed_precision` is null: no "
+            "rounding was applied.",
+        )
+    return {
+        "source": BPHS,
+        "authority": "Vimshottari periods and order: BPHS Chapter 46. See "
+                     "`sources.dasha` for the conventions that move boundaries.",
+        "balance_at_birth_source": balance,
+    }
+
+
 PANCHANGA = block(
     CLASSICAL,
     "The five limbs are standard panchang, not a BPHS construct. Tithi, yoga "
