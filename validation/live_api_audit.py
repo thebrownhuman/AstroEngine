@@ -53,6 +53,8 @@ def call(method: str, path: str, payload=None, query=None):
         url += "?" + urllib.parse.urlencode(query)
     body = None
     headers = {"Accept": "application/json"}
+    if os.environ.get("ASTRO_API_KEY"):
+        headers["X-API-Key"] = os.environ["ASTRO_API_KEY"]
     if payload is not None:
         body = json.dumps(payload).encode()
         headers["Content-Type"] = "application/json"

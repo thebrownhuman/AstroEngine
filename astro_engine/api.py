@@ -3,7 +3,7 @@
 Stateless. The same input yields the same JSON, with one exception: when
 `reference_time` is omitted the current instant is used, so the current dasha
 and the transits move with it. Designed to sit behind a Cloudflare Tunnel and be
-called as a tool by an LLM.
+called as a tool by an LLM. Access control for public exposure lives in guard.py.
 """
 
 from __future__ import annotations
@@ -25,6 +25,7 @@ from . import kp as krishnamurti
 from . import matching as milan
 from . import muhurta as day_periods
 from . import numerology as num
+from . import guard
 from . import provenance
 from . import porutham as tamil_match
 from . import yogas as yg
@@ -43,6 +44,16 @@ app = FastAPI(
         "Returns raw chart data for an LLM to interpret."
     ),
 )
+
+
+app.add_middleware(guard.Guard)
+guard.configure()
+
+
+def create_app() -> FastAPI:
+    """Re-read the auth, rate-limit and CORS environment; return the app."""
+    guard.configure()
+    return app
 
 
 def _build_http_error(exc: Exception) -> HTTPException:

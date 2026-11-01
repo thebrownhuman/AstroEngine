@@ -7,6 +7,12 @@ services:
       - "8000:8000"
     volumes:
       - ./ephe:/app/ephe
+    # Access control, read from .env next to this file. All empty = open, as on
+    # Tailscale. Set ASTRO_API_KEYS before exposing it (docs/PUBLIC-API.md).
+    environment:
+      - ASTRO_API_KEYS=${ASTRO_API_KEYS:-}
+      - ASTRO_RATE_LIMIT=${ASTRO_RATE_LIMIT:-}
+      - ASTRO_CORS_ORIGINS=${ASTRO_CORS_ORIGINS:-}
 
   # Pulls :latest every 5 minutes and recreates astro-engine when it changes.
   # Scoped by name to astro-engine only, so it leaves other stacks on the host

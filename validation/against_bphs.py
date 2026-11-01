@@ -20,13 +20,16 @@ sys.path.insert(0, ".")
 # verify_everything.py alongside the offline suites and needs no server. Set
 # ASTRO_ENGINE_URL to point it at a deployment instead.
 _URL = os.environ.get("ASTRO_ENGINE_URL")
+_HEADERS = {"Content-Type": "application/json"}
+if os.environ.get("ASTRO_API_KEY"):
+    _HEADERS["X-API-Key"] = os.environ["ASTRO_API_KEY"]
 
 if _URL:
     BASE = _URL.rstrip("/")
 
     def post(path, body):
         r = urllib.request.Request(BASE + path, data=json.dumps(body).encode(),
-                                   headers={"Content-Type": "application/json"})
+                                   headers=_HEADERS)
         return json.load(urllib.request.urlopen(r, timeout=60))
 else:
     from fastapi.testclient import TestClient
