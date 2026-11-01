@@ -123,6 +123,7 @@ def test_health_and_openapi():
         "/v1/ashtakavarga", "/v1/upagrahas", "/v1/doshas", "/v1/nakshatra",
         "/v1/sudarshana", "/v1/relationships", "/v1/kp", "/v1/matching",
         "/v1/porutham", "/v1/muhurta", "/v1/bala", "/v1/chandrashtama", "/v1/numerology",
+        "/v1/ask", "/v1/rules", "/v1/shadbala",
         "/v1/places", "/v1/timezone", "/v1/tool-definition", "/v1/tool-definitions",
         "/health",
     }
