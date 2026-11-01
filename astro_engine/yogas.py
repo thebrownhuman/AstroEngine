@@ -1,11 +1,11 @@
 """Yoga detection.
 
 The 21 yogas Prokerala's /astrology/yoga endpoint returns, using their exact
-names and group order, plus three extras of our own.
+names and group order, plus two extras of our own.
 
 Note their published OpenAPI example is out of date: it shows 24 yogas with
 different spellings ("Kedar", "Sunafa", "Veshi"). The live API returns 21, spelt
-"Kedara", "Sunapha", "Vesi", and omits Chandal, Kuja and Kemdrum entirely. The
+"Kedara", "Sunapha", "Vesi", and omits Chandal and Kuja entirely. The
 live names are authoritative here.
 
 Each detector returns the evidence behind its verdict, so a wrong answer can be
@@ -488,11 +488,6 @@ def kuja(view: ChartView) -> Yoga:
                 {"mars_house": house, "dosha_houses": list(houses)})
 
 
-def kemdrum(view: ChartView) -> Yoga:
-    """Their list carries Kemadruma twice under two spellings."""
-    return kemadruma(view, name="Kemdrum Yoga", group="Inauspicious Yogas")
-
-
 # --- assembly ----------------------------------------------------------------
 
 GROUP_ORDER = ("Major Yogas", "Chandra Yogas", "Soorya Yogas", "Inauspicious Yogas")
@@ -516,11 +511,11 @@ WEAKLY_VERIFIED = frozenset({"Kahala Yoga", "Kamal Yoga"})
 UNVERIFIED = frozenset({"Daridra Yoga"})
 
 # Ours, not part of Prokerala's set. Kuja Yoga is the familiar Mangal dosha.
-EXTRA = frozenset({"Chandal Yoga", "Kuja Yoga", "Kemdrum Yoga"})
+EXTRA = frozenset({"Chandal Yoga", "Kuja Yoga"})
 
 
 def detect(chart: dict) -> list[Yoga]:
-    """All 24, in Prokerala's order."""
+    """All 23, in Prokerala's order."""
     view = ChartView(chart)
     return [
         gajakesari(view), kedara(view), kahala(view), kamala(view), musala(view),
@@ -531,7 +526,7 @@ def detect(chart: dict) -> list[Yoga]:
         sunapha(view), anapha(view), duradhara(view), kemadruma(view),
         vesi(view), vasi(view), ubhayachari(view),
         daridra(view), grahan(view), shakat(view), chandal(view),
-        kuja(view), kemdrum(view),
+        kuja(view),
     ]
 
 

@@ -1,4 +1,4 @@
-"""Pick a small set of birth charts that exercises all 24 yogas.
+"""Pick a small set of birth charts that exercises all 23 yogas.
 
 Verification costs 200 credits per chart, so random charts are wasteful: rare
 yogas like the Panchamahapurusha set would never fire. Instead we scan many

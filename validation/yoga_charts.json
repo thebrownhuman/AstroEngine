@@ -31,8 +31,7 @@
         "Grahan Yoga": false,
         "Shakat Yoga": false,
         "Chandal Yoga": false,
-        "Kuja Yoga": true,
-        "Kemdrum Yoga": true
+        "Kuja Yoga": true
       }
     },
     {
@@ -66,8 +65,7 @@
         "Grahan Yoga": false,
         "Shakat Yoga": false,
         "Chandal Yoga": false,
-        "Kuja Yoga": true,
-        "Kemdrum Yoga": true
+        "Kuja Yoga": true
       }
     },
     {
@@ -101,8 +99,7 @@
         "Grahan Yoga": false,
         "Shakat Yoga": false,
         "Chandal Yoga": false,
-        "Kuja Yoga": true,
-        "Kemdrum Yoga": true
+        "Kuja Yoga": true
       }
     },
     {
@@ -136,8 +133,7 @@
         "Grahan Yoga": true,
         "Shakat Yoga": true,
         "Chandal Yoga": false,
-        "Kuja Yoga": false,
-        "Kemdrum Yoga": false
+        "Kuja Yoga": false
       }
     },
     {
@@ -171,8 +167,7 @@
         "Grahan Yoga": true,
         "Shakat Yoga": true,
         "Chandal Yoga": true,
-        "Kuja Yoga": false,
-        "Kemdrum Yoga": false
+        "Kuja Yoga": false
       }
     },
     {
@@ -206,8 +201,7 @@
         "Grahan Yoga": true,
         "Shakat Yoga": true,
         "Chandal Yoga": true,
-        "Kuja Yoga": false,
-        "Kemdrum Yoga": false
+        "Kuja Yoga": false
       }
     },
     {
@@ -241,8 +235,7 @@
         "Grahan Yoga": true,
         "Shakat Yoga": false,
         "Chandal Yoga": true,
-        "Kuja Yoga": false,
-        "Kemdrum Yoga": false
+        "Kuja Yoga": false
       }
     },
     {
@@ -276,8 +269,7 @@
         "Grahan Yoga": false,
         "Shakat Yoga": false,
         "Chandal Yoga": false,
-        "Kuja Yoga": true,
-        "Kemdrum Yoga": false
+        "Kuja Yoga": true
       }
     },
     {
@@ -311,8 +303,7 @@
         "Grahan Yoga": false,
         "Shakat Yoga": false,
         "Chandal Yoga": false,
-        "Kuja Yoga": true,
-        "Kemdrum Yoga": false
+        "Kuja Yoga": true
       }
     },
     {
@@ -346,8 +337,7 @@
         "Grahan Yoga": true,
         "Shakat Yoga": false,
         "Chandal Yoga": false,
-        "Kuja Yoga": true,
-        "Kemdrum Yoga": false
+        "Kuja Yoga": true
       }
     },
     {
@@ -381,8 +371,7 @@
         "Grahan Yoga": true,
         "Shakat Yoga": false,
         "Chandal Yoga": false,
-        "Kuja Yoga": true,
-        "Kemdrum Yoga": false
+        "Kuja Yoga": true
       }
     },
     {
@@ -416,8 +405,7 @@
         "Grahan Yoga": true,
         "Shakat Yoga": false,
         "Chandal Yoga": false,
-        "Kuja Yoga": true,
-        "Kemdrum Yoga": false
+        "Kuja Yoga": true
       }
     },
     {
@@ -451,8 +439,7 @@
         "Grahan Yoga": false,
         "Shakat Yoga": false,
         "Chandal Yoga": false,
-        "Kuja Yoga": true,
-        "Kemdrum Yoga": false
+        "Kuja Yoga": true
       }
     },
     {
@@ -486,8 +473,7 @@
         "Grahan Yoga": false,
         "Shakat Yoga": false,
         "Chandal Yoga": false,
-        "Kuja Yoga": false,
-        "Kemdrum Yoga": false
+        "Kuja Yoga": false
       }
     },
     {
@@ -521,8 +507,7 @@
         "Grahan Yoga": false,
         "Shakat Yoga": false,
         "Chandal Yoga": false,
-        "Kuja Yoga": false,
-        "Kemdrum Yoga": false
+        "Kuja Yoga": false
       }
     }
   ],
@@ -564,7 +549,6 @@
     "Veshi Yoga|False": 5,
     "Gajakesari Yoga|True": 7,
     "Daridra Yoga|False": 7,
-    "Kemdrum Yoga|True": 3,
     "Vaasi Yoga|False": 4,
     "Kahal Yoga|True": 3,
     "Raja Yoga|True": 11,
@@ -578,7 +562,6 @@
     "Kemadruma Yoga|True": 3,
     "Bhadra Yoga|True": 3,
     "Gajakesari Yoga|False": 8,
-    "Kemdrum Yoga|False": 12,
     "Raja Yoga|False": 4
   },
   "cost_credits": 3000

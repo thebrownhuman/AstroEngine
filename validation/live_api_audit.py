@@ -238,12 +238,9 @@ def test_deep_blocks(chart):
 
     yoga_groups = chart.get("yogas", {}).get("yoga_details", [])
     yoga_rows = [item for group in yoga_groups for item in group.get("yoga_list", [])]
-    check("24 yoga definitions", len(yoga_rows) == 24, repr(yoga_rows))
-    check("yoga names unique", len({item.get("name") for item in yoga_rows}) == 24, repr(yoga_rows))
+    check("23 yoga definitions", len(yoga_rows) == 23, repr(yoga_rows))
+    check("yoga names unique", len({item.get("name") for item in yoga_rows}) == 23, repr(yoga_rows))
     check("yoga present count", chart.get("yogas", {}).get("total_present") == sum(bool(item.get("has_yoga")) for item in yoga_rows), repr(chart.get("yogas")))
-    kem = {item.get("name"): item for item in yoga_rows if item.get("name") in {"Kemadruma Yoga", "Kemdrum Yoga"}}
-    if len(kem) == 2:
-        check("duplicate Kemadruma spellings agree", kem["Kemadruma Yoga"].get("has_yoga") == kem["Kemdrum Yoga"].get("has_yoga"), repr(kem))
 
     wheels = chart.get("sudarshana_chakra", {})
     check("three Sudarshana wheels", set(wheels) == {"Lagna", "Sun", "Moon"}, repr(wheels))

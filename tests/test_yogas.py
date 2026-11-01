@@ -30,8 +30,8 @@ def sample():
 
 def test_reports_all_twentyfour(sample):
     found = yogas.detect(sample)
-    assert len(found) == 24
-    assert len({y.name for y in found}) == 24
+    assert len(found) == 23
+    assert len({y.name for y in found}) == 23
 
 
 def test_groups_match_prokeralas_order(sample):
@@ -170,12 +170,6 @@ def test_kemadruma_excludes_the_other_chandra_yogas(sample):
     if yogas.kemadruma(view).present:
         assert not yogas.sunapha(view).present
         assert not yogas.anapha(view).present
-
-
-def test_kemdrum_duplicates_kemadruma(sample):
-    """Their list carries the same yoga twice under two spellings."""
-    view = yogas.ChartView(sample)
-    assert yogas.kemdrum(view).present == yogas.kemadruma(view).present
 
 
 def test_kuja_yoga_is_mangal_dosha(sample):

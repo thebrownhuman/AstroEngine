@@ -130,7 +130,7 @@ class ChartRequest(BaseModel):
         False,
         description=(
             "Add yoga detection: 18 yogas verified identical to Prokerala, "
-            "2 weakly verified, 1 unverified, plus 3 extras including Mangal "
+            "2 weakly verified, 1 unverified, plus 2 extras including Mangal "
             "dosha. Every yoga reports its own parity status."
         ),
     )

@@ -538,7 +538,7 @@ astro_engine/
   matching.py      Ashtakoot guna milan
   porutham.py      the Tamil checklist
   kp.py            Krishnamurti Paddhati
-  yogas.py         twenty-four yogas
+  yogas.py         twenty-three yogas
   numerology.py    Pythagorean and Chaldean
   places.py        offline GeoNames geocoder
   geo.py           local time to UTC, with full timezone history
