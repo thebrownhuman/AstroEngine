@@ -311,13 +311,28 @@ class SiderealSky:
         with _SWE_LOCK:
             self._activate()
             ayanamsa = self._ayanamsa_locked()
-            cusps, ascmc = swe.houses_ex(
-                self.jd_ut, latitude, longitude, house_system, self._flags
-            )
+            try:
+                cusps, ascmc = swe.houses_ex(
+                    self.jd_ut, latitude, longitude, house_system, self._flags
+                )
+            except swe.Error:
+                # Placidus and Koch are undefined near the poles (swisseph
+                # reports a bare "error"). The Ascendant and MC do not depend
+                # on the house system, so take them from Porphyry and report
+                # the cusps as unavailable. Vedic houses are whole-sign.
+                if house_system == b"O":
+                    raise
+                cusps = None
+                _, ascmc = swe.houses_ex(
+                    self.jd_ut, latitude, longitude, b"O", self._flags
+                )
         return {
             "ascendant": _describe("Lagna", ascmc[0] - ayanamsa, 0.0, 0.0),
             "midheaven": _describe("MC", ascmc[1] - ayanamsa, 0.0, 0.0),
-            "cusps": [round((c - ayanamsa) % 360.0, 6) for c in cusps],
+            "cusps": (
+                None if cusps is None
+                else [round((c - ayanamsa) % 360.0, 6) for c in cusps]
+            ),
         }
 
 

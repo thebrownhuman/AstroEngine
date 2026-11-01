@@ -169,6 +169,39 @@ Thirty-six numbers, Pythagorean and Chaldean.
 | `GET /v1/tool-definitions` | all four tool schemas: chart, matching, muhurta, KP |
 | `GET /health` | version, ephemeris backend, available ayanamsas |
 
+### Request shapes
+
+Authentication: when the server sets `ASTRO_API_KEYS`, every `/v1/*` request needs
+`X-API-Key: <key>` (401 otherwise); `/health` is open. Errors are `422 {"detail": ...}`.
+A location is `place` (offline lookup) **or** `latitude` + `longitude`, never both;
+`timezone` is an optional IANA name (derived from the place or coordinates otherwise).
+`input.timezone_source` says which: `explicit`, `place` or `derived_from_coordinates`.
+
+| Endpoint | Body / query |
+|---|---|
+| `/v1/chart`, `/v1/chart/summary`, `/v1/yogas`, `/v1/transits`, `/v1/ashtakavarga`, `/v1/upagrahas`, `/v1/doshas`, `/v1/relationships`, `/v1/sudarshana`, `/v1/nakshatra`, `/v1/kp` | `{"date": "1990-01-15", "time": "04:30", <location>, "ayanamsa": "lahiri", "prokerala_compatible": false, ...}`; `/v1/chart` adds `include_*` flags, `vargas`, `dasha_depth`, `reference_time` |
+| `/v1/chandrashtama` | the chart body plus `"year": 2026` (1801-2399) |
+| `/v1/matching` | `{"boy": <chart body>, "girl": <chart body>}` |
+| `/v1/porutham` | `{"boy_nakshatra": 0, "boy_nakshatra_pada": 1, "girl_nakshatra": 5, "girl_nakshatra_pada": 2, "twelve": false}`. Nakshatras are integers, **0 = Ashwini** .. 26 = Revati; pada 1-4 |
+| `/v1/muhurta` | `{"date": "2026-01-15", <location>}` |
+| `/v1/bala` | the muhurta body plus optional `janma_nakshatra` (0 = Ashwini) and `janma_rasi` (0 = Mesha), both or neither |
+| `/v1/numerology` | `{"first_name", "middle_name", "last_name", "date_of_birth": "1990-01-15", "reference_date", "additional_vowel", "prokerala_compatible"}` |
+| `GET /v1/places` | `?q=pune&limit=8&country=India` |
+| `GET /v1/timezone` | `?latitude=28.61&longitude=77.21` |
+| `GET /v1/tool-definition` | one schema (the chart tool); `GET /v1/tool-definitions` returns all four (chart, matching, muhurta, KP) |
+| `GET /health` | version, ephemeris backend, ayanamsas, source vocabulary |
+
+`ayanamsa` is one of `lahiri` (the default), `lahiri_1940`, `raman`, `krishnamurti`,
+`yukteshwar`, `true_chitra`, `true_revati`, `fagan_bradley`.
+
+### Reading the output
+
+- `engine.ephemeris` is `"swieph"`: the Swiss Ephemeris flag name, not a typo. It
+  reads `"moshier"` when the data files were not used.
+- `warnings` (top level, only when non-empty): at polar latitudes `cusps` becomes
+  null, and where the Sun does not rise `panchanga`, `solar_day` and `upagrahas`
+  are null, instead of the chart being rejected.
+
 ---
 
 ## Where each rule comes from

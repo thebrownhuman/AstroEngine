@@ -293,6 +293,8 @@ def chart(request: ChartRequest) -> dict:
     resolved = request.location()[3]
     if resolved:
         data["input"]["place"] = resolved
+        if request.timezone is None:
+            data["input"]["timezone_source"] = "place"
     return data
 
 
@@ -366,6 +368,8 @@ def upagraha_report(request: ChartRequest) -> dict:
                      include_upagrahas=True)
     except (ValueError, FileNotFoundError) as exc:
         raise _build_http_error(exc) from exc
+    if data["upagrahas"] is None:
+        raise HTTPException(status_code=422, detail=data["warnings"][0])
     return {"engine": data["engine"], "input": data["input"],
             "solar_day": data["solar_day"], "upagrahas": data["upagrahas"]}
 
@@ -593,6 +597,10 @@ def kp_report(request: ChartRequest) -> dict:
         data = build(request.to_birth_data(), vargas=["D1"], dasha_depth=1)
     except (ValueError, FileNotFoundError) as exc:
         raise _build_http_error(exc) from exc
+    if data["cusps"] is None:
+        raise HTTPException(
+            status_code=422,
+            detail="Placidus cusps are undefined at this latitude; KP needs them")
     return {"engine": data["engine"], "input": data["input"],
             **krishnamurti.compute(data, data["cusps"][:12])}
 

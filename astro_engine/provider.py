@@ -227,12 +227,13 @@ class LocalEngine:
             include_doshas=self.include_extras,
         )
 
+        warnings.extend(chart.get("warnings", []))
         if chart["engine"]["ephemeris"] == "moshier":
             warnings.append(
                 "running on the Moshier fallback; set SE_EPHE_PATH for full "
                 "0.001 arcsec precision"
             )
-        if chart["solar_day"]["born_before_sunrise"]:
+        if chart["solar_day"] and chart["solar_day"]["born_before_sunrise"]:
             warnings.append(
                 "born before sunrise: the Vedic vara is the previous day's "
                 "(panchanga.vara), not the calendar weekday"
@@ -314,7 +315,7 @@ def get_chart_summary(record: ChartRecord) -> dict:
         },
         "moon_sign": chart["grahas"]["Moon"]["sign_en"],
         "sun_sign": chart["grahas"]["Sun"]["sign_en"],
-        "nakshatra": chart["panchanga"]["nakshatra"]["name"],
+        "nakshatra": chart["grahas"]["Moon"]["nakshatra"],
         "grahas": {
             name: {"sign": g["sign_en"], "house": g["house"], "degree": g["dms"],
                    "retrograde": g["retrograde"], "dignity": g["dignity"]["state"]}

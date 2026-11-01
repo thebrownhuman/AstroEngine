@@ -30,7 +30,7 @@ import swisseph as _swe
 from .geo import to_utc
 from .vargas import VARGAS
 
-ENGINE_VERSION = "1.3.2"
+ENGINE_VERSION = "1.3.3"
 
 # Classical graha drishti from BPHS Chapter 26, expressed as house counts from
 # the occupied house. BPHS gives special aspects only to Mars, Jupiter and
@@ -279,7 +279,11 @@ def build(
     """Build a chart; anything outside the supported years raises ValueError."""
     if not MIN_YEAR <= birth.year <= MAX_YEAR:
         raise ValueError(f"{SUPPORTED_RANGE_MESSAGE}; got {birth.year}")
-    with ephemeris_range_errors(SUPPORTED_RANGE_MESSAGE):
+    # The year is already validated, so a remaining ephemeris failure is not a
+    # year problem and must not claim to be one.
+    with ephemeris_range_errors(
+        "the ephemeris could not compute a chart for this date and location"
+    ):
         return _build(
             birth, vargas=vargas, dasha_depth=dasha_depth,
             reference_time=reference_time, include_transits=include_transits,
@@ -318,20 +322,37 @@ def _build(
     sun_longitude = positions["Sun"].longitude
 
     offset = timedelta(hours=tz_info["utc_offset_hours"])
-    # Validate the solar day before asking Swiss Ephemeris for house cusps.
-    # At circumpolar latitudes houses_ex can fail before rise_trans reports the
-    # missing sunrise/sunset; the API should expose the useful 422 either way.
-    solar = sun_rise_set(
-        jd, birth.latitude, birth.longitude, convention=birth.sunrise_convention
-    )
+    # The sunrise-dependent blocks are optional: where the Sun does not rise or
+    # set (polar day/night, or the twilight edge of it) the chart is still
+    # valid, so those blocks become null with a warning rather than a 422.
+    warnings: list[str] = []
+    solar = None
+    try:
+        solar = sun_rise_set(
+            jd, birth.latitude, birth.longitude, convention=birth.sunrise_convention
+        )
+    except ValueError as exc:
+        if "no solar" not in str(exc):
+            raise
+        warnings.append(
+            f"{exc}; panchanga, solar_day and upagrahas are null because they "
+            "depend on sunrise"
+        )
     angles = sky.angles(birth.latitude, birth.longitude, birth.house_system.encode())
     lagna = angles["ascendant"]
     lagna_sign = lagna.sign_index
+    if angles["cusps"] is None:
+        warnings.append(
+            f"house system {birth.house_system!r} is undefined at latitude "
+            f"{birth.latitude}; cusps are null (Lagna, MC and the whole-sign "
+            "houses are unaffected)"
+        )
 
-    vedic_day_start_local = jd_to_datetime(solar["sunrise_jd"]) + offset
-    # Python's weekday() is Monday=0; the vara list is Sunday=0.
-    vara_index = (vedic_day_start_local.weekday() + 1) % 7
-    civil_vara_index = (local.weekday() + 1) % 7
+    if solar is not None:
+        vedic_day_start_local = jd_to_datetime(solar["sunrise_jd"]) + offset
+        # Python's weekday() is Monday=0; the vara list is Sunday=0.
+        vara_index = (vedic_day_start_local.weekday() + 1) % 7
+        civil_vara_index = (local.weekday() + 1) % 7
 
     grahas = {}
     for name, pos in positions.items():
@@ -423,10 +444,10 @@ def _build(
             "dignity": provenance.DIGNITY_STRICT if birth.strict_bphs else provenance.DIGNITY,
             "house_significations": provenance.HOUSE_SIGNIFICATIONS,
         },
-        "panchanga": panchanga.compute(
+        "panchanga": None if solar is None else panchanga.compute(
             sun_longitude, positions["Moon"].longitude, vara_index, civil_vara_index
         ),
-        "solar_day": {
+        "solar_day": None if solar is None else {
             "sunrise_local": (jd_to_datetime(solar["sunrise_jd"]) + offset).isoformat(),
             "sunset_local": (jd_to_datetime(solar["sunset_jd"]) + offset).isoformat(),
             "next_sunrise_local": (
@@ -445,8 +466,10 @@ def _build(
         },
     }
 
+    if warnings:
+        chart["warnings"] = warnings
     if include_upagrahas:
-        chart["upagrahas"] = upagrahas.compute(
+        chart["upagrahas"] = None if solar is None else upagrahas.compute(
             jd, birth.latitude, birth.longitude, sun_longitude, lagna_sign,
             solar, vara_index, ayanamsa=birth.ayanamsa, equinox=birth.equinox,
             house_system=birth.house_system.encode(),
@@ -506,8 +529,11 @@ def summarise(chart: dict) -> str:
     p = chart["panchanga"]
     lines += [
         "",
-        f"Panchanga: {p['vara']['name']}, {p['tithi']['name']}, "
-        f"{p['nakshatra']['name']}, yoga {p['yoga']['name']}, karana {p['karana']['name']}",
+        (
+            f"Panchanga: {p['vara']['name']}, {p['tithi']['name']}, "
+            f"{p['nakshatra']['name']}, yoga {p['yoga']['name']}, karana {p['karana']['name']}"
+            if p else "Panchanga: unavailable (no sunrise at this place and date)"
+        ),
         "",
         "Current dasha: " + " > ".join(
             f"{c['lord']} ({c['level']})" for c in chart["current_dasha"]["chain"]
