@@ -151,7 +151,13 @@ def test_chart_invariants(chart, expect_optional=True, expected_vargas=None):
         check(f"{name} DMS present", isinstance(body.get("dms"), str), repr(body.get("dms")))
     check("lagna longitude range", 0 <= chart.get("lagna", {}).get("longitude", -1) < 360, repr(chart.get("lagna")))
     cusps = chart.get("cusps", [])
-    check("12 house cusps", len(cusps) == 12, repr(cusps))
+    if cusps is None:
+        # Placidus is undefined at polar latitudes; 1.3.3 nulls the cusps and
+        # says so in warnings instead of rejecting the chart.
+        check("null cusps explained", any("cusps are null" in w for w in chart.get("warnings") or []),
+              repr(chart.get("warnings")))
+    else:
+        check("12 house cusps", len(cusps) == 12, repr(cusps))
     check("midheaven present", isinstance(chart.get("midheaven"), dict), repr(chart.get("midheaven")))
 
     houses = chart.get("houses", [])
@@ -469,7 +475,15 @@ def test_chart_matrix():
         # The high-latitude case may legitimately lack a sunrise in some
         # seasons; even then it must be a controlled 422, never a 500.
         check(f"chart matrix {label} controlled response", status in (200, 422), f"HTTP {status}: {body}")
-        if status == 200:
+        no_sunrise = status == 200 and any("no solar rise" in w for w in body.get("warnings") or [])
+        if no_sunrise:
+            # Since 1.3.3 a polar-day/night chart returns 200 with the
+            # sunrise-dependent blocks null and a warning, instead of a 422.
+            for key in ("panchanga", "solar_day", "upagrahas"):
+                check(f"chart matrix {label} {key} null without sunrise", body.get(key) is None, repr(body.get(key))[:80])
+            check(f"chart matrix {label} lagna present", 0 <= body.get("lagna", {}).get("longitude", -1) < 360, repr(body.get("lagna")))
+            check(f"chart matrix {label} dasha present", bool(body.get("dasha")), "dasha missing")
+        elif status == 200:
             test_chart_invariants(body, expected_vargas={"D1", "D9", "D10", "D60"})
             test_varga_math(body)
             test_deep_blocks(body)
