@@ -670,6 +670,34 @@ def numerology(request: NumerologyRequest) -> dict:
     )
 
 
+class AskTurn(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str = Field(..., max_length=8000)
+
+
+class AskRequest(ChartRequest):
+    question: str = Field(..., min_length=1, max_length=2000)
+    history: list[AskTurn] = Field(default_factory=list, max_length=20)
+
+
+@app.post("/v1/ask")
+def ask(request: AskRequest) -> dict:
+    """Grounded question answering: an LLM reads this engine's output and
+    every claim it makes cites a path into that output. See docs/ASK.md.
+    The LLM layer lives in astro_llm and is imported only here."""
+    from astro_llm import NotConfigured, ask as answer
+
+    birth = request.model_dump(include={
+        "date", "time", "place", "latitude", "longitude", "timezone", "ayanamsa",
+        "node_type", "prokerala_compatible", "strict_bphs", "reference_time",
+    })
+    try:
+        return answer(birth, request.question,
+                      [turn.model_dump() for turn in request.history])
+    except NotConfigured as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
 @app.get("/v1/places")
 def places(
     q: str = Query(..., min_length=1, max_length=100),
