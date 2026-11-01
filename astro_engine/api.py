@@ -14,6 +14,8 @@ from typing import Literal
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+import astro_rules
+
 from .chart import ENGINE_VERSION, BirthData, build, summarise
 from .dasha import PROKERALA_TRAVERSED_PRECISION
 from .ephemeris import (
@@ -329,6 +331,20 @@ def yoga_report(request: ChartRequest) -> dict:
         raise _build_http_error(exc) from exc
     return {"engine": data["engine"], "input": data["input"],
             "lagna": data["lagna"], "yogas": yg.report(data)}
+
+
+@app.post("/v1/rules")
+def rules_report(request: ChartRequest) -> dict:
+    """Book rules (astro_rules) that fire for this chart, each with its evidence."""
+    try:
+        data = build(request.to_birth_data(), vargas=["D1"], dasha_depth=1,
+                     reference_time=request.reference_time)
+    except (ValueError, FileNotFoundError) as exc:
+        raise _build_http_error(exc) from exc
+    data["yogas"] = yg.report(data)
+    hits = astro_rules.fired(data)
+    return {"engine": data["engine"], "input": data["input"], "lagna": data["lagna"],
+            "rules_loaded": len(astro_rules.RULES), "count": len(hits), "rules": hits}
 
 
 @app.post("/v1/transits")

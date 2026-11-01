@@ -1,0 +1,1310 @@
+# Effects of the bhava lords: the lord of each house placed in each house.
+#
+# Primary: BPHS, G.C. Sharma translation, Vol.1, Chapter 26 ("Effects of the
+# Bhava Lords"), verses 1-144. Cross-check: R. Santhanam translation, Vol.1,
+# Chapter 24 (same title, same verse numbers). The two editions number the
+# chapter differently; the verses line up one for one.
+#
+# `meaning` is a short paraphrase, not a quotation. Houses are whole-sign from
+# the Lagna, as the engine reports them. Verses 145-148 add that a planet ruling
+# two houses gives both results, that clashing results cancel, and that results
+# scale with the lord's strength (full, half, quarter); strength is not applied
+# here (it needs shadbala).
+
+# ---------------------------------------------------------------- 1st lord (v1-12)
+- id: bphs.house_lords.1_in_1
+  when: {lord_of: 1, in_house: 1}
+  meaning: "Good health and bodily comfort, prowess; intelligent but fickle-minded; two wives and relations with other women."
+  polarity: mixed
+  domains: [self, health, character, marriage, relationships]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "1"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "1"}
+  provenance: bphs
+- id: bphs.house_lords.1_in_2
+  when: {lord_of: 1, in_house: 2}
+  meaning: "Gainful, learned, happy, good-natured, religious and honourable; many wives."
+  polarity: positive
+  domains: [wealth, education, character, religion, marriage]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "2"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "2"}
+  provenance: bphs
+- id: bphs.house_lords.1_in_3
+  when: {lord_of: 1, in_house: 3}
+  meaning: "Lion-like valour, every kind of wealth, honour, intelligence and happiness; two wives."
+  polarity: positive
+  domains: [courage, wealth, status, intellect, marriage]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "3"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "3"}
+  provenance: bphs
+- id: bphs.house_lords.1_in_4
+  when: {lord_of: 1, in_house: 4}
+  meaning: "Happiness from father and mother, many brothers; lustful, virtuous and charming."
+  polarity: positive
+  domains: [father, mother, siblings, character]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "4"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "4"}
+  provenance: bphs
+- id: bphs.house_lords.1_in_5
+  when: {lord_of: 1, in_house: 5}
+  meaning: "Middling happiness from children, the first child may be lost; honourable, quick to anger, favoured by the ruler."
+  polarity: mixed
+  domains: [children, status, character]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "5"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "5"}
+  provenance: bphs
+- id: bphs.house_lords.1_in_6
+  when: {lord_of: 1, in_house: 6}
+  meaning: "The verse gives its results only when the lord is related to a malefic and lacks a benefic aspect (see clause)."
+  polarity: mixed
+  domains: [health, enemies]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "6"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "6"}
+  provenance: bphs
+  clauses:
+    - when: {all: [{associated_with: malefic}, {not: {aspected_by: benefic}}]}
+      meaning: "Deprived of bodily happiness (health) and troubled by enemies."
+      polarity: negative
+- id: bphs.house_lords.1_in_7
+  when: {lord_of: 1, in_house: 7}
+  meaning: "Result depends on the lord's nature: a malefic lord harms the wife's life; a benefic lord gives wandering, poverty and detachment, or else kingship (see clauses)."
+  polarity: mixed
+  domains: [spouse, marriage, wealth, spirituality, status]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "7"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "7"}
+  provenance: bphs
+  note: "Santhanam's verse text is OCR-damaged here; the readable parts (wife not long-lived, wandering, penury, alternatively a king) agree with Sharma."
+  clauses:
+    - when: {nature: malefic}
+      meaning: "The native's wife will not live (long)."
+      polarity: negative
+    - when: {nature: benefic}
+      meaning: "Aimless wanderer, poor, of ascetic disposition, or alternatively becomes a king."
+      polarity: mixed
+- id: bphs.house_lords.1_in_8
+  when: {lord_of: 1, in_house: 8}
+  meaning: "Learned (Sharma: versed in occult knowledge), but sickly, thievish, very angry, a gambler and drawn to others' wives."
+  polarity: negative
+  domains: [education, health, character, relationships]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "8"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "8"}
+  provenance: bphs
+  flagged: true
+  variants:
+    - {edition: Sharma, reading: "Siddha Vidya Visharada: expert in occult (siddha) knowledge."}
+    - {edition: Santhanam, reading: "An accomplished scholar."}
+- id: bphs.house_lords.1_in_9
+  when: {lord_of: 1, in_house: 9}
+  meaning: "Fortunate, dear to people, devoted to Vishnu, skilful and eloquent; has wife, sons and wealth."
+  polarity: positive
+  domains: [fortune, religion, speech, spouse, children, wealth]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "9"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "9"}
+  provenance: bphs
+- id: bphs.house_lords.1_in_10
+  when: {lord_of: 1, in_house: 10}
+  meaning: "Happiness from father, royal honour, fame among people and self-earned wealth."
+  polarity: positive
+  domains: [father, status, fame, wealth, career]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "10"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "10"}
+  provenance: bphs
+- id: bphs.house_lords.1_in_11
+  when: {lord_of: 1, in_house: 11}
+  meaning: "Always gaining; good qualities, fame and many wives."
+  polarity: positive
+  domains: [gains, character, fame, marriage]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "11"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "11"}
+  provenance: bphs
+  note: "Santhanam's verse text is OCR-damaged; legible fragments (gains, good qualities, fame, many wives) agree with Sharma."
+- id: bphs.house_lords.1_in_12
+  when: {lord_of: 1, in_house: 12}
+  meaning: "Lacks bodily comfort; without a benefic joining or aspecting the lord, also spends wastefully and is very angry (see clause)."
+  polarity: negative
+  domains: [health, expenses, character]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "12"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "12"}
+  provenance: bphs
+  note: "Santhanam's verse text is OCR-damaged; legible fragments (devoid of physical happiness, wasteful spending, anger, benefic exception) agree with Sharma."
+  clauses:
+    - when: {not: {associated_with: benefic}}
+      meaning: "No benefic joins or aspects the lord: spends wastefully and is very angry."
+      polarity: negative
+
+# ---------------------------------------------------------------- 2nd lord (v13-24)
+- id: bphs.house_lords.2_in_1
+  when: {lord_of: 2, in_house: 1}
+  meaning: "Has sons and wealth, but is at odds with the family, lustful, hard-hearted and does others' work."
+  polarity: mixed
+  domains: [children, wealth, family, character]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "13"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "13"}
+  provenance: bphs
+- id: bphs.house_lords.2_in_2
+  when: {lord_of: 2, in_house: 2}
+  meaning: "Wealthy and proud; two or more wives; without children."
+  polarity: mixed
+  domains: [wealth, character, marriage, children]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "14"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "14"}
+  provenance: bphs
+- id: bphs.house_lords.2_in_3
+  when: {lord_of: 2, in_house: 3}
+  meaning: "Depends on association: with a benefic, valorous, wise, virtuous, lustful and miserly; with a malefic, a heterodox (see clauses)."
+  polarity: mixed
+  domains: [courage, intellect, character, religion]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "15"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "15"}
+  provenance: bphs
+  clauses:
+    - when: {associated_with: benefic}
+      meaning: "Valorous, wise, virtuous, lustful and miserly."
+      polarity: mixed
+    - when: {associated_with: malefic}
+      meaning: "Heterodox (irreligious)."
+      polarity: negative
+- id: bphs.house_lords.2_in_4
+  when: {lord_of: 2, in_house: 4}
+  meaning: "Acquires every kind of wealth; with Jupiter and/or exaltation, equal to a king (editions differ, see variants)."
+  polarity: positive
+  domains: [wealth, status]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "16"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "16"}
+  provenance: bphs
+  clauses:
+    - when: {all: [{dignity: exalted}, {conjunct: Jupiter}]}
+      meaning: "Exalted and with Jupiter: equal to a king (both editions)."
+      polarity: positive
+    - when: {any: [{dignity: exalted}, {conjunct: Jupiter}]}
+      meaning: "Exalted or with Jupiter: equal to a king (Sharma's reading)."
+      polarity: positive
+  flagged: true
+  variants:
+    - {edition: Sharma, reading: "Conjunct Jupiter or in exaltation: equal to a king."}
+    - {edition: Santhanam, reading: "Exalted and conjunct Jupiter: equal to a king."}
+- id: bphs.house_lords.2_in_5
+  when: {lord_of: 2, in_house: 5}
+  meaning: "Wealthy; the native and his sons are both intent on earning."
+  polarity: positive
+  domains: [wealth, children]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "17"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "17"}
+  provenance: bphs
+- id: bphs.house_lords.2_in_6
+  when: {lord_of: 2, in_house: 6}
+  meaning: "Wealth turns on enemies: with a benefic, gains through enemies; with a malefic, losses through enemies and weakness of the legs (see clauses)."
+  polarity: mixed
+  domains: [wealth, enemies, health]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "18"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "18"}
+  provenance: bphs
+  clauses:
+    - when: {conjunct: benefic}
+      meaning: "Gains wealth through enemies."
+      polarity: positive
+    - when: {conjunct: malefic}
+      meaning: "Loses wealth through enemies; harm to the thighs or shanks."
+      polarity: negative
+- id: bphs.house_lords.2_in_7
+  when: {lord_of: 2, in_house: 7}
+  meaning: "Drawn to others' wives; a physician. If a malefic joins or aspects the lord, the wife is of questionable character."
+  polarity: mixed
+  domains: [relationships, career, spouse]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "19"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "19"}
+  provenance: bphs
+  clauses:
+    - when: {associated_with: malefic}
+      meaning: "The wife is of questionable character."
+      polarity: negative
+- id: bphs.house_lords.2_in_8
+  when: {lord_of: 2, in_house: 8}
+  meaning: "Abundant land and wealth, but little marital happiness and none from an elder brother."
+  polarity: mixed
+  domains: [property, wealth, marriage, siblings]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "20"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "20"}
+  provenance: bphs
+- id: bphs.house_lords.2_in_9
+  when: {lord_of: 2, in_house: 9}
+  meaning: "Wealthy, diligent and skilful; sickly in childhood, well later; visits holy places and keeps religious observances."
+  polarity: positive
+  domains: [wealth, health, religion, travel]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "21"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "21"}
+  provenance: bphs
+- id: bphs.house_lords.2_in_10
+  when: {lord_of: 2, in_house: 10}
+  meaning: "Libidinous, honourable and learned; many wives and much wealth, but little happiness from children."
+  polarity: mixed
+  domains: [character, status, education, marriage, wealth, children]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "22"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "22"}
+  provenance: bphs
+- id: bphs.house_lords.2_in_11
+  when: {lord_of: 2, in_house: 11}
+  meaning: "Every kind of wealth; ever diligent, honourable and famous."
+  polarity: positive
+  domains: [wealth, gains, status, fame]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "23"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "23"}
+  provenance: bphs
+- id: bphs.house_lords.2_in_12
+  when: {lord_of: 2, in_house: 12}
+  meaning: "Adventurous but without wealth, looking to others' wealth; no happiness from the eldest child."
+  polarity: negative
+  domains: [wealth, children, courage]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "24"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "24"}
+  provenance: bphs
+  note: "Sharma: dependent on others' wealth; Santhanam: interested in others' wealth. Same sense."
+
+# ---------------------------------------------------------------- 3rd lord (v25-36)
+- id: bphs.house_lords.3_in_1
+  when: {lord_of: 3, in_house: 1}
+  meaning: "Self-made wealth, given to worship, valorous and intelligent though unlearned."
+  polarity: positive
+  domains: [wealth, religion, courage, intellect, education]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "25"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "25"}
+  provenance: bphs
+- id: bphs.house_lords.3_in_2
+  when: {lord_of: 3, in_house: 2}
+  meaning: "Corpulent, lacking valour and initiative; covets others' wives and wealth."
+  polarity: negative
+  domains: [health, courage, character, relationships]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "26"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "26"}
+  provenance: bphs
+  flagged: true
+  variants:
+    - {edition: Sharma, reading: "Will be unhappy."}
+    - {edition: Santhanam, reading: "OCR text reads 'happy' (line damaged); may be a scan error for 'unhappy'."}
+- id: bphs.house_lords.3_in_3
+  when: {lord_of: 3, in_house: 3}
+  meaning: "Happiness through brothers, wealth and sons; cheerful and extremely happy."
+  polarity: positive
+  domains: [siblings, wealth, children]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "27"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "27"}
+  provenance: bphs
+  note: "Santhanam's verse text is OCR-damaged; checked against Sharma only."
+- id: bphs.house_lords.3_in_4
+  when: {lord_of: 3, in_house: 4}
+  meaning: "Happy, wealthy and intelligent, but gets a wicked spouse."
+  polarity: mixed
+  domains: [wealth, intellect, spouse]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "28"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "28"}
+  provenance: bphs
+  note: "Santhanam's verse text is OCR-damaged ('...wicked spouse' legible); checked against Sharma."
+- id: bphs.house_lords.3_in_5
+  when: {lord_of: 3, in_house: 5}
+  meaning: "Has sons and is virtuous; if a malefic joins or aspects the lord, the wife is cruel (formidable)."
+  polarity: mixed
+  domains: [children, character, spouse]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "29"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "29"}
+  provenance: bphs
+  clauses:
+    - when: {associated_with: malefic}
+      meaning: "The wife will be cruel (formidable)."
+      polarity: negative
+- id: bphs.house_lords.3_in_6
+  when: {lord_of: 3, in_house: 6}
+  meaning: "Inimical to his brothers and the maternal uncle, very wealthy, fond of the maternal aunt."
+  polarity: mixed
+  domains: [siblings, relatives, wealth]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "30"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "30"}
+  provenance: bphs
+- id: bphs.house_lords.3_in_7
+  when: {lord_of: 3, in_house: 7}
+  meaning: "Inclined to serve the ruler; unhappy in childhood, happy at the end of life."
+  polarity: mixed
+  domains: [career, self]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "31"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "31"}
+  provenance: bphs
+- id: bphs.house_lords.3_in_8
+  when: {lord_of: 3, in_house: 8}
+  meaning: "A thief, living by serving others; meets death at the hands of (or at the gate of) the ruler."
+  polarity: negative
+  domains: [character, career, longevity]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "32"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "32"}
+  provenance: bphs
+  flagged: true
+  variants:
+    - {edition: Sharma, reading: "May be killed by the king."}
+    - {edition: Santhanam, reading: "Will die at the gate of the royal palace."}
+- id: bphs.house_lords.3_in_9
+  when: {lord_of: 3, in_house: 9}
+  meaning: "Lacks happiness from father; fortune comes through his wife (women); has children and other pleasures."
+  polarity: mixed
+  domains: [father, fortune, spouse, children]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "33"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "33"}
+  provenance: bphs
+- id: bphs.house_lords.3_in_10
+  when: {lord_of: 3, in_house: 10}
+  meaning: "Every kind of happiness and self-made wealth; nurtures wicked women."
+  polarity: mixed
+  domains: [wealth, character, relationships]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "34"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "34"}
+  provenance: bphs
+- id: bphs.house_lords.3_in_11
+  when: {lord_of: 3, in_house: 11}
+  meaning: "Always gains in trade; intelligent though unlettered, adventurous, serves others."
+  polarity: positive
+  domains: [gains, career, intellect, courage]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "35"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "35"}
+  provenance: bphs
+- id: bphs.house_lords.3_in_12
+  when: {lord_of: 3, in_house: 12}
+  meaning: "Spends on evil deeds, has a cruel (wicked) father, and gains fortune through a woman or wife."
+  polarity: mixed
+  domains: [expenses, father, fortune, spouse]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "36"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "36"}
+  provenance: bphs
+
+# ---------------------------------------------------------------- 4th lord (v37-48)
+- id: bphs.house_lords.4_in_1
+  when: {lord_of: 4, in_house: 1}
+  meaning: "Learning, virtues, ornaments, lands, conveyances and happiness from mother."
+  polarity: positive
+  domains: [education, character, property, vehicles, mother]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "37"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "37"}
+  provenance: bphs
+- id: bphs.house_lords.4_in_2
+  when: {lord_of: 4, in_house: 2}
+  meaning: "Enjoys pleasures, every kind of wealth, family life and honour; adventurous but cunning."
+  polarity: positive
+  domains: [wealth, family, status, character]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "38"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "38"}
+  provenance: bphs
+- id: bphs.house_lords.4_in_3
+  when: {lord_of: 4, in_house: 3}
+  meaning: "Valorous, has servants; liberal, virtuous, charitable, with self-earned wealth and free of disease."
+  polarity: positive
+  domains: [courage, servants, character, wealth, health]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "39"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "39"}
+  provenance: bphs
+- id: bphs.house_lords.4_in_4
+  when: {lord_of: 4, in_house: 4}
+  meaning: "Rises to be a minister; every kind of wealth; skilful, virtuous, honourable, learned, happy and devoted to the spouse."
+  polarity: positive
+  domains: [career, status, wealth, education, spouse]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "40"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "40"}
+  provenance: bphs
+- id: bphs.house_lords.4_in_5
+  when: {lord_of: 4, in_house: 5}
+  meaning: "Happy and liked by all (Santhanam: 'like a bull'); devoted to Vishnu, virtuous, honourable, with self-earned wealth."
+  polarity: positive
+  domains: [character, religion, status, wealth]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "41"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "41"}
+  provenance: bphs
+  flagged: true
+  variants:
+    - {edition: Sharma, reading: "A favourite of all."}
+    - {edition: Santhanam, reading: "Like a bull (OCR 'bi all', probably 'bull' or 'by all')."}
+- id: bphs.house_lords.4_in_6
+  when: {lord_of: 4, in_house: 6}
+  meaning: "Lacks happiness from mother; angry, a thief and of questionable character (Santhanam: conjurer), independent in action and ill-disposed."
+  polarity: negative
+  domains: [mother, character]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "42"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "42"}
+  provenance: bphs
+  flagged: true
+  variants:
+    - {edition: Sharma, reading: "A thief and a man of questionable character."}
+    - {edition: Santhanam, reading: "A thief and a conjurer (magician)."}
+- id: bphs.house_lords.4_in_7
+  when: {lord_of: 4, in_house: 7}
+  meaning: "Highly educated, but gives up the patrimony and is tongue-tied in an assembly."
+  polarity: mixed
+  domains: [education, property, speech]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "43"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "43"}
+  provenance: bphs
+- id: bphs.house_lords.4_in_8
+  when: {lord_of: 4, in_house: 8}
+  meaning: "Without domestic and other comforts, little happiness from parents, and of weak virility."
+  polarity: negative
+  domains: [home, mother, father, health]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "44"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "44"}
+  provenance: bphs
+- id: bphs.house_lords.4_in_9
+  when: {lord_of: 4, in_house: 9}
+  meaning: "Dear to all, devoted to God, virtuous, honourable and blessed with every kind of happiness."
+  polarity: positive
+  domains: [religion, character, status, fortune]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "45"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "45"}
+  provenance: bphs
+- id: bphs.house_lords.4_in_10
+  when: {lord_of: 4, in_house: 10}
+  meaning: "Royal honours, an alchemist, very contented, enjoys pleasures and masters the five senses."
+  polarity: positive
+  domains: [status, career, spirituality]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "46"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "46"}
+  provenance: bphs
+- id: bphs.house_lords.4_in_11
+  when: {lord_of: 4, in_house: 11}
+  meaning: "Fear of secret disease; liberal, virtuous, charitable and helpful to others."
+  polarity: mixed
+  domains: [disease, character]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "47"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "47"}
+  provenance: bphs
+- id: bphs.house_lords.4_in_12
+  when: {lord_of: 4, in_house: 12}
+  meaning: "Without domestic and other comforts; has vices, is foolish and indolent."
+  polarity: negative
+  domains: [home, character]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "48"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "48"}
+  provenance: bphs
+
+# ---------------------------------------------------------------- 5th lord (v49-60)
+- id: bphs.house_lords.5_in_1
+  when: {lord_of: 5, in_house: 1}
+  meaning: "Scholarly and happy through children, but miserly, crooked and takes others' wealth."
+  polarity: mixed
+  domains: [education, children, character]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "49"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "49"}
+  provenance: bphs
+- id: bphs.house_lords.5_in_2
+  when: {lord_of: 5, in_house: 2}
+  meaning: "Many sons and wealth; supports the family, honourable, attached to the spouse and famous in the world."
+  polarity: positive
+  domains: [children, wealth, family, status, spouse, fame]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "50"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "50"}
+  provenance: bphs
+- id: bphs.house_lords.5_in_3
+  when: {lord_of: 5, in_house: 3}
+  meaning: "Attached to his siblings; a tale-bearer and miser, always intent on his own work."
+  polarity: mixed
+  domains: [siblings, character]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "51"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "51"}
+  provenance: bphs
+- id: bphs.house_lords.5_in_4
+  when: {lord_of: 5, in_house: 4}
+  meaning: "Happy, with happiness from mother, wealth and intelligence; a king, minister or preceptor."
+  polarity: positive
+  domains: [mother, wealth, intellect, status, career]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "52"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "52"}
+  provenance: bphs
+- id: bphs.house_lords.5_in_5
+  when: {lord_of: 5, in_house: 5}
+  meaning: "Children depend on association: with a benefic, sons; with a malefic, no issue; yet virtuous and dear to friends (see clauses, variants)."
+  polarity: mixed
+  domains: [children, character]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "53"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "53"}
+  provenance: bphs
+  clauses:
+    - when: {associated_with: benefic}
+      meaning: "Will have sons (progeny); Sharma requires a conjunction, Santhanam any relation."
+      polarity: positive
+    - when: {associated_with: malefic}
+      meaning: "Will have no issue."
+      polarity: negative
+  flagged: true
+  variants:
+    - {edition: Sharma, reading: "Sons when conjunct a benefic; with a malefic, no issue but virtuous and dear to friends."}
+    - {edition: Santhanam, reading: "Sons when related to a benefic; no issue when related to a malefic; virtuous and dear to friends in any case."}
+- id: bphs.house_lords.5_in_6
+  when: {lord_of: 5, in_house: 6}
+  meaning: "Sons become like enemies, or are lost, or a son is adopted or bought."
+  polarity: negative
+  domains: [children, enemies]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "54"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "54"}
+  provenance: bphs
+- id: bphs.house_lords.5_in_7
+  when: {lord_of: 5, in_house: 7}
+  meaning: "Very religious and honourable (Sharma: tolerant of all faiths), happy through children and helpful to others."
+  polarity: positive
+  domains: [religion, status, children, character]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "55"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "55"}
+  provenance: bphs
+  note: "Sharma: tolerant of all religions; Santhanam: honourable. Not material to the result."
+- id: bphs.house_lords.5_in_8
+  when: {lord_of: 5, in_house: 8}
+  meaning: "Little happiness from children; troubled by cough and lung disorders; angry and unhappy."
+  polarity: negative
+  domains: [children, disease, character]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "56"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "56"}
+  provenance: bphs
+- id: bphs.house_lords.5_in_9
+  when: {lord_of: 5, in_house: 9}
+  meaning: "A prince or equal to one; writes treatises, famous, the ornament of his family."
+  polarity: positive
+  domains: [status, education, fame, family]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "57"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "57"}
+  provenance: bphs
+- id: bphs.house_lords.5_in_10
+  when: {lord_of: 5, in_house: 10}
+  meaning: "Enjoys a raja yoga and many pleasures; very famous."
+  polarity: positive
+  domains: [status, career, fame]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "58"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "58"}
+  provenance: bphs
+- id: bphs.house_lords.5_in_11
+  when: {lord_of: 5, in_house: 11}
+  meaning: "Learned, dear to people, an author of treatises, very skilful, with many sons and wealth."
+  polarity: positive
+  domains: [education, fame, children, wealth, gains]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "59"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "59"}
+  provenance: bphs
+- id: bphs.house_lords.5_in_12
+  when: {lord_of: 5, in_house: 12}
+  meaning: "No happiness from his own sons; may have an adopted or purchased son."
+  polarity: negative
+  domains: [children]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "60"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "60"}
+  provenance: bphs
+
+# ---------------------------------------------------------------- 6th lord (v61-72)
+- id: bphs.house_lords.6_in_1
+  when: {lord_of: 6, in_house: 1}
+  meaning: "Sickly yet famous; at odds with his own people; rich, honourable, adventurous and virtuous."
+  polarity: mixed
+  domains: [health, fame, family, wealth, status, courage]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "61"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "61"}
+  provenance: bphs
+- id: bphs.house_lords.6_in_2
+  when: {lord_of: 6, in_house: 2}
+  meaning: "Adventurous, famous among his people, lives in foreign lands, happy, a good speaker, intent on his own work."
+  polarity: positive
+  domains: [courage, fame, foreign, speech]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "62"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "62"}
+  provenance: bphs
+- id: bphs.house_lords.6_in_3
+  when: {lord_of: 6, in_house: 3}
+  meaning: "Given to anger, lacking courage, at odds with all his siblings; servants disobey him."
+  polarity: negative
+  domains: [character, courage, siblings, servants]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "63"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "63"}
+  provenance: bphs
+- id: bphs.house_lords.6_in_4
+  when: {lord_of: 6, in_house: 4}
+  meaning: "Lacks happiness from mother; intelligent but a tale-bearer, jealous and fickle; very rich."
+  polarity: mixed
+  domains: [mother, intellect, character, wealth]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "64"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "64"}
+  provenance: bphs
+- id: bphs.house_lords.6_in_5
+  when: {lord_of: 6, in_house: 5}
+  meaning: "Fluctuating finances; enmity with sons and friends; happy, selfish and kind."
+  polarity: mixed
+  domains: [wealth, children, relationships, character]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "65"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "65"}
+  provenance: bphs
+- id: bphs.house_lords.6_in_6
+  when: {lord_of: 6, in_house: 6}
+  meaning: "Enmity with his own kinsmen, friendship with outsiders; middling happiness in wealth and the like."
+  polarity: mixed
+  domains: [relatives, relationships, wealth]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "66"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "66"}
+  provenance: bphs
+- id: bphs.house_lords.6_in_7
+  when: {lord_of: 6, in_house: 7}
+  meaning: "Denied happiness in marriage; famous, virtuous, honourable, adventurous and wealthy."
+  polarity: mixed
+  domains: [marriage, fame, status, wealth]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "67"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "67"}
+  provenance: bphs
+- id: bphs.house_lords.6_in_8
+  when: {lord_of: 6, in_house: 8}
+  meaning: "Sickly and hostile; covets others' wealth and wives; impure."
+  polarity: negative
+  domains: [health, enemies, character, relationships]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "68"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "68"}
+  provenance: bphs
+- id: bphs.house_lords.6_in_9
+  when: {lord_of: 6, in_house: 9}
+  meaning: "Trades in wood and stone; fortunes rise and fall."
+  polarity: mixed
+  domains: [career, fortune]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "69"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "69"}
+  provenance: bphs
+  note: "Santhanam's verse text is OCR-damaged; legible fragments ('wood ... stones', 'ups and downs in livelihood') agree with Sharma."
+- id: bphs.house_lords.6_in_10
+  when: {lord_of: 6, in_house: 10}
+  meaning: "Well known in his family, not devoted to his father, happy in foreign lands; a gifted speaker."
+  polarity: mixed
+  domains: [fame, family, father, foreign, speech]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "70"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "70"}
+  provenance: bphs
+- id: bphs.house_lords.6_in_11
+  when: {lord_of: 6, in_house: 11}
+  meaning: "Gains wealth through enemies; virtuous, adventurous and honourable, but with little happiness from children."
+  polarity: mixed
+  domains: [gains, enemies, character, children]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "71"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "71"}
+  provenance: bphs
+- id: bphs.house_lords.6_in_12
+  when: {lord_of: 6, in_house: 12}
+  meaning: "Spends on vices, hostile to the learned, and violent towards living beings."
+  polarity: negative
+  domains: [expenses, character]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "72"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "72"}
+  provenance: bphs
+  note: "Santhanam's verse text is OCR-damaged ('always ... torture living beings' legible); checked against Sharma."
+
+# ---------------------------------------------------------------- 7th lord (v73-84)
+- id: bphs.house_lords.7_in_1
+  when: {lord_of: 7, in_house: 1}
+  meaning: "Goes to others' wives; wicked yet skilful, lacking courage, troubled by wind (vata) disorders."
+  polarity: negative
+  domains: [relationships, character, courage, disease]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "73"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "73"}
+  provenance: bphs
+- id: bphs.house_lords.7_in_2
+  when: {lord_of: 7, in_house: 2}
+  meaning: "Many wives, gains wealth through his wife, procrastinating."
+  polarity: mixed
+  domains: [marriage, spouse, wealth, character]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "74"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "74"}
+  provenance: bphs
+- id: bphs.house_lords.7_in_3
+  when: {lord_of: 7, in_house: 3}
+  meaning: "Loss of children; a son survives only with great difficulty; a daughter may be born and live."
+  polarity: negative
+  domains: [children]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "75"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "75"}
+  provenance: bphs
+- id: bphs.house_lords.7_in_4
+  when: {lord_of: 7, in_house: 4}
+  meaning: "Wife not under his control; truthful, intelligent and religious; suffers dental disease."
+  polarity: mixed
+  domains: [spouse, character, religion, disease]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "76"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "76"}
+  provenance: bphs
+- id: bphs.house_lords.7_in_5
+  when: {lord_of: 7, in_house: 5}
+  meaning: "Honourable, endowed with all virtues, always cheerful and with every kind of wealth."
+  polarity: positive
+  domains: [status, character, wealth]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "77"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "77"}
+  provenance: bphs
+- id: bphs.house_lords.7_in_6
+  when: {lord_of: 7, in_house: 6}
+  meaning: "Wife is sickly (or he is hostile to her); given to anger and unhappy."
+  polarity: negative
+  domains: [spouse, marriage, character]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "78"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "78"}
+  provenance: bphs
+- id: bphs.house_lords.7_in_7
+  when: {lord_of: 7, in_house: 7}
+  meaning: "Happiness through his wife; courageous, skilful and intelligent; afflicted only by wind disorders."
+  polarity: positive
+  domains: [spouse, marriage, courage, intellect, disease]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "79"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "79"}
+  provenance: bphs
+- id: bphs.house_lords.7_in_8
+  when: {lord_of: 7, in_house: 8}
+  meaning: "Denied marital happiness; the wife is sickly, ill-natured and disobedient."
+  polarity: negative
+  domains: [marriage, spouse]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "80"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "80"}
+  provenance: bphs
+- id: bphs.house_lords.7_in_9
+  when: {lord_of: 7, in_house: 9}
+  meaning: "Relations with many women, well disposed to his own wife, and many undertakings."
+  polarity: mixed
+  domains: [relationships, spouse, career]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "81"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "81"}
+  provenance: bphs
+- id: bphs.house_lords.7_in_10
+  when: {lord_of: 7, in_house: 10}
+  meaning: "Wife not obedient to him; religious, with wealth and sons."
+  polarity: mixed
+  domains: [spouse, religion, wealth, children]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "82"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "82"}
+  provenance: bphs
+- id: bphs.house_lords.7_in_11
+  when: {lord_of: 7, in_house: 11}
+  meaning: "Gains wealth through his wife; less happiness from sons; has daughters."
+  polarity: mixed
+  domains: [spouse, gains, children]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "83"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "83"}
+  provenance: bphs
+- id: bphs.house_lords.7_in_12
+  when: {lord_of: 7, in_house: 12}
+  meaning: "Poverty and miserliness; livelihood tied to clothing (textiles); the wife is a spendthrift."
+  polarity: negative
+  domains: [wealth, career, spouse, expenses]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "84"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "84"}
+  provenance: bphs
+
+# ---------------------------------------------------------------- 8th lord (v85-96)
+- id: bphs.house_lords.8_in_1
+  when: {lord_of: 8, in_house: 1}
+  meaning: "Lacks bodily happiness, suffers wounds, and is hostile to gods and brahmins."
+  polarity: negative
+  domains: [health, religion]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "85"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "85"}
+  provenance: bphs
+- id: bphs.house_lords.8_in_2
+  when: {lord_of: 8, in_house: 2}
+  meaning: "Lacks bodily vigour, has a little wealth, and does not regain lost wealth."
+  polarity: negative
+  domains: [health, wealth]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "86"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "86"}
+  provenance: bphs
+- id: bphs.house_lords.8_in_3
+  when: {lord_of: 8, in_house: 3}
+  meaning: "No happiness from siblings; indolent, without servants or strength."
+  polarity: negative
+  domains: [siblings, character, servants, courage]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "87"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "87"}
+  provenance: bphs
+- id: bphs.house_lords.8_in_4
+  when: {lord_of: 8, in_house: 4}
+  meaning: "Deprived of his mother in childhood; without house, lands or happiness; betrays friends."
+  polarity: negative
+  domains: [mother, home, property, relationships]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "88"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "88"}
+  provenance: bphs
+- id: bphs.house_lords.8_in_5
+  when: {lord_of: 8, in_house: 5}
+  meaning: "Dull-witted, few children, but long-lived and wealthy."
+  polarity: mixed
+  domains: [intellect, children, longevity, wealth]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "89"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "89"}
+  provenance: bphs
+- id: bphs.house_lords.8_in_6
+  when: {lord_of: 8, in_house: 6}
+  meaning: "Overcomes enemies, but has a diseased body; danger from snakes and water in childhood."
+  polarity: mixed
+  domains: [enemies, disease, health]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "90"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "90"}
+  provenance: bphs
+- id: bphs.house_lords.8_in_7
+  when: {lord_of: 8, in_house: 7}
+  meaning: "Two wives; if a malefic joins the lord, a downfall in business is certain."
+  polarity: mixed
+  domains: [marriage, career]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "91"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "91"}
+  provenance: bphs
+  clauses:
+    - when: {conjunct: malefic}
+      meaning: "Certain downfall in business (livelihood)."
+      polarity: negative
+- id: bphs.house_lords.8_in_8
+  when: {lord_of: 8, in_house: 8}
+  meaning: "Long-lived; if the lord is weak, medium life, and the native is a thief, blameworthy and blames others."
+  polarity: mixed
+  domains: [longevity, character]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "92"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "92"}
+  provenance: bphs
+  note: "The weak-lord branch needs a strength measure (shadbala) and is not evaluated here."
+- id: bphs.house_lords.8_in_9
+  when: {lord_of: 8, in_house: 9}
+  meaning: "Betrays his religion, a heterodox; has a wicked wife and steals others' wealth."
+  polarity: negative
+  domains: [religion, spouse, character]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "93"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "93"}
+  provenance: bphs
+- id: bphs.house_lords.8_in_10
+  when: {lord_of: 8, in_house: 10}
+  meaning: "No happiness from father; a tale-bearer without livelihood; a benefic aspect stops these evils."
+  polarity: negative
+  domains: [father, character, career]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "94"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "94"}
+  provenance: bphs
+  clauses:
+    - when: {aspected_by: benefic}
+      meaning: "A benefic aspects the lord: the verse's evils do not mature."
+      polarity: positive
+- id: bphs.house_lords.8_in_11
+  when: {lord_of: 8, in_house: 11}
+  meaning: "Without wealth and unhappy in boyhood, happy later; long-lived if a benefic joins the lord."
+  polarity: mixed
+  domains: [wealth, self, longevity]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "95"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "95"}
+  provenance: bphs
+  flagged: true
+  variants:
+    - {edition: Sharma, reading: "The lack of wealth and unhappy boyhood apply to the 8th lord in the 11th without further condition."}
+    - {edition: Santhanam, reading: "They apply when the 8th lord is in the 11th together with a malefic."}
+  clauses:
+    - when: {conjunct: benefic}
+      meaning: "Joined by a benefic: long-lived."
+      polarity: positive
+- id: bphs.house_lords.8_in_12
+  when: {lord_of: 8, in_house: 12}
+  meaning: "Spends on evil deeds and has a short life, more so if a malefic joins the lord."
+  polarity: negative
+  domains: [expenses, longevity, character]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "96"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "96"}
+  provenance: bphs
+  clauses:
+    - when: {conjunct: malefic}
+      meaning: "A malefic joins the lord: the short-life indication is stronger."
+      polarity: negative
+
+# ---------------------------------------------------------------- 9th lord (v97-108)
+- id: bphs.house_lords.9_in_1
+  when: {lord_of: 9, in_house: 1}
+  meaning: "Fortunate, honoured by the ruler, virtuous, charming, learned and honoured by the public."
+  polarity: positive
+  domains: [fortune, status, character, education, fame]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "97"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "97"}
+  provenance: bphs
+- id: bphs.house_lords.9_in_2
+  when: {lord_of: 9, in_house: 2}
+  meaning: "Learned, popular, wealthy and sensuous; happiness through wife and sons."
+  polarity: positive
+  domains: [education, fame, wealth, spouse, children]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "98"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "98"}
+  provenance: bphs
+- id: bphs.house_lords.9_in_3
+  when: {lord_of: 9, in_house: 3}
+  meaning: "Happiness from siblings; wealthy, virtuous and charming."
+  polarity: positive
+  domains: [siblings, wealth, character]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "99"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "99"}
+  provenance: bphs
+- id: bphs.house_lords.9_in_4
+  when: {lord_of: 9, in_house: 4}
+  meaning: "Enjoys houses, conveyances and happiness, every kind of wealth, and is devoted to his mother."
+  polarity: positive
+  domains: [home, vehicles, wealth, mother]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "100"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "100"}
+  provenance: bphs
+- id: bphs.house_lords.9_in_5
+  when: {lord_of: 9, in_house: 5}
+  meaning: "Sons and prosperity; devoted to elders, bold, charitable and learned."
+  polarity: positive
+  domains: [children, fortune, character, education]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "101"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "101"}
+  provenance: bphs
+- id: bphs.house_lords.9_in_6
+  when: {lord_of: 9, in_house: 6}
+  meaning: "Meagre fortune; no happiness from maternal relatives (uncle); always troubled by enemies."
+  polarity: negative
+  domains: [fortune, relatives, enemies]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "102"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "102"}
+  provenance: bphs
+  note: "Sharma: maternal uncle; Santhanam: maternal relatives. Same sense."
+- id: bphs.house_lords.9_in_7
+  when: {lord_of: 9, in_house: 7}
+  meaning: "Happiness after marriage; virtuous and famous."
+  polarity: positive
+  domains: [marriage, character, fame]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "103"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "103"}
+  provenance: bphs
+- id: bphs.house_lords.9_in_8
+  when: {lord_of: 9, in_house: 8}
+  meaning: "Not fortunate (prosperous); no happiness from an elder brother."
+  polarity: negative
+  domains: [fortune, siblings]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "104"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "104"}
+  provenance: bphs
+- id: bphs.house_lords.9_in_9
+  when: {lord_of: 9, in_house: 9}
+  meaning: "Abundant fortune, virtues and beauty; much happiness from siblings."
+  polarity: positive
+  domains: [fortune, character, siblings]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "105"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "105"}
+  provenance: bphs
+- id: bphs.house_lords.9_in_10
+  when: {lord_of: 9, in_house: 10}
+  meaning: "A king or equal to one, a minister or army chief; virtuous and dear to all."
+  polarity: positive
+  domains: [status, career, character]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "106"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "106"}
+  provenance: bphs
+- id: bphs.house_lords.9_in_11
+  when: {lord_of: 9, in_house: 11}
+  meaning: "Financial gains day by day; devoted to elders, virtuous and meritorious in deeds."
+  polarity: positive
+  domains: [gains, wealth, character]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "107"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "107"}
+  provenance: bphs
+- id: bphs.house_lords.9_in_12
+  when: {lord_of: 9, in_house: 12}
+  meaning: "Loss of fortune; always spends on auspicious acts; becomes poor by entertaining guests."
+  polarity: negative
+  domains: [fortune, expenses, wealth]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "108"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "108"}
+  provenance: bphs
+
+# ---------------------------------------------------------------- 10th lord (v109-120)
+- id: bphs.house_lords.10_in_1
+  when: {lord_of: 10, in_house: 1}
+  meaning: "Learned, famous, a poet; ill in childhood, happy later; wealth grows day by day."
+  polarity: positive
+  domains: [education, fame, health, wealth]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "109"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "109"}
+  provenance: bphs
+- id: bphs.house_lords.10_in_2
+  when: {lord_of: 10, in_house: 2}
+  meaning: "Wealthy, virtuous, honoured by the ruler, charitable, with happiness from father and others."
+  polarity: positive
+  domains: [wealth, character, status, father]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "110"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "110"}
+  provenance: bphs
+- id: bphs.house_lords.10_in_3
+  when: {lord_of: 10, in_house: 3}
+  meaning: "Happiness from siblings and servants; valorous, virtuous, eloquent and truthful."
+  polarity: positive
+  domains: [siblings, servants, courage, speech, character]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "111"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "111"}
+  provenance: bphs
+- id: bphs.house_lords.10_in_4
+  when: {lord_of: 10, in_house: 4}
+  meaning: "Happy, always caring for his mother's welfare; owns conveyances, lands and houses; virtuous and wealthy."
+  polarity: positive
+  domains: [mother, vehicles, property, home, wealth]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "112"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "112"}
+  provenance: bphs
+- id: bphs.house_lords.10_in_5
+  when: {lord_of: 10, in_house: 5}
+  meaning: "Every kind of learning, always cheerful, wealthy and blessed with sons."
+  polarity: positive
+  domains: [education, wealth, children]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "113"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "113"}
+  provenance: bphs
+- id: bphs.house_lords.10_in_6
+  when: {lord_of: 10, in_house: 6}
+  meaning: "No happiness from father; skilful yet without wealth and troubled by enemies."
+  polarity: negative
+  domains: [father, wealth, enemies]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "114"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "114"}
+  provenance: bphs
+- id: bphs.house_lords.10_in_7
+  when: {lord_of: 10, in_house: 7}
+  meaning: "Happiness through wife; intelligent, virtuous, eloquent, truthful and religious."
+  polarity: positive
+  domains: [spouse, intellect, speech, character, religion]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "115"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "115"}
+  provenance: bphs
+- id: bphs.house_lords.10_in_8
+  when: {lord_of: 10, in_house: 8}
+  meaning: "Without good deeds, long-lived and intent on blaming others."
+  polarity: mixed
+  domains: [character, longevity]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "116"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "116"}
+  provenance: bphs
+- id: bphs.house_lords.10_in_9
+  when: {lord_of: 10, in_house: 9}
+  meaning: "One of royal birth becomes a king, an ordinary person becomes equal to one; wealth and happiness from children."
+  polarity: positive
+  domains: [status, wealth, children]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "117"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "117"}
+  provenance: bphs
+- id: bphs.house_lords.10_in_10
+  when: {lord_of: 10, in_house: 10}
+  meaning: "Skilful in all work, valorous, truthful and devoted to elders (teachers)."
+  polarity: positive
+  domains: [career, courage, character]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "118"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "118"}
+  provenance: bphs
+- id: bphs.house_lords.10_in_11
+  when: {lord_of: 10, in_house: 11}
+  meaning: "Wealth, happiness and sons; virtuous, truthful and always cheerful."
+  polarity: positive
+  domains: [wealth, gains, children, character]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "119"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "119"}
+  provenance: bphs
+- id: bphs.house_lords.10_in_12
+  when: {lord_of: 10, in_house: 12}
+  meaning: "Spends through royal courts (the state), fears enemies, and worries despite being skilful."
+  polarity: negative
+  domains: [expenses, enemies, character]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "120"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "120"}
+  provenance: bphs
+
+# ---------------------------------------------------------------- 11th lord (v121-132)
+- id: bphs.house_lords.11_in_1
+  when: {lord_of: 11, in_house: 1}
+  meaning: "Sattvic (genuine) by nature, rich, happy, even-sighted, a poet, eloquent and always gaining."
+  polarity: positive
+  domains: [character, wealth, speech, gains]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "121"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "121"}
+  provenance: bphs
+- id: bphs.house_lords.11_in_2
+  when: {lord_of: 11, in_house: 2}
+  meaning: "Every kind of wealth and accomplishment; charitable, religious and always happy."
+  polarity: positive
+  domains: [wealth, education, character, religion]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "122"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "122"}
+  provenance: bphs
+- id: bphs.house_lords.11_in_3
+  when: {lord_of: 11, in_house: 3}
+  meaning: "Skilful in all work, wealthy, happy through siblings; sometimes gout pains."
+  polarity: positive
+  domains: [career, wealth, siblings, disease]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "123"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "123"}
+  provenance: bphs
+- id: bphs.house_lords.11_in_4
+  when: {lord_of: 11, in_house: 4}
+  meaning: "Gains from maternal relatives, makes pilgrimages, and enjoys house and lands."
+  polarity: positive
+  domains: [relatives, gains, religion, travel, home, property]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "124"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "124"}
+  provenance: bphs
+- id: bphs.house_lords.11_in_5
+  when: {lord_of: 11, in_house: 5}
+  meaning: "Children happy, educated and virtuous; the native religious and happy."
+  polarity: positive
+  domains: [children, religion]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "125"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "125"}
+  provenance: bphs
+- id: bphs.house_lords.11_in_6
+  when: {lord_of: 11, in_house: 6}
+  meaning: "Afflicted by disease, cruel, lives abroad and is troubled by enemies."
+  polarity: negative
+  domains: [disease, character, foreign, enemies]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "126"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "126"}
+  provenance: bphs
+- id: bphs.house_lords.11_in_7
+  when: {lord_of: 11, in_house: 7}
+  meaning: "Always gains through the wife's relatives; liberal, virtuous, sensuous, and at the command of the spouse."
+  polarity: mixed
+  domains: [gains, relatives, spouse, character]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "127"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "127"}
+  provenance: bphs
+- id: bphs.house_lords.11_in_8
+  when: {lord_of: 11, in_house: 8}
+  meaning: "Losses (reversals) in undertakings; long-lived, but the wife dies first."
+  polarity: mixed
+  domains: [career, losses, longevity, spouse]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "128"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "128"}
+  provenance: bphs
+- id: bphs.house_lords.11_in_9
+  when: {lord_of: 11, in_house: 9}
+  meaning: "Fortunate, skilful, truthful, honoured by the ruler and affluent."
+  polarity: positive
+  domains: [fortune, character, status, wealth]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "129"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "129"}
+  provenance: bphs
+- id: bphs.house_lords.11_in_10
+  when: {lord_of: 11, in_house: 10}
+  meaning: "Honoured by the ruler, virtuous, devoted to his religion, intelligent, truthful and master of his senses."
+  polarity: positive
+  domains: [status, character, religion, intellect]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "130"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "130"}
+  provenance: bphs
+- id: bphs.house_lords.11_in_11
+  when: {lord_of: 11, in_house: 11}
+  meaning: "Gains in all undertakings; learning and happiness increase day by day."
+  polarity: positive
+  domains: [gains, education]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "131"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "131"}
+  provenance: bphs
+- id: bphs.house_lords.11_in_12
+  when: {lord_of: 11, in_house: 12}
+  meaning: "Always spends on good deeds; sensual, many wives, friendship with foreigners (barbarians)."
+  polarity: mixed
+  domains: [expenses, character, marriage, foreign]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "132"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "132"}
+  provenance: bphs
+  note: "Santhanam's verse text is OCR-damaged; legible fragments ('always ... good deeds', 'sensuous', 'many wives', 'barbarians') agree with Sharma."
+
+# ---------------------------------------------------------------- 12th lord (v133-144)
+- id: bphs.house_lords.12_in_1
+  when: {lord_of: 12, in_house: 1}
+  meaning: "A spendthrift, weak in constitution, suffers phlegmatic disorders; without wealth and learning."
+  polarity: negative
+  domains: [expenses, health, disease, wealth, education]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "133"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "133"}
+  provenance: bphs
+  note: "Santhanam's verse text is OCR-damaged; legible fragments ('spendthrift', 'weak in constitution', 'devoid of wealth') agree with Sharma."
+- id: bphs.house_lords.12_in_2
+  when: {lord_of: 12, in_house: 2}
+  meaning: "Always spends on auspicious deeds; religious, sweet-spoken, virtuous and happy."
+  polarity: positive
+  domains: [expenses, religion, speech, character]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "134"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "134"}
+  provenance: bphs
+- id: bphs.house_lords.12_in_3
+  when: {lord_of: 12, in_house: 3}
+  meaning: "No happiness from siblings; hates others and promotes only his own nourishment."
+  polarity: negative
+  domains: [siblings, character]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "135"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "135"}
+  provenance: bphs
+  note: "Santhanam's verse text is OCR-damaged; legible fragments ('devoid of fraternal bliss', 'hate others') agree with Sharma."
+- id: bphs.house_lords.12_in_4
+  when: {lord_of: 12, in_house: 4}
+  meaning: "No happiness from mother; losses of lands, conveyances and houses day by day."
+  polarity: negative
+  domains: [mother, property, vehicles, home, losses]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "136"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "136"}
+  provenance: bphs
+  note: "Santhanam's verse text is OCR-damaged; legible fragments ('devoid of maternal happiness', 'lands ... houses', 'day by day') agree with Sharma."
+- id: bphs.house_lords.12_in_5
+  when: {lord_of: 12, in_house: 5}
+  meaning: "Without sons and learning; spends and visits holy places to obtain a son."
+  polarity: negative
+  domains: [children, education, expenses, religion]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "137"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "137"}
+  provenance: bphs
+- id: bphs.house_lords.12_in_6
+  when: {lord_of: 12, in_house: 6}
+  meaning: "Enmity with his own people; angry, sinful, miserable and goes to others' wives."
+  polarity: negative
+  domains: [relatives, character, relationships]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "138"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "138"}
+  provenance: bphs
+- id: bphs.house_lords.12_in_7
+  when: {lord_of: 12, in_house: 7}
+  meaning: "Spends on account of his wife; no conjugal happiness; without learning and strength."
+  polarity: negative
+  domains: [expenses, spouse, marriage, education]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "139"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "139"}
+  provenance: bphs
+- id: bphs.house_lords.12_in_8
+  when: {lord_of: 12, in_house: 8}
+  meaning: "Always gaining, speaks pleasantly, medium span of life, endowed with all good qualities."
+  polarity: positive
+  domains: [gains, speech, longevity, character]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "140"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "140"}
+  provenance: bphs
+- id: bphs.house_lords.12_in_9
+  when: {lord_of: 12, in_house: 9}
+  meaning: "Dishonours his elders (teachers), is hostile even to friends, and always pursues his own ends."
+  polarity: negative
+  domains: [character, relationships]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "141"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "141"}
+  provenance: bphs
+- id: bphs.house_lords.12_in_10
+  when: {lord_of: 12, in_house: 10}
+  meaning: "Dealings with royal persons (Sharma: rises through them; Santhanam: spends through them); only moderate happiness from father."
+  polarity: mixed
+  domains: [status, expenses, father]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "142"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "142"}
+  provenance: bphs
+  flagged: true
+  variants:
+    - {edition: Sharma, reading: "Will rise through royal persons."}
+    - {edition: Santhanam, reading: "Will incur expenditure through royal persons."}
+- id: bphs.house_lords.12_in_11
+  when: {lord_of: 12, in_house: 11}
+  meaning: "Incurs losses despite indications of gain; only occasional gains through others (Santhanam adds: brought up by others)."
+  polarity: mixed
+  domains: [losses, gains]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "143"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "143"}
+  provenance: bphs
+  flagged: true
+  variants:
+    - {edition: Sharma, reading: "Losses in spite of a combination for gains; sometimes meagre gains through others' wealth."}
+    - {edition: Santhanam, reading: "Losses, brought up by others, sometimes gains through others."}
+- id: bphs.house_lords.12_in_12
+  when: {lord_of: 12, in_house: 12}
+  meaning: "Heavy expenditure only; no bodily happiness; irritable and spiteful."
+  polarity: negative
+  domains: [expenses, health, character]
+  source: {book: BPHS, edition: Sharma, ch: 26, v: "144"}
+  cross_check: {book: BPHS, edition: Santhanam, ch: 24, v: "144"}
+  provenance: bphs
