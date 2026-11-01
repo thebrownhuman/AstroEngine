@@ -27,6 +27,7 @@ from . import muhurta as day_periods
 from . import numerology as num
 from . import guard
 from . import provenance
+from . import shadbala as sb
 from . import porutham as tamil_match
 from . import yogas as yg
 from .geo import timezone_for, to_utc
@@ -161,6 +162,10 @@ class ChartRequest(BaseModel):
         False,
         description="Add natural, temporal and compound planetary friendship tables.",
     )
+    include_shadbala: bool = Field(
+        False,
+        description="Add shadbala and bhava bala (BPHS Ch.27, worked as in Raman).",
+    )
     include_doshas: bool = Field(
         False, description="Add Kaal Sarpa / Kaal Amrita and the papasamyam grid.",
     )
@@ -290,6 +295,8 @@ def chart(request: ChartRequest) -> dict:
         raise _build_http_error(exc) from exc
     if request.include_yogas:
         data["yogas"] = yg.report(data)
+    if request.include_shadbala:
+        data["shadbala"] = _shadbala(data)
     resolved = request.location()[3]
     if resolved:
         data["input"]["place"] = resolved
@@ -588,6 +595,24 @@ def bala_report(request: PersonalDayRequest) -> dict:
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     return found
+
+
+def _shadbala(data: dict) -> dict:
+    try:
+        return sb.from_chart(data)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=f"shadbala: {exc}") from exc
+
+
+@app.post("/v1/shadbala")
+def shadbala_report(request: ChartRequest) -> dict:
+    """Shadbala and bhava bala for a birth: the natal strength of each graha
+    and house. (`/v1/bala` is the daily tara/chandra bala.)"""
+    try:
+        data = build(request.to_birth_data(), vargas=["D1"], dasha_depth=1)
+    except (ValueError, FileNotFoundError) as exc:
+        raise _build_http_error(exc) from exc
+    return {"engine": data["engine"], "input": data["input"], **_shadbala(data)}
 
 
 @app.post("/v1/kp")

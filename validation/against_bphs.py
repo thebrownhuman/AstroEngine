@@ -783,6 +783,74 @@ _gk = yoga_mod.gajakesari(_gk_view(3, 0, 6, True))
 check("89 strict: Gajakesari needs a benefic joining or aspecting Jupiter",
       not _gk.present, _gk.reason)
 
+
+# --- Shadbala, V1 Ch.27 (Santhanam); Raman's Graha and Bhava Balas -----------
+from astro_engine import shadbala as sb_mod
+
+for _p in sb_mod.PLANETS:
+    _exalt = sb_mod.EXALTATION[_p][0] * 30 + sb_mod.EXALTATION[_p][1]
+    check(f"90 uchcha bala 60 at deep exaltation, 0 at debilitation (Ch.27 v1) [{_p}]",
+          abs(sb_mod.uchcha_bala(_p, _exalt) - 60) < 1e-9
+          and abs(sb_mod.uchcha_bala(_p, _exalt + 180)) < 1e-9)
+
+_sb_cases = [
+    ("Delhi 1990", {"date": "1990-01-15", "time": "04:30", "latitude": 28.6139,
+                    "longitude": 77.209, "timezone": "Asia/Kolkata"}),
+    ("Bangalore 1918 day", {"date": "1918-10-16", "time": "14:06", "latitude": 13.0,
+                            "longitude": 77.583, "timezone": "Asia/Kolkata"}),
+    ("London 2001 night", {"date": "2001-06-03", "time": "23:40", "latitude": 51.5074,
+                           "longitude": -0.1278, "timezone": "Europe/London"}),
+]
+for _label, _body in _sb_cases:
+    _sb = post("/v1/shadbala", _body)
+    _pl = _sb["planets"]
+    check(f"91 Mercury's nathonnata bala is always 60 (Ch.27 v8-9) [{_label}]",
+          _pl["Mercury"]["kala"]["nathonnata"] == 60)
+    _dn = {p: _pl[p]["kala"]["nathonnata"] for p in ("Sun", "Moon")}
+    check(f"91b diva and ratri bala sum to 60 (Ch.27 v8-9) [{_label}]",
+          abs(_dn["Sun"] + _dn["Moon"] - 60) < 0.02, str(_dn))
+    _tri = sorted(p for p in sb_mod.PLANETS if _pl[p]["kala"]["tribhaga"] == 60)
+    check(f"92 tribhaga: Jupiter plus one ruler of the third (Ch.27 v12) [{_label}]",
+          len(_tri) == 2 and "Jupiter" in _tri, str(_tri))
+    _lots = sorted(_pl[p]["kala"][k] for p in sb_mod.PLANETS
+                   for k in ("abda", "masa", "vara", "hora") if _pl[p]["kala"][k])
+    check(f"93 one lord each of year/month/day/hora at 15/30/45/60 (Ch.27 v13) [{_label}]",
+          _lots == [15, 30, 45, 60], str(_lots))
+    _nais = [_pl[p]["naisargika"] for p in
+             ("Saturn", "Mars", "Mercury", "Jupiter", "Venus", "Moon", "Sun")]
+    check(f"94 naisargika bala is 60/7 x 1..7, Saturn to the Sun (Ch.27 v14) [{_label}]",
+          all(abs(v - 60 * k / 7) < 0.01 for k, v in enumerate(_nais, 1)), str(_nais))
+    check(f"95 the Moon's paksha bala is twice the benefics' (Ch.27 v10-11) [{_label}]",
+          abs(_pl["Moon"]["kala"]["paksha"] - 2 * _pl["Jupiter"]["kala"]["paksha"]) < 0.02)
+    _sums = all(abs(_pl[p]["total_virupas"] - (
+        _pl[p]["sthana"]["total"] + _pl[p]["dig"] + _pl[p]["kala"]["total"]
+        + _pl[p]["chesta"] + _pl[p]["naisargika"] + _pl[p]["drik"])) < 0.05
+        for p in sb_mod.PLANETS)
+    check(f"96 shadbala is the sum of its six sources (Ch.27 v1-25) [{_label}]", _sums)
+    _req = [_pl[p]["required_virupas"] for p in sb_mod.PLANETS]
+    check(f"97 required shadbala 300/360/300/420/390/330/300 (Ch.27 v32-33) [{_label}]",
+          _req == [300, 360, 300, 420, 390, 330, 300], str(_req))
+    _bh = all(abs(r["total_virupas"] - (_pl[r["lord"]]["total_virupas"] + r["dig"]
+                                        + r["drishti"])) < 0.05 for r in _sb["bhavas"])
+    check(f"98 bhava bala = lord's shadbala + dig + drishti (Ch.27 v26-29) [{_label}]",
+          _bh and len(_sb["bhavas"]) == 12)
+    check(f"99 dig and chesta bala within 0-60 (Ch.27 v7, v24-25) [{_label}]",
+          all(0 <= _pl[p]["dig"] <= 60 and 0 <= _pl[p]["chesta"] <= 60
+              for p in sb_mod.PLANETS))
+
+_m = sb_mod.Moment(apparent_hours=12.0, is_day=True, part_fraction=0.5,
+                   hours_since_sunrise=6.0, ahargana=33405, chesta_interval=6862.6,
+                   year=1918)
+_lon = {"Sun": 10.0, "Moon": 100.0, "Mars": 200.0, "Mercury": 20.0,
+        "Jupiter": 0.0, "Venus": 40.0, "Saturn": 300.0}
+_b = sb_mod.compute(_lon, ayanamsa=23.0, ascendant=0.0, midheaven=270.0, moment=_m,
+                    convention="bphs")["planets"]
+check("100 bphs convention: the Sun's chesta is its ayana bala, the Moon's its "
+      "paksha bala (Ch.27 v18)",
+      _b["Sun"]["chesta"] == _b["Sun"]["kala"]["ayana"]
+      and _b["Moon"]["chesta"] == _b["Moon"]["kala"]["paksha"])
+check("101 Jupiter on the Lagna has full dig bala (Ch.27 v7)", _b["Jupiter"]["dig"] == 60)
+
 print(f"\n{BASE}\n" + "-" * 78)
 failed = [(c, d) for c, ok, d in results if not ok]
 for case, ok, detail in results:
