@@ -248,3 +248,82 @@ def test_health_and_guard(client_for, monkeypatch):
     guard.configure()
     assert c.post("/v1/sessions", json=BIRTH).status_code == 401
     assert c.get("/health").status_code == 200
+
+
+# ---- precomputed charts, heartbeat, sweep ----------------------------------
+
+def test_parse_placements_from_fact_sheet(engine_data):
+    sheet = facts.fact_sheet(*engine_data)
+    assert facts.parse_placements(sheet) == facts.placements(engine_data[0])
+
+
+def test_facts_endpoint_returns_sheet_and_raw_outputs(client_for):
+    c = client_for(FakeLLM([]))
+    r = c.post("/v1/facts", json=BIRTH)
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert "Lagna: Vrischika" in body["facts"]
+    assert body["chart"]["lagna"]["sign"] == "Vrischika"
+    assert "rules" in body["rules"] and "planets" in body["shadbala"]
+    assert body["summary"]
+
+
+def failing_engine(request):
+    raise AssertionError("engine must not be called")
+
+
+@pytest.fixture
+def offline_client(books, monkeypatch):
+    monkeypatch.delenv("ASTRO_API_KEYS", raising=False)
+    app = chat_app.create_app(engine_transport=httpx.MockTransport(failing_engine),
+                              llm_transport=httpx.MockTransport(FakeLLM([completion("Mars is in Leo.")])),
+                              books_dir=str(books))
+    yield TestClient(app)
+    monkeypatch.undo()
+    guard.configure()
+
+
+def test_session_from_precomputed_fact_sheet(offline_client, engine_data):
+    sheet = facts.fact_sheet(*engine_data)
+    r = offline_client.post("/v1/sessions", json={"chart_id": "c-42", "facts": sheet})
+    assert r.status_code == 200, r.text
+    s = r.json()
+    assert s["chart_id"] == "c-42" and "Vrischika" in s["summary"]
+    m = offline_client.post(f"/v1/sessions/{s['session_id']}/messages", json={"message": "Mars?"})
+    assert m.status_code == 200 and m.json()["chart_id"] == "c-42"
+    assert any(not ch["ok"] and ch["graha"] == "Mars" for ch in m.json()["checks"])
+    assert offline_client.get(f"/v1/sessions/{s['session_id']}").json()["chart_id"] == "c-42"
+
+
+def test_session_from_raw_engine_outputs(offline_client, engine_data):
+    chart, rules, shad = engine_data
+    r = offline_client.post("/v1/sessions", json={"chart_id": "c-7", "chart": chart,
+                                                  "rules": rules, "shadbala": shad})
+    assert r.status_code == 200, r.text
+    got = offline_client.get(f"/v1/sessions/{r.json()['session_id']}").json()
+    assert got["facts"] == facts.fact_sheet(chart, rules, shad)
+
+
+def test_session_request_needs_some_input(offline_client):
+    assert offline_client.post("/v1/sessions", json={"chart_id": "x"}).status_code == 422
+
+
+def test_heartbeat_slides_ttl(client_for):
+    c = client_for(FakeLLM([]))
+    sid = new_session(c)["session_id"]
+    store = c.app.state.sessions
+    store.sessions[sid].expires -= 600
+    before = store.sessions[sid].expires
+    r = c.post(f"/v1/sessions/{sid}/heartbeat")
+    assert r.status_code == 200 and r.json()["expires_at"]
+    assert store.sessions[sid].expires > before
+    assert c.post("/v1/sessions/nope/heartbeat").status_code == 404
+
+
+def test_sweep_purges_expired():
+    store = chat_app.InMemorySessionStore(ttl_seconds=60)
+    live = store.add(chart_id=None, name=None, facts="f", summary="s", placements={})
+    dead = store.add(chart_id=None, name=None, facts="f", summary="s", placements={})
+    store.sessions[dead.id].expires = 0
+    assert store.sweep() == 1
+    assert dead.id not in store.sessions and live.id in store.sessions

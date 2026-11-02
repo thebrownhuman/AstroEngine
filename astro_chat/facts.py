@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 MAX_RULES = 40
 
 
@@ -72,3 +74,12 @@ def summary(chart: dict) -> str:
     dasha = "/".join(p["lord"] for p in chain)
     return (f"{lg['sign']} lagna, Moon in {moon['sign']} ({moon['nakshatra']})"
             + (f", running {dasha} dasha" if dasha else ""))
+
+
+_GRAHA_LINE = re.compile(r"^- (\w+): (\w+) \((\w+)\), house (\d+),", re.M)
+
+
+def parse_placements(sheet: str) -> dict[str, dict]:
+    """Recover placements from a stored fact sheet, for the reply checks."""
+    return {m[1]: {"sign": m[2], "sign_en": m[3], "house": int(m[4])}
+            for m in _GRAHA_LINE.finditer(sheet)}

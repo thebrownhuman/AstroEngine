@@ -22,12 +22,29 @@ All `/v1/*` paths use the engine's `Guard` (`ASTRO_API_KEYS`, `ASTRO_RATE_LIMIT`
 | Method | Path | |
 |---|---|---|
 | GET | `/health` | liveness, book chunk count |
-| POST | `/v1/sessions` | birth fields as `/v1/chart` (`date`, `time`, `place` or `latitude`/`longitude`, `timezone`) + optional `name` |
-| GET | `/v1/sessions/{id}` | summary, fact sheet, history |
+| POST | `/v1/facts` | birth fields → `facts`, `summary` and raw `chart`, `rules`, `shadbala` (for the app to store) |
+| POST | `/v1/sessions` | see "Opening a session" |
+| GET | `/v1/sessions/{id}` | summary, fact sheet, history, `chart_id` |
+| POST | `/v1/sessions/{id}/heartbeat` | slide the TTL; returns `expires_at` |
 | DELETE | `/v1/sessions/{id}` | end session |
 | POST | `/v1/sessions/{id}/messages` | `{message}` → `reply`, `sources`, `checks`, `expires_at` |
 
-Session creation calls the engine once each for `/v1/chart`
+## Opening a session
+
+`POST /v1/sessions` takes optional `chart_id` and `name` plus one of:
+
+1. `facts`: a fact sheet stored earlier (from `/v1/facts`). No engine call.
+2. `chart` (+ `rules`, `shadbala`): raw engine outputs stored earlier; the
+   sheet is built from them (`astro_chat.facts.fact_sheet`, a pure function).
+   No engine call.
+3. Birth fields as `/v1/chart` (`date`, `time`, `place` or
+   `latitude`/`longitude`, `timezone`): the engine is called.
+
+`chart_id` is echoed in every session and message response. A stored sheet
+carries the dasha chain "as of" the day it was computed, so the storing app
+should refresh it when the current period ends.
+
+With birth fields, session creation calls the engine once each for `/v1/chart`
 (`include_yogas: true`), `/v1/rules` and `/v1/shadbala`. Engine 4xx errors are
 passed through (bad date, unknown place); other failures give 502.
 
@@ -36,7 +53,21 @@ dignity, retrograde and combust state; house lords; the current dasha chain
 with dates; present yogas (name + reason); shadbala `total_rupas`, `is_strong`
 and rank; fired rules (id, meaning, source ch.v).
 
-Sessions live in memory with a sliding TTL; a restart drops them. `sources`
+## Session lifetime
+
+A session lives while the user is active on that chart: it expires
+`CHAT_SESSION_TTL_MIN` (30) minutes after the last activity. Every message,
+`GET` and `heartbeat` slides it; the frontend calls `heartbeat` while the chart
+is open. Expired sessions are purged lazily on access and by a sweep every
+60 s, and the fact sheet and history go with them. A restart drops all
+sessions.
+
+Persistence is the calling app's job (saved charts, conversation logs);
+astro_chat has no database. Storage sits behind the `SessionStore` protocol in
+`astro_chat/app.py` (`add`, `touch`, `delete`, `sweep`), implemented by
+`InMemorySessionStore`; a Redis store can be passed to `create_app(store=...)`.
+
+ `sources`
 are snippets of at most 300 characters, never whole pages. `reasoning_content`
 is not returned unless `CHAT_RETURN_REASONING=true`.
 

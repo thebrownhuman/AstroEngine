@@ -12,12 +12,14 @@ import os
 import secrets
 import threading
 import time
+from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
+from typing import Protocol
 from datetime import datetime, timezone
 
 import httpx
 from fastapi import FastAPI, HTTPException, Response
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from astro_engine import guard
 
@@ -29,6 +31,8 @@ log = logging.getLogger("astro_chat")
 MAX_ATTEMPTS = 4
 SNIPPET_CHARS = 300
 MAX_HISTORY_TURNS = 20
+MAX_FACTS_CHARS = 20_000
+SWEEP_SECONDS = 60
 
 SYSTEM_PROMPT = """You are a careful Vedic astrology (Jyotisha) assistant.
 Answer only from the CHART FACTS and BOOK PASSAGES below. The chart facts were
@@ -60,14 +64,40 @@ def _iso(ts: float) -> str:
     return datetime.fromtimestamp(ts, timezone.utc).isoformat(timespec="seconds")
 
 
-class SessionRequest(BaseModel):
+class BirthRequest(BaseModel):
     date: str = Field(..., max_length=32)
     time: str = Field(..., max_length=32)
     place: str | None = Field(None, max_length=200)
     latitude: float | None = Field(None, ge=-90.0, le=90.0)
     longitude: float | None = Field(None, ge=-180.0, le=180.0)
     timezone: str | None = Field(None, max_length=64)
+
+
+class SessionRequest(BaseModel):
+    """Birth data (the engine is called), or a chart computed earlier: either
+    the fact sheet itself or the raw engine outputs to build it from."""
+
+    date: str | None = Field(None, max_length=32)
+    time: str | None = Field(None, max_length=32)
+    place: str | None = Field(None, max_length=200)
+    latitude: float | None = Field(None, ge=-90.0, le=90.0)
+    longitude: float | None = Field(None, ge=-180.0, le=180.0)
+    timezone: str | None = Field(None, max_length=64)
     name: str | None = Field(None, max_length=100)
+    chart_id: str | None = Field(None, max_length=128)
+    facts: str | None = Field(None, max_length=MAX_FACTS_CHARS)
+    chart: dict | None = None
+    rules: dict | None = None
+    shadbala: dict | None = None
+
+    @model_validator(mode="after")
+    def _one_source(self):
+        if not (self.facts or self.chart or (self.date and self.time)):
+            raise ValueError("give date and time, a precomputed facts sheet, or chart")
+        return self
+
+    def birth(self) -> dict:
+        return self.model_dump(include=set(BirthRequest.model_fields), exclude_none=True)
 
 
 class MessageRequest(BaseModel):
@@ -77,6 +107,7 @@ class MessageRequest(BaseModel):
 @dataclass
 class Session:
     id: str
+    chart_id: str | None
     name: str | None
     facts: str
     summary: str
@@ -86,37 +117,57 @@ class Session:
     lock: asyncio.Lock = field(default_factory=asyncio.Lock)
 
 
-class SessionStore:
+class SessionStore(Protocol):
+    """What the app needs from session storage. In memory today; a Redis
+    implementation would keep the same methods and TTL semantics."""
+
+    def add(self, **fields) -> Session: ...
+    def touch(self, sid: str) -> Session | None: ...  # get and slide the TTL
+    def delete(self, sid: str) -> bool: ...
+    def sweep(self) -> int: ...  # purge expired, return how many
+    def __len__(self) -> int: ...
+
+
+class InMemorySessionStore:
     def __init__(self, ttl_seconds: float):
         self.ttl = ttl_seconds
         self.sessions: dict[str, Session] = {}
         self._lock = threading.Lock()
 
-    def _sweep(self, now: float):
-        for sid in [s for s, v in self.sessions.items() if v.expires <= now]:
+    def _purge(self, now: float) -> int:
+        dead = [sid for sid, v in self.sessions.items() if v.expires <= now]
+        for sid in dead:
             del self.sessions[sid]
+        return len(dead)
 
-    def add(self, **kw) -> Session:
+    def sweep(self) -> int:
+        with self._lock:
+            return self._purge(time.time())
+
+    def add(self, **fields) -> Session:
         now = time.time()
         with self._lock:
-            self._sweep(now)
-            s = Session(id=secrets.token_urlsafe(16), expires=now + self.ttl, **kw)
+            self._purge(now)
+            s = Session(id=secrets.token_urlsafe(16), expires=now + self.ttl, **fields)
             self.sessions[s.id] = s
             return s
 
-    def touch(self, sid: str) -> Session:
+    def touch(self, sid: str) -> Session | None:
         now = time.time()
         with self._lock:
-            self._sweep(now)
             s = self.sessions.get(sid)
-            if s is None:
-                raise HTTPException(404, "session not found or expired")
+            if s is None or s.expires <= now:
+                self.sessions.pop(sid, None)
+                return None
             s.expires = now + self.ttl
             return s
 
     def delete(self, sid: str) -> bool:
         with self._lock:
             return self.sessions.pop(sid, None) is not None
+
+    def __len__(self) -> int:
+        return len(self.sessions)
 
 
 async def _engine_post(client: httpx.AsyncClient, path: str, body: dict) -> dict:
@@ -156,14 +207,28 @@ async def _llm_complete(client: httpx.AsyncClient, payload: dict) -> dict:
     raise HTTPException(502, "LLM gateway unavailable after retries")
 
 
-def create_app(engine_transport=None, llm_transport=None, books_dir: str | None = None) -> FastAPI:
-    app = FastAPI(title="astro_chat", version="0.1.0",
+def create_app(engine_transport=None, llm_transport=None, books_dir: str | None = None,
+               store: SessionStore | None = None) -> FastAPI:
+    ttl = float(_env("CHAT_SESSION_TTL_MIN", "30")) * 60
+    store = store or InMemorySessionStore(ttl)
+
+    @asynccontextmanager
+    async def lifespan(app):
+        async def sweeper():
+            while True:
+                await asyncio.sleep(SWEEP_SECONDS)
+                if n := store.sweep():
+                    log.info("astro_chat: purged %d expired sessions", n)
+        task = asyncio.create_task(sweeper())
+        yield
+        task.cancel()
+
+    app = FastAPI(title="astro_chat", version="0.2.0", lifespan=lifespan,
                   description="Chart-grounded chat over the astro_engine.")
     app.add_middleware(guard.Guard)
     guard.configure()
 
-    ttl = float(_env("CHAT_SESSION_TTL_MIN", "30")) * 60
-    app.state.sessions = store = SessionStore(ttl)
+    app.state.sessions = store
     app.state.books = books = BookIndex.load(
         books_dir or _env("CHAT_BOOKS_DIR", "/app/books"))
     log.info("astro_chat: %d book chunks loaded", len(books.chunks))
@@ -182,28 +247,63 @@ def create_app(engine_transport=None, llm_transport=None, books_dir: str | None 
             headers={"Authorization": f"Bearer {key}"} if key else {},
             transport=llm_transport, timeout=180)
 
-    @app.get("/health")
-    def health():
-        return {"status": "ok", "sessions": len(store.sessions),
-                "book_chunks": len(books.chunks)}
-
-    @app.post("/v1/sessions")
-    async def create_session(req: SessionRequest):
-        birth = req.model_dump(exclude_none=True, exclude={"name"})
+    async def compute(birth: dict) -> tuple[dict, dict, dict]:
         async with engine_client() as client:
-            chart, rules, shad = await asyncio.gather(
+            return await asyncio.gather(
                 _engine_post(client, "/v1/chart", {**birth, "include_yogas": True}),
                 _engine_post(client, "/v1/rules", birth),
                 _engine_post(client, "/v1/shadbala", birth))
-        s = store.add(name=req.name, facts=facts.fact_sheet(chart, rules, shad),
-                      summary=facts.summary(chart), placements=facts.placements(chart))
-        return {"session_id": s.id, "expires_at": _iso(s.expires), "summary": s.summary}
+
+    def live(sid: str) -> Session:
+        s = store.touch(sid)
+        if s is None:
+            raise HTTPException(404, "session not found or expired")
+        return s
+
+    @app.get("/health")
+    def health():
+        return {"status": "ok", "sessions": len(store), "book_chunks": len(books.chunks)}
+
+    @app.post("/v1/facts")
+    async def compute_facts(req: BirthRequest):
+        """Compute once; the caller stores the result and later opens sessions
+        from it without the engine being called again."""
+        chart, rules, shad = await compute(req.model_dump(exclude_none=True))
+        return {"facts": facts.fact_sheet(chart, rules, shad), "summary": facts.summary(chart),
+                "chart": chart, "rules": rules, "shadbala": shad}
+
+    @app.post("/v1/sessions")
+    async def create_session(req: SessionRequest):
+        if req.facts:
+            sheet = req.facts
+            placements = facts.parse_placements(sheet)
+            summary = sheet.splitlines()[0][:200]
+        else:
+            if req.chart:
+                chart, rules, shad = req.chart, req.rules or {}, req.shadbala or {}
+            else:
+                chart, rules, shad = await compute(req.birth())
+            try:
+                sheet = facts.fact_sheet(chart, rules, shad)
+                placements, summary = facts.placements(chart), facts.summary(chart)
+            except (KeyError, TypeError) as exc:
+                raise HTTPException(422, f"chart payload is not engine output: missing {exc}") from exc
+        s = store.add(chart_id=req.chart_id, name=req.name, facts=sheet,
+                      summary=summary, placements=placements)
+        return {"session_id": s.id, "chart_id": s.chart_id, "expires_at": _iso(s.expires),
+                "summary": s.summary}
 
     @app.get("/v1/sessions/{sid}")
     def get_session(sid: str):
-        s = store.touch(sid)
-        return {"session_id": s.id, "name": s.name, "summary": s.summary,
-                "facts": s.facts, "history": s.history, "expires_at": _iso(s.expires)}
+        s = live(sid)
+        return {"session_id": s.id, "chart_id": s.chart_id, "name": s.name,
+                "summary": s.summary, "facts": s.facts, "history": s.history,
+                "expires_at": _iso(s.expires)}
+
+    @app.post("/v1/sessions/{sid}/heartbeat")
+    def heartbeat(sid: str):
+        s = live(sid)
+        return {"session_id": s.id, "chart_id": s.chart_id, "expires_at": _iso(s.expires)}
 
     @app.delete("/v1/sessions/{sid}", status_code=204)
     def delete_session(sid: str):
@@ -213,7 +313,7 @@ def create_app(engine_transport=None, llm_transport=None, books_dir: str | None 
 
     @app.post("/v1/sessions/{sid}/messages")
     async def message(sid: str, req: MessageRequest):
-        s = store.touch(sid)
+        s = live(sid)
         async with s.lock:
             hits = books.search(req.message, k=int(_env("CHAT_TOP_K", "5")))
             passages = "\n\n".join(
@@ -237,6 +337,7 @@ def create_app(engine_transport=None, llm_transport=None, books_dir: str | None 
                           {"role": "assistant", "content": reply}]
         out = {
             "reply": reply,
+            "chart_id": s.chart_id,
             "sources": [{"ref": f"P{i}", "book": h.book, "chapter": h.chapter,
                          "page": h.page, "snippet": h.text[:SNIPPET_CHARS]}
                         for i, h in enumerate(hits, 1)],
