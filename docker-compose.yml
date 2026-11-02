@@ -20,9 +20,39 @@ services:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
       - ASTRO_LLM_MODEL=${ASTRO_LLM_MODEL:-}
 
-  # Pulls :latest every 5 minutes and recreates astro-engine when it changes.
-  # Scoped by name to astro-engine only, so it leaves other stacks on the host
-  # alone. CI publishes :latest only after the test suite passes.
+  # Chat service (docs/ASTRO-CHAT.md): same image, different command. Talks to
+  # the engine over the compose network and to the LLM gateway. Books are not
+  # in git; put the .txt files in ./books.
+  astro-chat:
+    image: ghcr.io/thebrownhuman/astroengine:latest
+    container_name: astro-chat
+    restart: unless-stopped
+    command: ["uvicorn", "astro_chat.app:app", "--host", "0.0.0.0", "--port", "8001"]
+    ports:
+      - "8001:8001"
+    depends_on:
+      - astro-engine
+    volumes:
+      - ./books:/app/books:ro
+    environment:
+      - ASTRO_API_KEYS=${ASTRO_API_KEYS:-}
+      - ASTRO_RATE_LIMIT=${ASTRO_RATE_LIMIT:-}
+      - ASTRO_CORS_ORIGINS=${ASTRO_CORS_ORIGINS:-}
+      - ASTRO_ENGINE_URL=${ASTRO_ENGINE_URL:-http://astro-engine:8000}
+      - ASTRO_ENGINE_KEY=${ASTRO_ENGINE_KEY:-}
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY:-}
+      - DEEPSEEK_BASE_URL=${DEEPSEEK_BASE_URL:-}
+      - DEEPSEEK_MODEL=${DEEPSEEK_MODEL:-}
+      - CHAT_THINKING=${CHAT_THINKING:-}
+      - CHAT_SEARCH=${CHAT_SEARCH:-}
+      - CHAT_SESSION_TTL_MIN=${CHAT_SESSION_TTL_MIN:-}
+      - CHAT_TOP_K=${CHAT_TOP_K:-}
+      - CHAT_RETURN_REASONING=${CHAT_RETURN_REASONING:-}
+
+  # Pulls :latest every 5 minutes and recreates the named containers when it
+  # changes. Scoped by name to astro-engine and astro-chat only, so it
+  # leaves other stacks on the host alone. CI publishes :latest only after
+  # the test suite passes.
   watchtower:
     image: containrrr/watchtower
     container_name: watchtower-astro-engine
@@ -31,4 +61,4 @@ services:
       - DOCKER_API_VERSION=1.44
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    command: --interval 300 --cleanup astro-engine
+    command: --interval 300 --cleanup astro-engine astro-chat
