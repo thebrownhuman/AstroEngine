@@ -65,7 +65,7 @@ Auth and rate limit are the same `X-API-Key` guard as the rest of `/v1/`.
 
 | status | when |
 |--------|------|
-| 503    | the server has no `ANTHROPIC_API_KEY` |
+| 503    | no LLM is configured on the server |
 | 422    | invalid birth data or question |
 | 401/429| key missing/invalid, rate limited (guard) |
 
@@ -88,10 +88,19 @@ gives no medical, legal or financial advice.
 
 ## Configuration
 
-| env                 | default             |
-|---------------------|---------------------|
-| `ANTHROPIC_API_KEY` | none (endpoint 503) |
-| `ASTRO_LLM_MODEL`   | `claude-sonnet-5-5` |
+Two backends. When `DEEPSEEK_API_KEY` is set, `/v1/ask` talks to an
+OpenAI-compatible `/chat/completions` endpoint (the homelab gateway in
+production); otherwise it uses Anthropic. With neither, the endpoint is 503.
+
+| env                 | default                                   |
+|---------------------|-------------------------------------------|
+| `DEEPSEEK_API_KEY`  | none                                      |
+| `DEEPSEEK_BASE_URL` | none (required with `DEEPSEEK_API_KEY`), e.g. `http://100.72.157.104:9090/v1` |
+| `DEEPSEEK_MODEL`    | `deepseek-chat`                           |
+| `ANTHROPIC_API_KEY` | none                                      |
+| `ASTRO_LLM_MODEL`   | overrides either model; `claude-sonnet-5-5` for Anthropic |
+
+Inside Docker on the NUC, use the Tailscale address, not `localhost`.
 
 ## Evaluation
 
@@ -99,4 +108,4 @@ gives no medical, legal or financial advice.
 fixed charts) against the live model and reports factual accuracy (answer
 matches the engine), faithfulness (claims whose evidence resolves) and refusal
 correctness. Expected values come from the engine at run time, not from the
-YAML. It skips cleanly without `ANTHROPIC_API_KEY`.
+YAML. It skips cleanly when no LLM is configured.

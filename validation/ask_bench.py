@@ -8,7 +8,7 @@ the real model, and scores three things:
 - faithfulness: share of submitted claims whose evidence paths resolve;
 - refusal correctness: predictions refused, interpretation answered fact-only.
 
-Needs ANTHROPIC_API_KEY; without it the bench prints a notice and exits 0.
+Needs DEEPSEEK_API_KEY + DEEPSEEK_BASE_URL or ANTHROPIC_API_KEY; without them the bench prints a notice and exits 0.
 
     python validation/ask_bench.py [--only CASE_ID ...] [--json out.json]
 """
@@ -112,8 +112,8 @@ def main() -> int:
     parser.add_argument("--json", type=Path)
     args = parser.parse_args()
 
-    if not os.environ.get("ANTHROPIC_API_KEY", "").strip():
-        print("SKIP: ANTHROPIC_API_KEY is not set; the ask bench needs the model.")
+    if not any(os.environ.get(k, "").strip() for k in ("DEEPSEEK_API_KEY", "ANTHROPIC_API_KEY")):
+        print("SKIP: no LLM is configured (DEEPSEEK_API_KEY or ANTHROPIC_API_KEY); the ask bench needs the model.")
         return 0
 
     from astro_llm import ask, model_name

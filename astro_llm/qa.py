@@ -19,12 +19,23 @@ MAX_TURNS = 6
 MAX_TOKENS = 4000
 
 
+DEFAULT_DEEPSEEK_MODEL = "deepseek-chat"
+
+
 class NotConfigured(RuntimeError):
-    """ANTHROPIC_API_KEY is not set."""
+    """Neither DEEPSEEK_API_KEY nor ANTHROPIC_API_KEY is set."""
+
+
+def _env(name: str) -> str:
+    return os.environ.get(name, "").strip()
 
 
 def model_name() -> str:
-    return os.environ.get("ASTRO_LLM_MODEL", "").strip() or DEFAULT_MODEL
+    if _env("ASTRO_LLM_MODEL"):
+        return _env("ASTRO_LLM_MODEL")
+    if _env("DEEPSEEK_API_KEY"):
+        return _env("DEEPSEEK_MODEL") or DEFAULT_DEEPSEEK_MODEL
+    return DEFAULT_MODEL
 
 
 SYSTEM_PROMPT = """You answer questions about one person's Vedic birth chart \
@@ -77,9 +88,16 @@ def looks_like_prediction(question: str) -> bool:
 
 
 def _client():
-    if not os.environ.get("ANTHROPIC_API_KEY", "").strip():
+    # An OpenAI-compatible gateway (DEEPSEEK_*) wins when configured.
+    if _env("DEEPSEEK_API_KEY"):
+        if not _env("DEEPSEEK_BASE_URL"):
+            raise NotConfigured("DEEPSEEK_API_KEY is set but DEEPSEEK_BASE_URL is not")
+        from .openai_compat import OpenAICompatClient
+        return OpenAICompatClient(_env("DEEPSEEK_BASE_URL"), _env("DEEPSEEK_API_KEY"))
+    if not _env("ANTHROPIC_API_KEY"):
         raise NotConfigured(
-            "ANTHROPIC_API_KEY is not set on the server; /v1/ask is unavailable")
+            "no LLM is configured on the server (set DEEPSEEK_API_KEY and "
+            "DEEPSEEK_BASE_URL, or ANTHROPIC_API_KEY); /v1/ask is unavailable")
     from anthropic import Anthropic
     return Anthropic()
 

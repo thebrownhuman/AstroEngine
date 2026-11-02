@@ -135,10 +135,11 @@ def test_engine_errors_return_to_the_model():
 # --- the endpoint ----------------------------------------------------------------
 
 def test_missing_key_is_503_not_a_crash(monkeypatch):
-    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    for name in ("ANTHROPIC_API_KEY", "DEEPSEEK_API_KEY"):
+        monkeypatch.delenv(name, raising=False)
     response = client.post("/v1/ask", json={**BIRTH, "question": "What is my lagna?"})
     assert response.status_code == 503
-    assert "ANTHROPIC_API_KEY" in response.json()["detail"]
+    assert "DEEPSEEK_API_KEY" in response.json()["detail"]
 
 
 def test_tool_loop_grounds_claims_in_the_chart(scripted):
