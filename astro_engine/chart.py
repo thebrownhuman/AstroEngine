@@ -30,7 +30,7 @@ import swisseph as _swe
 from .geo import to_utc
 from .vargas import VARGAS
 
-ENGINE_VERSION = "1.4.0"
+ENGINE_VERSION = "1.4.1"
 
 # Classical graha drishti from BPHS Chapter 26, expressed as house counts from
 # the occupied house. BPHS gives special aspects only to Mars, Jupiter and
@@ -326,6 +326,21 @@ def _build(
     # set (polar day/night, or the twilight edge of it) the chart is still
     # valid, so those blocks become null with a warning rather than a 422.
     warnings: list[str] = []
+    # Dates are proleptic Gregorian. Records before the 1582 reform were kept in
+    # the Julian calendar (10+ days behind), so flag rather than shift silently.
+    birth_date = (birth.year, birth.month, birth.day)
+    if (1582, 10, 5) <= birth_date <= (1582, 10, 14):
+        warnings.append(
+            f"{birth.year}-{birth.month:02d}-{birth.day:02d} never existed in the "
+            "Gregorian calendar (5-14 Oct 1582 were dropped at the reform); it was "
+            "read as proleptic Gregorian, not as a Julian date"
+        )
+    elif birth_date < (1582, 10, 15):
+        warnings.append(
+            "date is before the 1582 Gregorian reform and was read as proleptic "
+            "Gregorian; if the record is in the Julian calendar, convert it first "
+            "(the gap is 10 days in 1582 and shrinks to zero around 200 CE)"
+        )
     solar = None
     try:
         solar = sun_rise_set(

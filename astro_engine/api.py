@@ -392,7 +392,7 @@ def upagraha_report(request: ChartRequest) -> dict:
     except (ValueError, FileNotFoundError) as exc:
         raise _build_http_error(exc) from exc
     if data["upagrahas"] is None:
-        raise HTTPException(status_code=422, detail=data["warnings"][0])
+        raise HTTPException(status_code=422, detail=next(w for w in data["warnings"] if "no solar" in w))
     return {"engine": data["engine"], "input": data["input"],
             "solar_day": data["solar_day"], "upagrahas": data["upagrahas"]}
 

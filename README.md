@@ -200,7 +200,9 @@ A location is `place` (offline lookup) **or** `latitude` + `longitude`, never bo
   reads `"moshier"` when the data files were not used.
 - `warnings` (top level, only when non-empty): at polar latitudes `cusps` becomes
   null, and where the Sun does not rise `panchanga`, `solar_day` and `upagrahas`
-  are null, instead of the chart being rejected.
+  are null, instead of the chart being rejected. Dates are proleptic Gregorian:
+  a birth before 15 Oct 1582 gets a warning to convert Julian-calendar records
+  first, and 5-14 Oct 1582 (dropped at the reform) is flagged as nonexistent.
 
 ---
 
